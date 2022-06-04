@@ -17,7 +17,8 @@ async function buscarTodos (url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from paises where pais like ' + "'%" + `${filter}` + "%' " + `limit ${limit} offset ${page-1}`, (err, res) => {
+            console.log(filter);
+            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${page-1}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }

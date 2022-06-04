@@ -28,7 +28,7 @@ const getAll = async (page = 1, filter = ''): Promise<TListaPaises | Error> => {
         if (data) {
             return {
                 data,
-                qtd: Number(headers['x-total-count'] || Environment.LIMITE_DE_LINHAS),
+                qtd: data.length
             };
         }
 
