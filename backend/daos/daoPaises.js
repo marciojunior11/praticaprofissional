@@ -91,7 +91,7 @@ async function alterar (id, pais) {
 // @route GET /api/paises/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
-        pool.query('delete from paises where id = $1', [id], (err, res) => {
+        pool.query(`delete from paises where id = ${id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }

@@ -47,6 +47,7 @@ export const ConsultaPaises: React.FC = () => {
         if (window.confirm('Deseja apagar o registro?')) {
             PaisesService.deleteById(id)
                 .then(result => {
+                    console.log(result);
                     if (result instanceof Error) {
                         alert(result.message);
                     } else {
@@ -75,16 +76,19 @@ export const ConsultaPaises: React.FC = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Ações</TableCell>
                             <TableCell>ID</TableCell>
                             <TableCell>País</TableCell>
                             <TableCell>Sigla</TableCell>
+                            <TableCell align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {paises?.map(row => (
                             <TableRow key={row.id}>
-                                <TableCell>
+                                <TableCell>{row.id}</TableCell>
+                                <TableCell>{row.pais}</TableCell>
+                                <TableCell>{row.sigla}</TableCell>
+                                <TableCell align="right">
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>
                                     </IconButton>
@@ -92,9 +96,6 @@ export const ConsultaPaises: React.FC = () => {
                                         <Icon>edit</Icon>
                                     </IconButton>
                                 </TableCell>
-                                <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.pais}</TableCell>
-                                <TableCell>{row.sigla}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
