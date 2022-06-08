@@ -1,3 +1,4 @@
+import { RestorePageOutlined } from "@mui/icons-material";
 import { Environment } from "../../../environment";
 import { Api } from "../axios-config";
 
@@ -23,12 +24,12 @@ const getAll = async (page = 1, filter = ''): Promise<TListaPaises | Error> => {
 
         const urlRelativa = `/api/paises?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
 
-        const { data, headers } = await Api.get(urlRelativa);
+        const response = await Api.get(urlRelativa);
 
-        if (data) {
+        if (response) {
             return {
-                data,
-                qtd: data.length
+                data: response.data.rows,
+                qtd: response.data.rowCount
             };
         }
 
@@ -85,9 +86,10 @@ const updateById = async (id : number, dados : IPaises): Promise<void | Error> =
 
 const deleteById = async (id : number): Promise<void | Error> => {
     try {
-        await Api.delete(`/clientes/${id}`);
+        await Api.delete(`/api/paises/${id}`);
+        return
     } catch (error) {
-        console.error(error);
+        console.error('ERRO', error);
         return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
     }      
 }

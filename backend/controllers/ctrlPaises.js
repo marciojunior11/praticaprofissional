@@ -6,10 +6,10 @@ async function buscarTodos(req, res) {
     try {
         const url = req.url;
         const paises = await daoPaises.buscarTodos(url);
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET');
+        const qtd = await daoPaises.getQtd(url);
+        paises.rowCount = qtd;
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(paises.rows));
+        res.end(JSON.stringify(paises));
     } catch (error) {
         console.log(error);
     };
@@ -98,8 +98,9 @@ async function deletar(req, res, id) {
         }
         
         const mPais = await daoPaises.deletar(id)
+        console.log(mPais);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(mPais));
+        res.end();
     } catch (error) {
         console.log(error);
     }

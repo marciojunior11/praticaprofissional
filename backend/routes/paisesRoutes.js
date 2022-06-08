@@ -2,18 +2,16 @@ const ctrlPaises = require('../controllers/ctrlPaises');
 
 function paisesRoutes(req, res) {
     if(req.url.includes('/paises?_page') && req.method === 'GET') {
-        res.setHeader("Access-Control-Allow-Origin", "*");
         ctrlPaises.buscarTodos(req, res);
     } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'GET') {
         const id = req.url.split('/')[3];
-        console.log('ID', id)
         ctrlPaises.buscarUm(req, res, id);
     } else if(req.url === '/api/paises' && req.method === 'POST') {
         ctrlPaises.salvar(req, res);
     } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlPaises.alterar(req, res, id);
-    } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'DELETE') {
+    } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'OPTIONS') {
         const id = req.url.split('/')[3];
         ctrlPaises.deletar(req, res, id);
     } else {

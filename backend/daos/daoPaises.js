@@ -2,6 +2,26 @@ const { pool } = require('../datamodule/index');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/paises
+async function getQtd(url) {
+    return new Promise((resolve, reject) => {
+        if (url.endsWith('=')) {
+            pool.query('select * from paises', (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res.rowCount);
+            })
+        } else {
+            var filter = url.split('=')[3];
+            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res.rowCount);
+            })
+        }
+    })
+}
 async function buscarTodos (url) {
     var limit = url.split('=')[2];
     var page = url.split('=')[1];
@@ -9,7 +29,7 @@ async function buscarTodos (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from paises limit ${limit} offset ${page-1}`,(err, res) => {
+            pool.query(`select * from paises limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -18,7 +38,7 @@ async function buscarTodos (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${page-1}`, (err, res) => {
+            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -81,6 +101,7 @@ async function deletar (id) {
 };
 
 module.exports = {
+    getQtd,
     buscarTodos,
     buscarUm,
     salvar,

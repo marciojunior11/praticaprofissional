@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
@@ -11,19 +11,23 @@ export const ConsultaPaises: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
 
-    const [paises, setPaises] = useState<IPaises[]>();
+    const [paises, setPaises] = useState<IPaises[]>([]);
     const [qtdPaises, setQtdPaises] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     const busca = useMemo(() => {
-        return searchParams.get('busca')?.toUpperCase() || '';   
+        return searchParams.get('busca')?.toUpperCase() || ''; 
+    }, [searchParams]);
+
+    const pagina = useMemo(() => {
+        return Number(searchParams.get('pagina') || '1');   
     }, [searchParams]);
 
     useEffect(() => {
         setIsLoading(true);
 
         debounce(() => {
-            PaisesService.getAll(1, busca)
+            PaisesService.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -36,7 +40,25 @@ export const ConsultaPaises: React.FC = () => {
                     }
                 });
         })
-    }, [busca]);
+    }, [busca, pagina]);
+
+    const handleDelete = (id: number) => {
+
+        if (window.confirm('Deseja apagar o registro?')) {
+            PaisesService.deleteById(id)
+                .then(result => {
+                    if (result instanceof Error) {
+                        alert(result.message);
+                    } else {
+                        setPaises(oldRows => [
+                            ...oldRows.filter(oldRow => oldRow.id !== id)
+                        ]);
+                        alert('Registro apagado com sucesso!');
+                    }
+                })
+        }
+
+    }
 
     return (
         <LayoutBase 
@@ -45,7 +67,7 @@ export const ConsultaPaises: React.FC = () => {
                 <ListTools
                     mostrarInputBusca
                     textoDaBusca={busca}
-                    handleSeachTextChange={texto => setSearchParams({ busca : texto }, { replace : true })}
+                    handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
                 />
             }
         >
@@ -62,7 +84,14 @@ export const ConsultaPaises: React.FC = () => {
                     <TableBody>
                         {paises?.map(row => (
                             <TableRow key={row.id}>
-                                <TableCell>Ações</TableCell>
+                                <TableCell>
+                                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                                        <Icon>delete</Icon>
+                                    </IconButton>
+                                    <IconButton color="primary" size="small">
+                                        <Icon>edit</Icon>
+                                    </IconButton>
+                                </TableCell>
                                 <TableCell>{row.id}</TableCell>
                                 <TableCell>{row.pais}</TableCell>
                                 <TableCell>{row.sigla}</TableCell>
@@ -76,7 +105,18 @@ export const ConsultaPaises: React.FC = () => {
                         {isLoading && (
                             <TableRow>
                                 <TableCell colSpan={4}>
-                                        <LinearProgress variant="indeterminate"/> 
+                                    <LinearProgress variant="indeterminate"/> 
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {(qtdPaises > 0 && qtdPaises > Environment.LIMITE_DE_LINHAS) && (
+                            <TableRow>
+                                <TableCell colSpan={4}>
+                                    <Pagination 
+                                        page={pagina}
+                                        count={Math.ceil(qtdPaises / Environment.LIMITE_DE_LINHAS)}
+                                        onChange={(_, newPage) => setSearchParams({ busca, pagina: newPage.toString() }, { replace : true })}
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}
