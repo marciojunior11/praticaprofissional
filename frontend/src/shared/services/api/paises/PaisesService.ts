@@ -44,7 +44,7 @@ const getAll = async (page = 1, filter = ''): Promise<TListaPaises | Error> => {
 const getById = async (id : number): Promise<IPaises | Error> => {
     try {
 
-        const { data } = await Api.get(`/clientes/${id}`);
+        const { data } = await Api.get(`/api/paises/${id}`);
 
         if (data) {
             return data;

@@ -11,6 +11,10 @@ interface IListItemLinkProps {
     onClick: (() => void) | undefined;
 }
 
+interface ISidemenuProps {
+    children?: React.ReactNode;
+}
+
 const ListItemLink: React.FC<IListItemLinkProps> = ({ to, icon, label, onClick }) => {
 
     const navigate = useNavigate();
@@ -36,7 +40,7 @@ const ListItemLink: React.FC<IListItemLinkProps> = ({ to, icon, label, onClick }
     );
 };
 
-export const Sidemenu = ({children}: {children: React.ReactNode}) => {
+export const Sidemenu: React.FC<ISidemenuProps> = ( {children} ) => {
 
     const theme = useTheme();
     const smDown = useMediaQuery(theme.breakpoints.down('sm'));
