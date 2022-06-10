@@ -6,6 +6,7 @@ import {
     Dashboard,
     ConsultaClientes, 
     ConsultaPaises,
+    CadastroPaises
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -39,7 +40,7 @@ export const AppRoutes = () => {
             {/*<Route path="/cidades/detalhe/:id" element={<Dashboard/>}/>*/}
 
             <Route path="/paises" element={<ConsultaPaises/>}/>
-            <Route path="/paises/detalhe/:id" element={<p>DETALHE</p>}/>
+            <Route path="/paises/cadastro/:id" element={<CadastroPaises/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

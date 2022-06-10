@@ -70,6 +70,7 @@ export const ConsultaPaises: React.FC = () => {
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
+                    onClickNew={() => navigate('/paises/cadastro/novo')}
                 />
             }
         >
@@ -93,7 +94,7 @@ export const ConsultaPaises: React.FC = () => {
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>
                                     </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/paises/detalhe/${row.id}`)}>
+                                    <IconButton color="primary" size="small" onClick={() => navigate(`/paises/cadastro/${row.id}`)}>
                                         <Icon>edit</Icon>
                                     </IconButton>
                                 </TableCell>

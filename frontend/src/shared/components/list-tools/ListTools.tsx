@@ -8,7 +8,7 @@ interface IListTools {
     handleSeachTextChange?: (novoTexto: string) => void;
     textoBotaoNovo?: string;
     mostrarBotaoNovo?: boolean;
-    handleClickNew?: () => void;
+    onClickNew?: () => void;
 }
 
 export const ListTools: React.FC<IListTools> = ({
@@ -17,7 +17,7 @@ export const ListTools: React.FC<IListTools> = ({
     handleSeachTextChange,
     textoBotaoNovo = 'Novo',
     mostrarBotaoNovo = true,
-    handleClickNew,
+    onClickNew,
 }) => {
 
     const theme = useTheme();
@@ -57,7 +57,7 @@ export const ListTools: React.FC<IListTools> = ({
                         endIcon={<Icon>add</Icon>}
                         variant='contained'
                         disableElevation
-                        onClick={handleClickNew}
+                        onClick={onClickNew}
                     >
                         {textoBotaoNovo}
                     </Button>

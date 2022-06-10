@@ -14,11 +14,11 @@ interface IDetailToolsProps {
     botaoSalvarIsLoading?: boolean,
     botaoSalvarFecharIsLoading?: boolean,
 
-    handleClickNovo?: () => void,
-    handleClickVoltar?: () => void,
-    handleClickApagar?: () => void,
-    handleClickSalvar?: () => void,
-    handleClickSalvarFechar?: () => void,
+    onClickNovo?: () => void,
+    onClickVoltar?: () => void,
+    onClickApagar?: () => void,
+    onClickSalvar?: () => void,
+    onClickSalvarFechar?: () => void,
 }
 
 export const DetailTools: React.FC<IDetailToolsProps> = ({
@@ -36,11 +36,11 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
     botaoSalvarIsLoading = false,
     botaoSalvarFecharIsLoading = false,
 
-    handleClickNovo,
-    handleClickVoltar,
-    handleClickApagar,
-    handleClickSalvar,
-    handleClickSalvarFechar,
+    onClickNovo: handleClickNovo,
+    onClickVoltar: handleClickVoltar,
+    onClickApagar: handleClickApagar,
+    onClickSalvar: handleClickSalvar,
+    onClickSalvarFechar: handleClickSalvarFechar,
 }) => {
 
     const theme = useTheme();
