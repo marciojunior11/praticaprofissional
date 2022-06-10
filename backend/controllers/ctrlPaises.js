@@ -91,13 +91,12 @@ async function alterar(req, res, id) {
 // @route GET /api/paises/:id
 async function deletar(req, res, id) {
     try {
-        // const pais = await daoPaises.buscarUm(id);
-        // if (pais.rows.length === 0) {
-        //     res.writeHead(404, { 'Content-Type': 'application/json' });
-        //     res.end(JSON.stringify({ message: 'País não encontrado.' }));
-        // }
-        
-        const response = await daoPaises.deletar(id)
+        const pais = await daoPaises.buscarUm(id);
+        if (pais.rows.length === 0) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'País não encontrado.' }));
+        }
+        const response = await daoPaises.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) {

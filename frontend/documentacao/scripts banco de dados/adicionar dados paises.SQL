@@ -1,0 +1,15 @@
+insert into paises values (1, 'BRASIL', 'BR');
+insert into paises values (2, 'PARAGUAI', 'PY');
+insert into paises values (3, 'ARGENTINA', 'AR');
+insert into paises values (4, 'ESTADOS UNIDOS', 'US');
+insert into paises values (5, 'CANADA', 'CA');
+insert into paises values (6, 'MEXICO', 'MX');
+insert into paises values (7, 'PERU', 'PE');
+insert into paises values (8, 'JAPAO', 'JP');
+insert into paises values (9, 'COREIA DO SUL', 'KR');
+insert into paises values (10, 'ITALIA', 'IT');
+insert into paises values (11, 'FRANÇA', 'FR');
+insert into paises values (12, 'EGITO', 'EG');
+insert into paises values (13, 'ESPANHA', 'ES');
+insert into paises values (14, 'GRECIA', 'GR');
+insert into paises values (15, 'URUGUAI', 'UY');

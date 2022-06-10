@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon } from "@mui/material";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
@@ -10,6 +10,7 @@ import { Environment } from "../../shared/environment";
 export const ConsultaPaises: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
+    const navigate = useNavigate();
 
     const [paises, setPaises] = useState<IPaises[]>([]);
     const [qtdPaises, setQtdPaises] = useState(0);
@@ -92,7 +93,7 @@ export const ConsultaPaises: React.FC = () => {
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>
                                     </IconButton>
-                                    <IconButton color="primary" size="small">
+                                    <IconButton color="primary" size="small" onClick={() => navigate(`/paises/detalhe/${row.id}`)}>
                                         <Icon>edit</Icon>
                                     </IconButton>
                                 </TableCell>

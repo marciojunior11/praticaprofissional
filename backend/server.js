@@ -4,7 +4,7 @@ const { router } = require('./routes/router');
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.method == 'OPTIONS') {
-        res.setHeader('Access-Control-Allow-Methods', 'DELETE');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     }
     router(req, res);
 });

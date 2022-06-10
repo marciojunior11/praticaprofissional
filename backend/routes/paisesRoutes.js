@@ -1,7 +1,10 @@
 const ctrlPaises = require('../controllers/ctrlPaises');
 
 function paisesRoutes(req, res) {
-    if(req.url.includes('/paises?_page') && req.method === 'GET') {
+    if(req.method === 'OPTIONS') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end();
+    } else if(req.url.includes('/paises?_page') && req.method === 'GET') {
         ctrlPaises.buscarTodos(req, res);
     } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'GET') {
         const id = req.url.split('/')[3];
@@ -11,7 +14,7 @@ function paisesRoutes(req, res) {
     } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlPaises.alterar(req, res, id);
-    } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'OPTIONS') {
+    } else if(req.url.match(/\/api\/paises\/([0-9+])/) && req.method === 'DELETE') {
         const id = req.url.split('/')[3];
         ctrlPaises.deletar(req, res, id);
     } else {
