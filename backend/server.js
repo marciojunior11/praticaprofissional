@@ -5,6 +5,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.method == 'OPTIONS') {
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', '*')
     }
     router(req, res);
 });

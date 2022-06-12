@@ -25,7 +25,7 @@ async function buscarUm(req, res, id) {
             res.end(JSON.stringify({ message: 'País não encontrado.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(pais.rows));
+            res.end(JSON.stringify(pais.rows[0]));
         };
     } catch (error) {
         console.log(error);
@@ -43,9 +43,8 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { id, pais, sigla } = JSON.parse(body);
+            const { pais, sigla } = JSON.parse(body);
             const mPais = {
-                id,
                 pais,
                 sigla
             };
@@ -78,6 +77,7 @@ async function alterar(req, res, id) {
                 pais,
                 sigla
             };
+            console.log('MPAIS', mPais);
             const novoPais = await daoPaises.alterar(id, mPais)
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(novoPais));

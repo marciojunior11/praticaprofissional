@@ -6,11 +6,8 @@ export const Dashboard = () => {
     return (
         <LayoutBase
             titulo='Página inicial'
-            barraDeFerramentas={(
-                <DetailTools mostrarBotaoSalvarFechar/>
-            )}
         >
-            Testando
+            Home
         </LayoutBase>
     );
 };

@@ -65,11 +65,11 @@ async function buscarUm (id) {
 // @route POST /api/paises
 async function salvar (pais) {
     return new Promise((resolve, reject) => {
-        pool.query('insert into paises values($1, $2, $3)', [pais.id, pais.pais, pais.sigla], (err, res) => {
+        pool.query('insert into paises (pais, sigla) values($1, $2)', [pais.pais.toUpperCase(), pais.sigla.toUpperCase()], (err, res) => {
             if (err) {
                 return reject(err);
             }
-            return resolve(res);
+            return resolve(pais);
         })
     })
 };
@@ -77,8 +77,9 @@ async function salvar (pais) {
 // @descricao ALTERA UM REGISTRO
 // @route PUT /api/paises/:id
 async function alterar (id, pais) {
+    console.log(pais);
     return new Promise((resolve, reject) => {
-        pool.query('update paises set id = $1, pais = $2, sigla = $3 where id = $4 ', [pais.id, pais.pais, pais.sigla, id], (err, res) => {
+        pool.query('update paises set id = $1, pais = $2, sigla = $3 where id = $4 ', [pais.id, pais.pais.toUpperCase(), pais.sigla.toUpperCase(), id], (err, res) => {
             if (err) {
                 return reject(err);
             }
