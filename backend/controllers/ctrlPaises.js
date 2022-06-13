@@ -77,7 +77,6 @@ async function alterar(req, res, id) {
                 pais,
                 sigla
             };
-            console.log('MPAIS', mPais);
             const novoPais = await daoPaises.alterar(id, mPais)
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(novoPais));

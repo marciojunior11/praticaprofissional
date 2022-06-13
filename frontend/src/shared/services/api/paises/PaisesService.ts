@@ -58,10 +58,12 @@ const getById = async (id : number): Promise<IPaises | Error> => {
     }    
 }
 
-const create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<void | Error> => {
+const create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<number | undefined | Error> => {
     try {
-        await Api.post<IPaises>('/api/paises', dados);
-
+        const { data } = await Api.post<IPaises>('/api/paises', dados);
+        if (data) {
+            return data.id;
+        }
     } catch (error) {
         console.error(error);
         return new Error((error as {message:string}).message || 'Erro ao criar o registros.');
@@ -70,9 +72,7 @@ const create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<void | Error>
 
 const updateById = async (id : number, dados : IDetalhesPaises): Promise<void | Error> => {
     try {
-        console.log('DADOS API', dados);
-        const response = await Api.put(`/api/paises/${id}`, dados);
-        console.log(response);
+        await Api.put(`/api/paises/${id}`, dados);
     } catch (error) {
         console.error(error);
         return new Error((error as {message:string}).message || 'Erro ao atualizar o registros.');
@@ -81,8 +81,7 @@ const updateById = async (id : number, dados : IDetalhesPaises): Promise<void | 
 
 const deleteById = async (id : number): Promise<void | Error> => {
     try {
-        const response = await Api.delete(`/api/paises/${id}`);
-        console.log(response);
+        await Api.delete(`/api/paises/${id}`);
     } catch (error) {
         console.error('ERRO', error);
         return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');

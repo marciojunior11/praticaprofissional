@@ -29,7 +29,7 @@ async function buscarTodos (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from paises limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from paises order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -65,11 +65,13 @@ async function buscarUm (id) {
 // @route POST /api/paises
 async function salvar (pais) {
     return new Promise((resolve, reject) => {
-        pool.query('insert into paises (pais, sigla) values($1, $2)', [pais.pais.toUpperCase(), pais.sigla.toUpperCase()], (err, res) => {
+        pool.query('insert into paises (pais, sigla) values($1, $2)', [pais.pais.toUpperCase(), pais.sigla.toUpperCase()], async (err, res) => {
             if (err) {
                 return reject(err);
             }
-            return resolve(pais);
+            const response = await pool.query('select * from paises where id = (select max(id) from paises)');
+            console.log(response)
+            return resolve(response.rows[0]);
         })
     })
 };
