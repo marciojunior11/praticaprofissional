@@ -6,18 +6,21 @@ interface IDetailToolsProps {
     mostrarBotaoVoltar?: boolean,
     mostrarBotaoApagar?: boolean,
     mostrarBotaoSalvar?: boolean,
+    mostrarBotaoSalvarNovo?: boolean,
     mostrarBotaoSalvarFechar?: boolean,
 
     botaoNovoIsLoading?: boolean,
     botaoVoltarIsLoading?: boolean,
     botaoApagarIsLoading?: boolean,
     botaoSalvarIsLoading?: boolean,
+    botaoSalvarNovoIsLoading?: boolean,
     botaoSalvarFecharIsLoading?: boolean,
 
     onClickNovo?: () => void,
     onClickVoltar?: () => void,
     onClickApagar?: () => void,
     onClickSalvar?: () => void,
+    onClickSalvarNovo?: () => void,
     onClickSalvarFechar?: () => void,
 }
 
@@ -28,18 +31,21 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
     mostrarBotaoVoltar = true,
     mostrarBotaoApagar = true,
     mostrarBotaoSalvar = true,
+    mostrarBotaoSalvarNovo = false,
     mostrarBotaoSalvarFechar = false,
 
     botaoNovoIsLoading = false,
     botaoVoltarIsLoading = false,
     botaoApagarIsLoading = false,
     botaoSalvarIsLoading = false,
+    botaoSalvarNovoIsLoading = false,
     botaoSalvarFecharIsLoading = false,
 
     onClickNovo: handleClickNovo,
     onClickVoltar: handleClickVoltar,
     onClickApagar: handleClickApagar,
     onClickSalvar: handleClickSalvar,
+    onClickSalvarNovo: handleClickSalvarNovo,
     onClickSalvarFechar: handleClickSalvarFechar,
 }) => {
 
@@ -74,6 +80,24 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
 
             { botaoSalvarIsLoading && (
                 <Skeleton width={110} height={60}/>
+            )}
+
+            { (mostrarBotaoSalvarNovo && !botaoSalvarNovoIsLoading) && (
+                <Button
+                    color='primary'
+                    startIcon={<Icon>save</Icon>}
+                    variant='contained'
+                    disableElevation
+                    onClick={handleClickSalvarNovo}
+                >
+                    <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
+                        Salvar e novo
+                    </Typography>
+                </Button>
+            )}
+
+            { botaoSalvarIsLoading && (
+                <Skeleton width={180} height={60}/>
             )}
 
             { (mostrarBotaoSalvarFechar && !botaoSalvarFecharIsLoading && !smDown && !mdDown) && (

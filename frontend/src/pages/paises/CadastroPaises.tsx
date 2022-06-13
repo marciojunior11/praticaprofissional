@@ -1,24 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FormHandles } from "@unform/core";
-import { Form } from "@unform/web";
 import { Box, Grid, LinearProgress, Paper, Typography } from "@mui/material";
+import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
-import { VTextField } from "../../shared/forms";
+import { PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms";
 
 interface IFormData {
     pais: string;
     sigla: string;
 }
 
+const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
+    pais: yup.string().required(),
+    sigla: yup.string().required().min(2)
+})
+
 export const CadastroPaises: React.FC = () => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
-    const formRef = useRef<FormHandles>(null);
+    const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -46,30 +50,56 @@ export const CadastroPaises: React.FC = () => {
     }, [id])
 
     const handleSave = (dados: IFormData) => {
-        setIsLoading(true);
-        if (id === 'novo') {
-            PaisesService.create(dados)
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        alert(result.message);
+        formValidationSchema
+            .validate(dados, { abortEarly: false })
+                .then((dadosValidados) => {
+                    setIsLoading(true);
+                    if (id === 'novo') {
+                        PaisesService.create(dadosValidados)
+                            .then((result) => {
+                                setIsLoading(false);
+                                if (result instanceof Error) {
+                                    alert(result.message);
+                                } else {
+                                    alert('Cadastrado com Sucesso!');
+                                    if (isSaveAndClose()) {
+                                        navigate('/paises');
+                                    } else if (isSaveAndNew()) {
+                                        navigate('/paises/cadastro/novo');
+                                        formRef.current?.setData({
+                                            pais: '',
+                                            sigla: ''
+                                        });
+                                    } else {
+                                        navigate(`/paises/cadastro/${result}`);
+                                    }
+                                }
+                            });
                     } else {
-                        alert('Cadastrado com Sucesso!');
-                        navigate(`/paises/cadastro/${result}`);
+                        PaisesService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            .then((result) => {
+                                setIsLoading(false);
+                                if (result instanceof Error) {
+                                    alert(result.message);
+                                } else {
+                                    alert('Alterado com Sucesso!')
+                                    if (isSaveAndClose()) {
+                                        navigate('/paises')
+                                    }
+                                }
+                            });
                     }
-                });
-        } else {
-            PaisesService.updateById(Number(id), { id: Number(id), ...dados })
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        alert(result.message);
-                    } else {
-                        alert('Alterado com Sucesso!')
-                    }
-                });
-        }
+                })
+                .catch((errors: yup.ValidationError) => {
+                    const validationErrors: IVFormErrors = {}
 
+                    errors.inner.forEach(error => {
+                        if ( !error.path ) return;
+
+                        validationErrors[error.path] = error.message;
+                    });
+                    formRef.current?.setErrors(validationErrors);
+                })
     };
 
     const handleDelete = (id: number) => {
@@ -93,18 +123,20 @@ export const CadastroPaises: React.FC = () => {
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
+                    mostrarBotaoSalvarNovo
                     mostrarBotaoApagar={id !== 'novo'}
                     mostrarBotaoNovo={id !== 'novo'}
                     
-                    onClickSalvar={() => formRef.current?.submitForm()}
-                    onClickSalvarFechar={() => formRef.current?.submitForm()}
+                    onClickSalvar={save}
+                    onClickSalvarNovo={saveAndNew}
+                    onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/paises/cadastro/novo') }
                     onClickVoltar={() => navigate('/paises') }
                 />
             }
         >
-            <Form ref={formRef} onSubmit={handleSave}>
+            <VForm ref={formRef} onSubmit={handleSave}>
                 <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
                     <Grid container direction="column" padding={2} spacing={2}>
 
@@ -136,6 +168,7 @@ export const CadastroPaises: React.FC = () => {
                                     name='sigla' 
                                     label="Sigla"
                                     disabled={isLoading}
+                                    inputProps={{ maxLength: 2 }}
                                 />
                             </Grid>
                         </Grid>
@@ -143,7 +176,7 @@ export const CadastroPaises: React.FC = () => {
                     </Grid>
 
                 </Box>
-            </Form>
+            </VForm>
         </LayoutBase>
     )
 
