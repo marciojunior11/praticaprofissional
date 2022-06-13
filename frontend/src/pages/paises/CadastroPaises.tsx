@@ -37,6 +37,11 @@ export const CadastroPaises: React.FC = () => {
                         formRef.current?.setData(result);
                     }
                 });
+        } else {
+            formRef.current?.setData({
+                pais: '',
+                sigla: ''
+            });
         }
     }, [id])
 
