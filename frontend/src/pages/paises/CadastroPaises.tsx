@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
-import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms";
+import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 
 interface IFormData {
     pais: string;
@@ -53,6 +53,7 @@ export const CadastroPaises: React.FC = () => {
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
+
                     setIsLoading(true);
                     if (id === 'novo') {
                         PaisesService.create(dadosValidados)
@@ -117,13 +118,17 @@ export const CadastroPaises: React.FC = () => {
         }
     }
 
+    const validate = (key: string) => {
+        
+    }
+
     return (
         <LayoutBase 
             titulo={id === 'novo' ? 'Novo País' : 'Editar País'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo
+                    mostrarBotaoSalvarNovo={id == 'novo'}
                     mostrarBotaoApagar={id !== 'novo'}
                     mostrarBotaoNovo={id !== 'novo'}
                     
