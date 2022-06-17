@@ -8,7 +8,7 @@ export interface IPaises {
     sigla: string;
 }
 
-export interface IDetalhesPais {
+export interface IDetalhesPaises {
     id: number;
     pais: string;
     sigla: string;
@@ -58,7 +58,7 @@ const getById = async (id : number): Promise<IPaises | Error> => {
     }    
 }
 
-const create = async (dados: Omit<IDetalhesPais, 'id'>): Promise<number | undefined | Error> => {
+const create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<number | undefined | Error> => {
     try {
         const { data } = await Api.post<IPaises>('/api/paises', dados);
         if (data) {
@@ -70,7 +70,7 @@ const create = async (dados: Omit<IDetalhesPais, 'id'>): Promise<number | undefi
     }     
 }
 
-const updateById = async (id : number, dados : IDetalhesPais): Promise<void | Error> => {
+const updateById = async (id : number, dados : IDetalhesPaises): Promise<void | Error> => {
     try {
         await Api.put(`/api/paises/${id}`, dados);
     } catch (error) {
