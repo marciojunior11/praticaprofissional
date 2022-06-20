@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Grid, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Grid, Icon, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
@@ -26,6 +26,8 @@ export const CadastroPaises: React.FC = () => {
 
     const [isLoading, setIsLoading] = useState(false);
 
+    const [isValid, setIsValid] = useState(false);
+
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
@@ -47,60 +49,82 @@ export const CadastroPaises: React.FC = () => {
                 sigla: ''
             });
         }
-    }, [id])
+    }, [id]);
+
+    const validate = (filter: string) => {
+        PaisesService.validate(filter)
+            .then((result) => {
+                if (result instanceof Error) {
+                    alert(result.message);
+                } else {
+                    setIsValid(result);
+                    if (result === false) {
+                        const validationErrors: IVFormErrors = {};
+                        validationErrors['pais'] = 'Já existe um país com esse nome.';
+                        formRef.current?.setErrors(validationErrors);
+                    }
+                }
+            })
+    }
 
     const handleSave = (dados: IFormData) => {
-        formValidationSchema
-            .validate(dados, { abortEarly: false })
-                .then((dadosValidados) => {
+        if (isValid === true) {
+            formValidationSchema
+                .validate(dados, { abortEarly: false })
+                    .then((dadosValidados) => {
 
-                    setIsLoading(true);
-                    if (id === 'novo') {
-                        PaisesService.create(dadosValidados)
-                            .then((result) => {
-                                setIsLoading(false);
-                                if (result instanceof Error) {
-                                    alert(result.message);
-                                } else {
-                                    alert('Cadastrado com Sucesso!');
-                                    if (isSaveAndClose()) {
-                                        navigate('/paises');
-                                    } else if (isSaveAndNew()) {
-                                        navigate('/paises/cadastro/novo');
-                                        formRef.current?.setData({
-                                            pais: '',
-                                            sigla: ''
-                                        });
+                        setIsLoading(true);
+                        if (id === 'novo') {
+                            PaisesService.create(dadosValidados)
+                                .then((result) => {
+                                    setIsLoading(false);
+                                    if (result instanceof Error) {
+                                        alert(result.message);
                                     } else {
-                                        navigate(`/paises/cadastro/${result}`);
+                                        alert('Cadastrado com Sucesso!');
+                                        if (isSaveAndClose()) {
+                                            navigate('/paises');
+                                        } else if (isSaveAndNew()) {
+                                            navigate('/paises/cadastro/novo');
+                                            formRef.current?.setData({
+                                                pais: '',
+                                                sigla: ''
+                                            });
+                                        } else {
+                                            navigate(`/paises/cadastro/${result}`);
+                                        }
                                     }
-                                }
-                            });
-                    } else {
-                        PaisesService.updateById(Number(id), { id: Number(id), ...dadosValidados })
-                            .then((result) => {
-                                setIsLoading(false);
-                                if (result instanceof Error) {
-                                    alert(result.message);
-                                } else {
-                                    alert('Alterado com Sucesso!')
-                                    if (isSaveAndClose()) {
-                                        navigate('/paises')
+                                });
+                        } else {
+                            PaisesService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                                .then((result) => {
+                                    setIsLoading(false);
+                                    if (result instanceof Error) {
+                                        alert(result.message);
+                                    } else {
+                                        alert('Alterado com Sucesso!')
+                                        if (isSaveAndClose()) {
+                                            navigate('/paises')
+                                        }
                                     }
-                                }
-                            });
-                    }
-                })
-                .catch((errors: yup.ValidationError) => {
-                    const validationErrors: IVFormErrors = {}
+                                });
+                        }
+                    })
+                    .catch((errors: yup.ValidationError) => {
+                        const validationErrors: IVFormErrors = {}
 
-                    errors.inner.forEach(error => {
-                        if ( !error.path ) return;
-
-                        validationErrors[error.path] = error.message;
-                    });
-                    formRef.current?.setErrors(validationErrors);
-                })
+                        errors.inner.forEach(error => {
+                            if ( !error.path ) return;
+                            console.log('path', error.path);
+                            console.log('message', error.message);
+                            validationErrors[error.path] = error.message;
+                        });
+                        console.log(validationErrors);
+                        formRef.current?.setErrors(validationErrors);
+                    })
+        } else {
+            alert('Verifique os campos.');
+        }
     };
 
     const handleDelete = (id: number) => {
@@ -116,10 +140,6 @@ export const CadastroPaises: React.FC = () => {
                     }
                 })
         }
-    }
-
-    const validate = (key: string) => {
-        
     }
 
     return (
@@ -162,6 +182,18 @@ export const CadastroPaises: React.FC = () => {
                                     name='pais' 
                                     label="País"
                                     disabled={isLoading}
+                                    InputProps={isValid === true ? {
+                                        endAdornment: (
+                                            <InputAdornment position='start'>
+                                                <Icon color="success">done</Icon>
+                                            </InputAdornment>
+                                        )
+                                    } : undefined}
+                                    onChange={() => {
+                                        setIsValid(false);
+                                        formRef.current?.setFieldError('pais', '');
+                                    }}
+                                    onBlur={(e) => validate(e.target.value)}
                                 />
                             </Grid>
                         </Grid>

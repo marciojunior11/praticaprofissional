@@ -21,7 +21,21 @@ async function getQtd(url) {
             })
         }
     })
-}
+};
+
+async function buscarTodosSemFiltro(url) {
+    return new Promise((resolve, reject) => {
+        const filter = url.split('=')[1]
+        console.log(filter);
+        pool.query(`select * from paises where pais like '%${filter}%'`, (err, res) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(res);
+        })
+    })
+};
+
 async function buscarTodos (url) {
     var limit = url.split('=')[2];
     var page = url.split('=')[1];
@@ -105,6 +119,7 @@ async function deletar (id) {
 
 module.exports = {
     getQtd,
+    buscarTodosSemFiltro,
     buscarTodos,
     buscarUm,
     salvar,

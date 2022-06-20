@@ -2,6 +2,16 @@ const daoPaises = require('../daos/daoPaises');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/paises
+async function BuscarTodosSemFiltro(req, res) {
+    try {
+        const response = await daoPaises.buscarTodosSemFiltro(req.url);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(response));
+    } catch (error) { 
+        console.log(error);
+    }
+}
+
 async function buscarTodos(req, res) {
     try {
         const url = req.url;
@@ -104,6 +114,7 @@ async function deletar(req, res, id) {
 };
 
 module.exports = {
+    BuscarTodosSemFiltro,
     buscarTodos,
     buscarUm,
     salvar,

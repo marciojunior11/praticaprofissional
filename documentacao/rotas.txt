@@ -1,0 +1,14 @@
+sulfix api/${obj}
+
+GET
+/sulfix/:id
+/sulfix/_?page=${page}&_limit${limit}&nome_like${filter}
+
+POST
+/sulfix
+
+PUT
+/sulfix:id
+
+DELETE
+/sulfix:id

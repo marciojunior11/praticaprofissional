@@ -29,7 +29,7 @@ export const VTextField: React.FC<TVTextFieldProps> = ({ name, ...rest }) => {
 
             
             value={value.toUpperCase()}
-            onChange={e => setValue(e.target.value)}
+            onChange={e => { setValue(e.target.value); rest.onChange?.(e); }}
 
             onKeyDown={() => error ? clearError() : undefined}
         />
