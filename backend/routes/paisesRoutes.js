@@ -9,9 +9,9 @@ function paisesRoutes(req, res) {
             const id = req.url.split('/')[3];
             ctrlPaises.buscarUm(req, res, id);
         } else if (req.url.includes('filter')) {
-            ctrlPaises.BuscarTodosSemFiltro(req, res);
+            ctrlPaises.buscarTodosSemPg(req, res);
         } else {
-            ctrlPaises.buscarTodos(req, res);
+            ctrlPaises.buscarTodosComPg(req, res);
         }
     } else if(req.url === '/api/paises' && req.method === 'POST') {
         ctrlPaises.salvar(req, res);

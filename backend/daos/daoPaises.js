@@ -23,7 +23,7 @@ async function getQtd(url) {
     })
 };
 
-async function buscarTodosSemFiltro(url) {
+async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         const filter = url.split('=')[1]
         console.log(filter);
@@ -36,7 +36,7 @@ async function buscarTodosSemFiltro(url) {
     })
 };
 
-async function buscarTodos (url) {
+async function buscarTodosComPg (url) {
     var limit = url.split('=')[2];
     var page = url.split('=')[1];
     limit = limit.replace(/[^0-9]/g, '');
@@ -119,8 +119,8 @@ async function deletar (id) {
 
 module.exports = {
     getQtd,
-    buscarTodosSemFiltro,
-    buscarTodos,
+    buscarTodosSemPg,
+    buscarTodosComPg,
     buscarUm,
     salvar,
     alterar,

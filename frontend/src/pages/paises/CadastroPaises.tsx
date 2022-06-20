@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Grid, Icon, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, CircularProgress, Collapse, Grid, Icon, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
@@ -25,6 +25,7 @@ export const CadastroPaises: React.FC = () => {
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
 
     const [isLoading, setIsLoading] = useState(false);
+    const [isValidating, setIsValidating] = useState<any>();
 
     const [isValid, setIsValid] = useState(false);
 
@@ -52,15 +53,17 @@ export const CadastroPaises: React.FC = () => {
     }, [id]);
 
     const validate = (filter: string) => {
+        setIsValidating(true);
         PaisesService.validate(filter)
             .then((result) => {
+                setIsValidating(false);
                 if (result instanceof Error) {
                     alert(result.message);
                 } else {
                     setIsValid(result);
                     if (result === false) {
                         const validationErrors: IVFormErrors = {};
-                        validationErrors['pais'] = 'Já existe um país com esse nome.';
+                        validationErrors['pais'] = 'Este país já está cadastrado.';
                         formRef.current?.setErrors(validationErrors);
                     }
                 }
@@ -181,19 +184,37 @@ export const CadastroPaises: React.FC = () => {
                                     fullWidth
                                     name='pais' 
                                     label="País"
-                                    disabled={isLoading}
-                                    InputProps={isValid === true ? {
+                                    disabled={isLoading}                             
+                                    InputProps={{
                                         endAdornment: (
-                                            <InputAdornment position='start'>
-                                                <Icon color="success">done</Icon>
-                                            </InputAdornment>
+                                                <InputAdornment position='start'>
+                                                    { isValidating === true && (
+                                                        <Box sx={{ display: 'flex',  }}>
+                                                            <CircularProgress size={24}/>
+                                                        </Box>
+                                                    )}
+                                                    { isValidating === false && (
+                                                        <Box sx={{ display: 'flex',  }}>
+                                                            { isValid === true ? (
+                                                                <Icon color="success">done</Icon>
+                                                            ) : (
+                                                                <Icon color="error">close</Icon>
+                                                            )}
+                                                        </Box>
+                                                    )}
+                                                </InputAdornment>
                                         )
-                                    } : undefined}
+                                    }}
                                     onChange={() => {
                                         setIsValid(false);
+                                        setIsValidating('');
                                         formRef.current?.setFieldError('pais', '');
                                     }}
-                                    onBlur={(e) => validate(e.target.value)}
+                                    onBlur={(e) => {
+                                        if (e.target.value) {
+                                            validate(e.target.value)
+                                        }
+                                    }}
                                 />
                             </Grid>
                         </Grid>

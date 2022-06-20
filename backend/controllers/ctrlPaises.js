@@ -2,9 +2,9 @@ const daoPaises = require('../daos/daoPaises');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/paises
-async function BuscarTodosSemFiltro(req, res) {
+async function buscarTodosSemPg(req, res) {
     try {
-        const response = await daoPaises.buscarTodosSemFiltro(req.url);
+        const response = await daoPaises.buscarTodosSemPg(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) { 
@@ -12,10 +12,10 @@ async function BuscarTodosSemFiltro(req, res) {
     }
 }
 
-async function buscarTodos(req, res) {
+async function buscarTodosComPg(req, res) {
     try {
         const url = req.url;
-        const paises = await daoPaises.buscarTodos(url);
+        const paises = await daoPaises.buscarTodosComPg(url);
         const qtd = await daoPaises.getQtd(url);
         paises.rowCount = qtd;
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -114,8 +114,8 @@ async function deletar(req, res, id) {
 };
 
 module.exports = {
-    BuscarTodosSemFiltro,
-    buscarTodos,
+    buscarTodosSemPg,
+    buscarTodosComPg,
     buscarUm,
     salvar,
     alterar,
