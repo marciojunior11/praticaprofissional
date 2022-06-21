@@ -7,6 +7,7 @@ import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
+import { toast } from "react-toastify";
 
 interface IFormData {
     pais: string;
@@ -126,7 +127,8 @@ export const CadastroPaises: React.FC = () => {
                         formRef.current?.setErrors(validationErrors);
                     })
         } else {
-            alert('Verifique os campos.');
+            toast.error('Verifique os campos.');
+            //alert('Verifique os campos.');
         }
     };
 
