@@ -110,6 +110,8 @@ export const CadastroPaises: React.FC = () => {
                                         toast.success('Alterado com sucesso!');
                                         if (isSaveAndClose()) {
                                             navigate('/paises')
+                                        } else {
+                                            setIsValidating(null);
                                         }
                                     }
                                 });

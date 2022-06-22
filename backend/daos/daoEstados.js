@@ -1,11 +1,11 @@
 const { pool } = require('../datamodule/index');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/paises
+// @route GET /api/estados
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from paises', (err, res) => {
+            pool.query('select * from estados', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -13,7 +13,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -27,7 +27,7 @@ async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         const filter = url.split('=')[1]
         console.log(filter);
-        pool.query(`select * from paises where pais like '%${filter}%'`, (err, res) => {
+        pool.query(`select * from estados where estado like '%${filter}%'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -43,7 +43,7 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from paises order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from estados order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -52,7 +52,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -63,10 +63,10 @@ async function buscarTodosComPg (url) {
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/paises
+// @route GET /api/estados
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from paises where id = $1', [id], (err, res) => {
+        pool.query('select * from estados where id = $1', [id], (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -76,8 +76,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/paises
-async function salvar (pais) {
+// @route POST /api/estados
+async function salvar (estado) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -96,14 +96,14 @@ async function salvar (pais) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into paises (pais, sigla) values($1, $2)', [pais.pais.toUpperCase(), pais.sigla.toUpperCase()], async (err, res) => {
+            client.query('insert into estados (estado, uf, fk_idPais) values($1, $2, $3)', [estado.estado.toUpperCase(), estado.sigla.toUpperCase(), /*ID PAIS*/], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from paises where id = (select max(id) from paises)');
+                        const response = await client.query('select * from estados where id = (select max(id) from estados)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -115,8 +115,8 @@ async function salvar (pais) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/paises/:id
-async function alterar (id, pais) {
+// @route PUT /api/estados/:id
+async function alterar (id, estado) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -135,7 +135,7 @@ async function alterar (id, pais) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update paises set id = $1, pais = $2, sigla = $3 where id = $4 ', [pais.id, pais.pais.toUpperCase(), pais.sigla.toUpperCase(), id], (err, res) => {
+                client.query('update estados set id = $1, estado = $2, uf = $3, fk_idPais = $4 where id = $5 ', [estado.id, estado.estado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -152,7 +152,7 @@ async function alterar (id, pais) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/paises/:id
+// @route GET /api/estados/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -172,7 +172,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from paises where id = ${id}`, (err, res) => {
+                client.query(`delete from estados where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -188,7 +188,7 @@ async function deletar (id) {
 
 
 
-        // pool.query(`delete from paises where id = ${id}`, (err, res) => {
+        // pool.query(`delete from estados where id = ${id}`, (err, res) => {
         //     if (err) {
         //         return reject(err);
         //     }
