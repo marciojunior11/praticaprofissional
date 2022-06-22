@@ -53,10 +53,11 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { estado, uf } = JSON.parse(body);
+            const response = JSON.parse(body);
             const mEstado = {
-                estado,
-                sigla
+                estado: response.estado,
+                uf: response.uf,
+                pais: response.pais
             };
             const novoEstado = await daoEstados.salvar(mEstado);
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -81,11 +82,12 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { id, estado, sigla } = JSON.parse(body);
+            const response = JSON.parse(body);
             const mEstado = {
-                id,
-                estado,
-                sigla
+                id: response.id,
+                estado: response.estado,
+                uf: response.uf,
+                pais: response.pais
             };
             const novoPais = await daoEstados.alterar(id, mEstado)
             res.writeHead(201, { 'Content-Type': 'application/json'});

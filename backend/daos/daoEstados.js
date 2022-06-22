@@ -96,7 +96,7 @@ async function salvar (estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into estados (estado, uf, fk_idPais) values($1, $2, $3)', [estado.estado.toUpperCase(), estado.sigla.toUpperCase(), /*ID PAIS*/], async (err, res) => {
+            client.query('insert into estados (estado, uf, fk_idPais) values($1, $2, $3)', [estado.estado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -185,15 +185,6 @@ async function deletar (id) {
                 })
             })
         })
-
-
-
-        // pool.query(`delete from estados where id = ${id}`, (err, res) => {
-        //     if (err) {
-        //         return reject(err);
-        //     }
-        //     return resolve(res);
-        // })
     })
 };
 
