@@ -32,7 +32,7 @@ async function buscarUm(req, res, id) {
         const estado = await daoEstados.buscarUm(id);
         if (estado.rows.length === 0) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'País não encontrado.' }));
+            res.end(JSON.stringify({ message: 'Estado não encontrado.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(estado.rows[0]));
@@ -75,7 +75,7 @@ async function alterar(req, res, id) {
         const mEstado = await daoEstados.buscarUm(id);
         if (mEstado.rows.length === 0) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'País não encontrado.' })); 
+            res.end(JSON.stringify({ message: 'Estado não encontrado.' })); 
         };
         let body = '';
         req.on('data', (chunk) => {
@@ -85,7 +85,7 @@ async function alterar(req, res, id) {
             const response = JSON.parse(body);
             const mEstado = {
                 id: response.id,
-                estado: response.estado,
+                estado: `${response.estado} - ${response.pais.sigla}`,
                 uf: response.uf,
                 pais: response.pais
             };
@@ -105,7 +105,7 @@ async function deletar(req, res, id) {
         const estado = await daoEstados.buscarUm(id);
         if (estado.rows.length === 0) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'País não encontrado.' }));
+            res.end(JSON.stringify({ message: 'Estado não encontrado.' }));
         }
         const response = await daoEstados.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });

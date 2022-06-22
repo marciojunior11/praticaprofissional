@@ -1,27 +1,27 @@
 import { Environment } from "../../../environment";
 import { Api } from "../axios-config";
 
-export interface IPaises {
+export interface IEstados {
     id: number;
     pais: string;
     sigla: string;
 }
 
-export interface IDetalhesPaises {
+export interface IDetalhesEstados {
     id: number;
     pais: string;
     sigla: string;
 }
 
-type TListaPaises = {
-    data: IPaises[];
+type TListaEstados = {
+    data: IEstados[];
     qtd: number;
 }
 
-const getAll = async (page = 1, filter = ''): Promise<TListaPaises | Error> => {
+const getAll = async (page = 1, filter = ''): Promise<TListaEstados | Error> => {
     try {
 
-        const urlRelativa = `/api/paises?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+        const urlRelativa = `/api/estados?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
 
         const response = await Api.get(urlRelativa);
 
@@ -40,10 +40,10 @@ const getAll = async (page = 1, filter = ''): Promise<TListaPaises | Error> => {
     }
 };
 
-const getById = async (id : number): Promise<IPaises | Error> => {
+const getById = async (id : number): Promise<IEstados | Error> => {
     try {
 
-        const { data } = await Api.get(`/api/paises/${id}`);
+        const { data } = await Api.get(`/api/estados/${id}`);
 
         if (data) {
             return data;
@@ -57,9 +57,9 @@ const getById = async (id : number): Promise<IPaises | Error> => {
     }    
 }
 
-const create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<number | undefined | Error> => {
+const create = async (dados: Omit<IDetalhesEstados, 'id'>): Promise<number | undefined | Error> => {
     try {
-        const { data } = await Api.post<IPaises>('/api/paises', dados);
+        const { data } = await Api.post<IEstados>('/api/estados', dados);
         if (data) {
             return data.id;
         }
@@ -69,9 +69,9 @@ const create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<number | unde
     }     
 }
 
-const updateById = async (id : number, dados : IDetalhesPaises): Promise<void | Error> => {
+const updateById = async (id : number, dados : IDetalhesEstados): Promise<void | Error> => {
     try {
-        await Api.put(`/api/paises/${id}`, dados);
+        await Api.put(`/api/estados/${id}`, dados);
     } catch (error) {
         console.error(error);
         return new Error((error as {message:string}).message || 'Erro ao atualizar o registros.');
@@ -80,7 +80,7 @@ const updateById = async (id : number, dados : IDetalhesPaises): Promise<void | 
 
 const deleteById = async (id : number): Promise<void | Error> => {
     try {
-        await Api.delete(`/api/paises/${id}`);
+        await Api.delete(`/api/estados/${id}`);
     } catch (error) {
         console.error('ERRO', error);
         return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
@@ -89,7 +89,7 @@ const deleteById = async (id : number): Promise<void | Error> => {
 
 const validate = async (filter: string): Promise<boolean | Error> => {
     try {
-        const response = await Api.get(`/api/paises?_filter=${filter}`);
+        const response = await Api.get(`/api/estados?_filter=${filter}`);
         if (response.data.rowCount != 0) {
             return false;
         } else {
@@ -101,7 +101,7 @@ const validate = async (filter: string): Promise<boolean | Error> => {
     }
 }
 
-export const PaisesService = {
+export const EstadosService = {
     getAll,
     getById,
     create,
