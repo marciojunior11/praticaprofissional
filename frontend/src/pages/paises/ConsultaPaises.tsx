@@ -6,6 +6,7 @@ import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { PaisesService, IPaises } from '../../shared/services/api/paises/PaisesService';
 import { Environment } from "../../shared/environment";
+import { toast } from "react-toastify";
 
 export const ConsultaPaises: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +34,7 @@ export const ConsultaPaises: React.FC = () => {
                     setIsLoading(false);
 
                     if (result instanceof Error) {
-                        alert(result.message)
+                        toast.error(result.message);
                     } else {
                         console.log(result);
                         setPaises(result.data);
@@ -50,12 +51,12 @@ export const ConsultaPaises: React.FC = () => {
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
-                        alert(result.message);
+                        toast.error(result.message);
                     } else {
                         setPaises(oldRows => [
                             ...oldRows.filter(oldRow => oldRow.id !== id)
                         ]);
-                        alert('Registro apagado com sucesso!');
+                        toast.success('Apagado com sucesso!');
                     }
                 })
         }
