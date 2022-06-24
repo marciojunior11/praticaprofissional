@@ -27,7 +27,7 @@ async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         const filter = url.split('=')[1]
         console.log(filter);
-        pool.query(`select * from paises where pais like '%${filter}%'`, (err, res) => {
+        pool.query(`select * from paises where pais like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

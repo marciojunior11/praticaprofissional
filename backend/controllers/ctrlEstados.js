@@ -1,10 +1,22 @@
 const daoEstados = require('../daos/daoEstados');
+const daoPaises = require('../daos/daoPaises');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/estados
 async function buscarTodosSemPg(req, res) {
     try {
+        var mListaEstados = [];
         const response = await daoEstados.buscarTodosSemPg(req.url);
+        response.rows.forEach(async (item, index) => {
+            let mPais = await daoPaises.buscarUm(item.fk_idpais);
+            mListaEstados.push({
+                id: item.id,
+                estado: item.estado,
+                uf: item.uf,
+                pais: mPais.rows[0]
+            })
+        })
+        response.rows = mListaEstados;
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) { 
@@ -14,12 +26,23 @@ async function buscarTodosSemPg(req, res) {
 
 async function buscarTodosComPg(req, res) {
     try {
+        var mListaEstados = [];
         const url = req.url;
-        const estados = await daoEstados.buscarTodosComPg(url);
+        var response = await daoEstados.buscarTodosComPg(url);
+        response.rows.forEach(async item => {
+            let mPais = await daoPaises.buscarUm(item.fk_idpais);
+            mListaEstados.push({
+                id: item.id,
+                estado: item.estado,
+                uf: item.uf,
+                pais: mPais.rows[0]
+            })
+        })
         const qtd = await daoEstados.getQtd(url);
-        estados.rowCount = qtd;
+        response.rowCount = qtd;
+        response.rows = mListaEstados
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(estados));
+        res.end(JSON.stringify(response));
     } catch (error) {
         console.log(error);
     };
@@ -30,12 +53,22 @@ async function buscarTodosComPg(req, res) {
 async function buscarUm(req, res, id) {
     try {
         const estado = await daoEstados.buscarUm(id);
+        const pais = await daoPaises.buscarUm(estado.rows[0].fk_idpais);
+        console.log(estado);
+        console.log(pais);
+        var mEstado = {
+            id: estado.rows[0].id,
+            estado: estado.rows[0].estado,
+            uf: estado.rows[0].uf,
+            pais: pais.rows[0]
+        }
+        console.log(mEstado);
         if (estado.rows.length === 0) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Estado não encontrado.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(estado.rows[0]));
+            res.end(JSON.stringify(mEstado));
         };
     } catch (error) {
         console.log(error);
@@ -85,7 +118,7 @@ async function alterar(req, res, id) {
             const response = JSON.parse(body);
             const mEstado = {
                 id: response.id,
-                estado: `${response.estado} - ${response.pais.sigla}`,
+                estado: response.estado,
                 uf: response.uf,
                 pais: response.pais
             };

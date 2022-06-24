@@ -1,16 +1,19 @@
+import { IPaises } from './../paises/PaisesService';
 import { Environment } from "../../../environment";
 import { Api } from "../axios-config";
 
 export interface IEstados {
     id: number;
-    pais: string;
-    sigla: string;
+    estado: string;
+    uf: string;
+    pais: IPaises;
 }
 
 export interface IDetalhesEstados {
     id: number;
-    pais: string;
-    sigla: string;
+    estado: string;
+    uf: string;
+    pais: IPaises;
 }
 
 type TListaEstados = {
