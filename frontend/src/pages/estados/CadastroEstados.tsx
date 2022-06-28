@@ -6,9 +6,9 @@ import * as yup from 'yup';
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { EstadosService } from "../../shared/services/api/estados/EstadosService";
-import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
 import { toast } from "react-toastify";
-import { IPaises } from "../../shared/services/api/paises/PaisesService";
+import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
 
 interface IFormData {
     estado: string;
@@ -242,11 +242,11 @@ export const CadastroEstados: React.FC = () => {
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                <VTextField 
-                                    fullWidth
-                                    name='pais' 
-                                    label="País"
-                                    disabled={isLoading}
+                                <VAutocomplete
+                                    name="pais"
+                                    optionLabel="pais"
+                                    TFLabel="País"
+                                    getAll={PaisesService.getAll}
                                 />
                             </Grid>
                         </Grid>
