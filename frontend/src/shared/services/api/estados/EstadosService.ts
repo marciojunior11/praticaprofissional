@@ -26,12 +26,14 @@ const getAll = async (page = 1, filter = ''): Promise<TListaEstados | Error> => 
 
         const urlRelativa = `/api/estados?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
 
-        const response = await Api.get(urlRelativa);
+        const { data } = await Api.get(urlRelativa);
 
-        if (response) {
+        console.log('RES', data);
+
+        if (data) {
             return {
-                data: response.data.rows,
-                qtd: response.data.rowCount
+                data: data.rows,
+                qtd: data.rowCount
             };
         }
 
@@ -90,9 +92,9 @@ const deleteById = async (id : number): Promise<void | Error> => {
     }      
 }
 
-const validate = async (filter: string): Promise<boolean | Error> => {
+const validate = async (dados: Omit<IDetalhesEstados, 'id'>): Promise<boolean | Error> => {
     try {
-        const response = await Api.get(`/api/estados?_filter=${filter}`);
+        const response = await Api.post(`/api/estados/validate`, dados);
         if (response.data.rowCount != 0) {
             return false;
         } else {

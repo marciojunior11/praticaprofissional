@@ -40,7 +40,8 @@ async function buscarTodosComPg(req, res) {
         })
         const qtd = await daoEstados.getQtd(url);
         response.rowCount = qtd;
-        response.rows = mListaEstados
+        response.rows = mListaEstados;
+        console.log(response.rows);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) {
@@ -148,11 +149,37 @@ async function deletar(req, res, id) {
     }
 };
 
+async function validate(req, res) {
+    try {
+        let body = '';
+
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+
+        req.on('end', async () => {
+            const response = JSON.parse(body);
+            const mEstado = {
+                estado: response.estado,
+                uf: response.uf,
+                pais: response.pais
+            };
+            const resp = await daoEstados.validate(mEstado);
+            console.log(resp);
+            res.writeHead(201, { 'Content-Type': 'application/json'});
+            res.end(JSON.stringify(resp));
+        })
+    } catch (error) {
+        console.log(error);
+    }; 
+}
+
 module.exports = {
     buscarTodosSemPg,
     buscarTodosComPg,
     buscarUm,
     salvar,
     alterar,
-    deletar
+    deletar,
+    validate
 }

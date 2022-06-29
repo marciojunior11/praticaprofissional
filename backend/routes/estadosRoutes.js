@@ -13,8 +13,11 @@ function estadosRoutes(req, res) {
         } else {
             ctrlEstados.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/estados' && req.method === 'POST') {
-        ctrlEstados.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url === '/api/estados')
+            ctrlEstados.salvar(req, res);
+        else if (req.url.includes('validate'))
+            ctrlEstados.validate(req, res);
     } else if(req.url.match(/\/api\/estados\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlEstados.alterar(req, res, id);

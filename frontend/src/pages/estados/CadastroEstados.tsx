@@ -5,7 +5,7 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { EstadosService } from "../../shared/services/api/estados/EstadosService";
+import { EstadosService, IEstados } from "../../shared/services/api/estados/EstadosService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
@@ -61,9 +61,9 @@ export const CadastroEstados: React.FC = () => {
         }
     }, [id]);
 
-    const validate = (filter: string) => {
+    const validate = (dados: IFormData) => {
         setIsValidating(true);
-        EstadosService.validate(filter)
+        EstadosService.validate(dados)
             .then((result) => {
                 setIsValidating(false);
                 if (result instanceof Error) {
@@ -80,6 +80,7 @@ export const CadastroEstados: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
+        validate(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -222,11 +223,11 @@ export const CadastroEstados: React.FC = () => {
                                         setIsValidating('');
                                         formRef.current?.setFieldError('estado', '');
                                     }}
-                                    onBlur={(e) => {
-                                        if (e.target.value) {
-                                            validate(e.target.value)
-                                        }
-                                    }}
+                                    // onBlur={(e) => {
+                                    //     if (e.target.value) {
+                                    //         validate(e.target.value)
+                                    //     }
+                                    // }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>

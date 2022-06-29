@@ -188,6 +188,18 @@ async function deletar (id) {
     })
 };
 
+async function validate(estado) {
+    const mPais = estado.pais;
+    return new Promise( async (resolve, reject) => {
+        pool.query(`select * from estados where estado like '%${estado.estado.toUpperCase()}%' and fk_idpais = ${mPais.id}`, (err, res) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(res);
+        })
+    })
+}
+
 module.exports = {
     getQtd,
     buscarTodosSemPg,
@@ -195,5 +207,6 @@ module.exports = {
     buscarUm,
     salvar,
     alterar,
-    deletar
+    deletar,
+    validate
 }
