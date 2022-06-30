@@ -89,8 +89,8 @@ const deleteById = async (id : number): Promise<void | Error> => {
 
 const validate = async (filter: string): Promise<boolean | Error> => {
     try {
-        const response = await Api.get(`/api/paises?_filter=${filter}`);
-        if (response.data.rowCount != 0) {
+        const { data } = await Api.get(`/api/paises?_filter=${filter}`);
+        if (data != 0) {
             return false;
         } else {
             return true;
