@@ -1,4 +1,5 @@
 const { pool } = require('../datamodule/index');
+const daoPaises = require('./daoPaises');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/estados
@@ -25,14 +26,43 @@ async function getQtd(url) {
 
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
-        const filter = url.split('=')[1]
-        console.log(filter);
-        pool.query(`select * from estados where estado like '${filter.toUpperCase()}'`, (err, res) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(res);
-        })
+        if (url.endsWith('=')) {
+            pool.query('select * from estados', async (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                const mListaEstados = [];
+                for (let i = 0; i < res.rowCount ; i++) {
+                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
+                    mListaEstados.push({
+                        id: res.rows[i].id,
+                        estado: res.rows[i].estado,
+                        uf: res.rows[i].uf,
+                        pais: mPais.rows[0]
+                    })
+                }
+                return resolve(mListaEstados);
+            })
+        } else {
+            const filter = url.split('=')[1]
+            console.log(filter);
+            pool.query(`select * from estados where estado like '${filter.toUpperCase()}'`, async (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                const mListaEstados = [];
+                for (let i = 0; i < res.rowCount ; i++) {
+                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
+                    mListaEstados.push({
+                        id: res.rows[i].id,
+                        estado: res.rows[i].estado,
+                        uf: res.rows[i].uf,
+                        pais: mPais.rows[0]
+                    })
+                }
+                return resolve(mListaEstados);
+            })   
+        }
     })
 };
 
@@ -41,22 +71,42 @@ async function buscarTodosComPg (url) {
     var page = url.split('=')[1];
     limit = limit.replace(/[^0-9]/g, '');
     page = page.replace(/[^0-9]/g, '');
-    return new Promise((resolve, reject) => {
+    return new Promise( async (resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from estados order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from estados order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res);
+                const mListaEstados = [];
+                for (let i = 0; i < res.rowCount ; i++) {
+                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
+                    mListaEstados.push({
+                        id: res.rows[i].id,
+                        estado: res.rows[i].estado,
+                        uf: res.rows[i].uf,
+                        pais: mPais.rows[0]
+                    })
+                }
+                return resolve(mListaEstados);
             })
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res);
+                const mListaEstados = [];
+                for (let i = 0; i < res.rowCount ; i++) {
+                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
+                    mListaEstados.push({
+                        id: res.rows[i].id,
+                        estado: res.rows[i].estado,
+                        uf: res.rows[i].uf,
+                        pais: mPais.rows[0]
+                    })
+                }
+                return resolve(mListaEstados);
             })
         }
     })
@@ -191,7 +241,7 @@ async function deletar (id) {
 async function validate(estado) {
     const mPais = estado.pais;
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from estados where estado like '%${estado.estado.toUpperCase()}%' and fk_idpais = ${mPais.id}`, (err, res) => {
+        pool.query(`select * from estados where estado like '${estado.estado.toUpperCase()}' and fk_idpais = ${mPais.id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }

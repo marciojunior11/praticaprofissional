@@ -27,7 +27,7 @@ export const ConsultaEstados: React.FC = () => {
 
     useEffect(() => {
         setIsLoading(true);
-
+        console.log(busca, pagina);
         debounce(() => {
             EstadosService.getAll(pagina, busca)
                 .then((result) => {

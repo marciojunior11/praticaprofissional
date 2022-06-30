@@ -27,7 +27,7 @@ async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         const filter = url.split('=')[1]
         console.log(filter);
-        pool.query(`select * from paises where pais like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from paises where pais like '%${filter.toUpperCase()}%'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -197,6 +197,17 @@ async function deletar (id) {
     })
 };
 
+async function validate(filter) {
+    return new Promise( async (resolve, reject) => {
+        pool.query(`select * from paises where pais like '%${filter.toUpperCase()}%'`, (err, res) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(res);
+        })
+    })
+}
+
 module.exports = {
     getQtd,
     buscarTodosSemPg,
@@ -204,5 +215,6 @@ module.exports = {
     buscarUm,
     salvar,
     alterar,
-    deletar
+    deletar,
+    validate
 }

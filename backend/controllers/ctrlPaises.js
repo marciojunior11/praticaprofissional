@@ -113,11 +113,23 @@ async function deletar(req, res, id) {
     }
 };
 
+async function validate(req, res) {
+    try {
+            const filter = req.url.split('=')[1];
+            const resp = await daoPaises.validate(filter);
+            res.writeHead(201, { 'Content-Type': 'application/json'});
+            res.end(JSON.stringify(resp.rowCount));
+    } catch (error) {
+        console.log(error);
+    }; 
+}
+
 module.exports = {
     buscarTodosSemPg,
     buscarTodosComPg,
     buscarUm,
     salvar,
     alterar,
-    deletar
+    deletar,
+    validate
 }

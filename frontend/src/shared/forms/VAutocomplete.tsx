@@ -88,6 +88,9 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
             //REST PARAMS
             disablePortal
             getOptionLabel={option => option[optionLabel]}
+            autoComplete
+            blurOnSelect
+                
 
             //LOADING PARAMS
             loading={isLoading}

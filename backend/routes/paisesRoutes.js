@@ -9,7 +9,7 @@ function paisesRoutes(req, res) {
             const id = req.url.split('/')[3];
             ctrlPaises.buscarUm(req, res, id);
         } else if (req.url.includes('filter')) {
-            ctrlPaises.buscarTodosSemPg(req, res);
+            ctrlPaises.validate(req, res);
         } else {
             ctrlPaises.buscarTodosComPg(req, res);
         }

@@ -5,20 +5,12 @@ const daoPaises = require('../daos/daoPaises');
 // @route GET /api/estados
 async function buscarTodosSemPg(req, res) {
     try {
-        var mListaEstados = [];
         const response = await daoEstados.buscarTodosSemPg(req.url);
-        response.rows.forEach(async (item, index) => {
-            let mPais = await daoPaises.buscarUm(item.fk_idpais);
-            mListaEstados.push({
-                id: item.id,
-                estado: item.estado,
-                uf: item.uf,
-                pais: mPais.rows[0]
-            })
-        })
-        response.rows = mListaEstados;
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(response));
+        res.end(JSON.stringify({
+            data: response,
+            totalCount: response.length
+        }));
     } catch (error) { 
         console.log(error);
     }
@@ -26,24 +18,14 @@ async function buscarTodosSemPg(req, res) {
 
 async function buscarTodosComPg(req, res) {
     try {
-        var mListaEstados = [];
         const url = req.url;
-        var response = await daoEstados.buscarTodosComPg(url);
-        response.rows.forEach(async item => {
-            let mPais = await daoPaises.buscarUm(item.fk_idpais);
-            mListaEstados.push({
-                id: item.id,
-                estado: item.estado,
-                uf: item.uf,
-                pais: mPais.rows[0]
-            })
-        })
+        const response = await daoEstados.buscarTodosComPg(url);
         const qtd = await daoEstados.getQtd(url);
-        response.rowCount = qtd;
-        response.rows = mListaEstados;
-        console.log(response.rows);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(response));
+        res.end(JSON.stringify({
+            data: response,
+            totalCount: qtd
+        }));
     } catch (error) {
         console.log(error);
     };
@@ -165,9 +147,8 @@ async function validate(req, res) {
                 pais: response.pais
             };
             const resp = await daoEstados.validate(mEstado);
-            console.log(resp);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(resp));
+            res.end(JSON.stringify(resp.rowCount));
         })
     } catch (error) {
         console.log(error);
