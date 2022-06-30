@@ -1,11 +1,11 @@
+const daoCidades = require('../daos/daoCidades');
 const daoEstados = require('../daos/daoEstados');
-const daoPaises = require('../daos/daoPaises');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/estados
+// @route GET /api/cidades
 async function buscarTodosSemPg(req, res) {
     try {
-        const response = await daoEstados.buscarTodosSemPg(req.url);
+        const response = await daoCidades.buscarTodosSemPg(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -19,8 +19,8 @@ async function buscarTodosSemPg(req, res) {
 async function buscarTodosComPg(req, res) {
     try {
         const url = req.url;
-        const response = await daoEstados.buscarTodosComPg(url);
-        const qtd = await daoEstados.getQtd(url);
+        const response = await daoCidades.buscarTodosComPg(url);
+        const qtd = await daoCidades.getQtd(url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -32,16 +32,16 @@ async function buscarTodosComPg(req, res) {
 };
 
 // @descricao BUSCA UM REGISTROS
-// @route GET /api/estados/:id
+// @route GET /api/cidades/:id
 async function buscarUm(req, res, id) {
     try {
-        const estado = await daoEstados.buscarUm(id);
-        if (!estado) {
+        const cidade = await daoCidades.buscarUm(id);
+        if (!cidade) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Estado não encontrado.' }));
+            res.end(JSON.stringify({ message: 'Cidade não encontrada.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(estado));
+            res.end(JSON.stringify(cidade));
         };
     } catch (error) {
         console.log(error);
@@ -49,7 +49,7 @@ async function buscarUm(req, res, id) {
 };
 
 // @descricao SALVA UM REGISTROS
-// @route POST /api/estados
+// @route POST /api/cidades
 async function salvar(req, res) {
     try {
         let body = '';
@@ -60,14 +60,13 @@ async function salvar(req, res) {
 
         req.on('end', async () => {
             const response = JSON.parse(body);
-            const mEstado = {
-                estado: response.estado,
-                uf: response.uf,
-                pais: response.pais
+            const mCidade = {
+                cidade: response.cidade,
+                estado: response.estado
             };
-            const novoEstado = await daoEstados.salvar(mEstado);
+            const novaCidade = await daoCidades.salvar(mCidade);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novoEstado));
+            res.end(JSON.stringify(novaCidade));
         })
     } catch (error) {
         console.log(error);
@@ -75,13 +74,13 @@ async function salvar(req, res) {
 };
 
 // @descricao ALTERA UM REGISTROS
-// @route PUT /api/estados/:id
+// @route PUT /api/cidades/:id
 async function alterar(req, res, id) {
     try {
-        const mEstado = await daoEstados.buscarUm(id);
-        if (!mEstado) {
+        const mCidade = await daoCidades.buscarUm(id);
+        if (!mCidade) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Estado não encontrado.' })); 
+            res.end(JSON.stringify({ message: 'Cidade não encontrada.' })); 
         };
         let body = '';
         req.on('data', (chunk) => {
@@ -89,15 +88,14 @@ async function alterar(req, res, id) {
         })
         req.on('end', async () => {
             const response = JSON.parse(body);
-            const mEstado = {
+            const mCidade = {
                 id: response.id,
-                estado: response.estado,
-                uf: response.uf,
-                pais: response.pais
+                cidade: response.cidade,
+                estado: response.estado
             };
-            const novoPais = await daoEstados.alterar(id, mEstado)
+            const novaCidade = await daoCidades.alterar(id, mCidade)
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novoPais));
+            res.end(JSON.stringify(novaCidade));
         })
     } catch (error) {
         console.log(error);
@@ -105,15 +103,15 @@ async function alterar(req, res, id) {
 };
 
 // @descricao DELETA UM REGISTROS
-// @route GET /api/estados/:id
+// @route GET /api/cidades/:id
 async function deletar(req, res, id) {
     try {
-        const estado = await daoEstados.buscarUm(id);
-        if (!estado) {
+        const cidade = await daoCidades.buscarUm(id);
+        if (!cidade) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Estado não encontrado.' }));
+            res.end(JSON.stringify({ message: 'Cidade não encontrada.' }));
         }
-        const response = await daoEstados.deletar(id);
+        const response = await daoCidades.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) {
@@ -131,12 +129,11 @@ async function validate(req, res) {
 
         req.on('end', async () => {
             const response = JSON.parse(body);
-            const mEstado = {
-                estado: response.estado,
-                uf: response.uf,
-                pais: response.pais
+            const mCidade = {
+                cidade: response.cidade,
+                estado: response.estado
             };
-            const resp = await daoEstados.validate(mEstado);
+            const resp = await daoCidades.validate(mCidade);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(resp.rowCount));
         })

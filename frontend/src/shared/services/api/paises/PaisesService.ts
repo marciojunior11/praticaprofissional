@@ -90,6 +90,7 @@ const deleteById = async (id : number): Promise<void | Error> => {
 const validate = async (filter: string): Promise<boolean | Error> => {
     try {
         const { data } = await Api.get(`/api/paises?_filter=${filter}`);
+        console.log(data);
         if (data != 0) {
             return false;
         } else {

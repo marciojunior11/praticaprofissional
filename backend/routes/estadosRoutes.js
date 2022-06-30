@@ -9,7 +9,7 @@ function estadosRoutes(req, res) {
             const id = req.url.split('/')[3];
             ctrlEstados.buscarUm(req, res, id);
         } else if (req.url.includes('filter')) {
-            ctrlEstados.buscarTodosSemPg(req, res);
+            ctrlEstados.validate(req, res);
         } else {
             ctrlEstados.buscarTodosComPg(req, res);
         }

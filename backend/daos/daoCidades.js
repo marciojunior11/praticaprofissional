@@ -1,12 +1,12 @@
 const { pool } = require('../datamodule/index');
-const daoPaises = require('./daoPaises');
+const daoEstados = require('./daoEstados');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/estados
+// @route GET /api/cidades
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from estados', (err, res) => {
+            pool.query('select * from cidades', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -14,7 +14,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from cidades where cidade like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -27,40 +27,38 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from estados', async (err, res) => {
+            pool.query('select * from cidades', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaEstados = [];
+                const mListaCidades = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
-                    mListaEstados.push({
+                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
+                    mListaCidades.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
-                        uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        cidade: res.rows[i].cidade,
+                        estado: mEstado.rows[0]
                     })
                 }
-                return resolve(mListaEstados);
+                return resolve(mListaCidades);
             })
         } else {
             const filter = url.split('=')[1]
             console.log(filter);
-            pool.query(`select * from estados where estado like '${filter.toUpperCase()}'`, async (err, res) => {
+            pool.query(`select * from cidades where cidade like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaEstados = [];
+                const mListaCidades = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
-                    mListaEstados.push({
+                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
+                    mListaCidades.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
-                        uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        cidade: res.rows[i].cidade,
+                        estado: mEstado.rows[0]
                     })
                 }
-                return resolve(mListaEstados);
+                return resolve(mListaCidades);
             })   
         }
     })
@@ -73,62 +71,59 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise( async (resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from estados order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query(`select * from cidades order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaEstados = [];
+                const mListaCidades = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
-                    mListaEstados.push({
+                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
+                    mListaCidades.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
-                        uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        cidade: res.rows[i].cidade,
+                        estado: mEstado.rows[0]
                     })
                 }
-                return resolve(mListaEstados);
+                return resolve(mListaCidades);
             })
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from cidades where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaEstados = [];
+                const mListaCidades = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
-                    mListaEstados.push({
+                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
+                    mListaCidades.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
-                        uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        cidade: res.rows[i].cidade,
+                        estado: mEstado.rows[0]
                     })
                 }
-                return resolve(mListaEstados);
+                return resolve(mListaCidades);
             })
         }
     })
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/estados
+// @route GET /api/cidades
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from estados where id = $1', [id], async (err, res) => {
+        pool.query('select * from cidades where id = $1', [id], async (err, res) => {
             if (err) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                const mPais = await daoPaises.buscarUm(res.rows[0].fk_idpais);
-                const mEstado = {
+                const mEstado = await daoEstados.buscarUm(res.rows[0].fk_idestado);
+                const mCidade = {
                     id: res.rows[0].id,
-                    estado: res.rows[0].estado,
-                    uf: res.rows[0].uf,
-                    pais: mPais.rows[0]
+                    cidade: res.rows[0].cidade,
+                    estado: mEstado
                 }
-                return resolve(mEstado);
+                return resolve(mCidade);
             }
             return resolve(null);
         })
@@ -136,8 +131,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/estados
-async function salvar (estado) {
+// @route POST /api/cidades
+async function salvar (cidade) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -156,14 +151,14 @@ async function salvar (estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into estados (estado, uf, fk_idPais) values($1, $2, $3)', [estado.estado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id], async (err, res) => {
+            client.query('insert into cidades (cidade, fk_idEstado) values($1, $2)', [cidade.cidade.toUpperCase(), cidade.estado.id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from estados where id = (select max(id) from estados)');
+                        const response = await client.query('select * from cidades where id = (select max(id) from cidades)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -175,8 +170,8 @@ async function salvar (estado) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/estados/:id
-async function alterar (id, estado) {
+// @route PUT /api/cidades/:id
+async function alterar (id, cidade) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -195,7 +190,7 @@ async function alterar (id, estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update estados set id = $1, estado = $2, uf = $3, fk_idPais = $4 where id = $5 ', [estado.id, estado.estado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, id], (err, res) => {
+                client.query('update cidades set id = $1, cidade = $2, fk_idestado = $3 where id = $4 ', [cidade.id, cidade.cidade.toUpperCase(), cidade.estado.id, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -212,7 +207,7 @@ async function alterar (id, estado) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/estados/:id
+// @route GET /api/cidades/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -232,7 +227,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from estados where id = ${id}`, (err, res) => {
+                client.query(`delete from cidades where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -248,10 +243,10 @@ async function deletar (id) {
     })
 };
 
-async function validate(estado) {
-    const mPais = estado.pais;
+async function validate(cidade) {
+    const mEstado = cidade.estado;
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from estados where estado like '${estado.estado.toUpperCase()}' and fk_idpais = ${mPais.id}`, (err, res) => {
+        pool.query(`select * from cidades where cidade like '${cidade.cidade.toUpperCase()}' and fk_idestado = ${mEstado.id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }
