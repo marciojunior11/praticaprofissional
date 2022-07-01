@@ -9,6 +9,7 @@ import { EstadosService, IEstados } from "../../shared/services/api/estados/Esta
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { useDebounce } from "../../shared/hooks";
 
 interface IFormData {
     estado: string;
@@ -31,6 +32,7 @@ export const CadastroEstados: React.FC = () => {
     const navigate = useNavigate();
 
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+    const { debounce } = useDebounce();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
@@ -72,7 +74,7 @@ export const CadastroEstados: React.FC = () => {
                     setIsValid(result);
                     if (result === false) {
                         const validationErrors: IVFormErrors = {};
-                        validationErrors['estado'] = 'Este estado já está cadastrado.';
+                        validationErrors['estado'] = 'Já existe um estado vinculado a este país.';
                         formRef.current?.setErrors(validationErrors);
                     }
                 }
@@ -80,7 +82,9 @@ export const CadastroEstados: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
-        validate(dados);
+        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
+            validate(dados);
+        }
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -138,6 +142,7 @@ export const CadastroEstados: React.FC = () => {
                         console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
+                    validationErrors['pais'] = 'O campo é obrigatório';
                     console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
@@ -223,11 +228,17 @@ export const CadastroEstados: React.FC = () => {
                                         setIsValidating('');
                                         formRef.current?.setFieldError('estado', '');
                                     }}
-                                    // onBlur={(e) => {
-                                    //     if (e.target.value) {
-                                    //         validate(e.target.value)
-                                    //     }
-                                    // }}
+                                    onBlur={(e) => {
+                                        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
+                                            const formData = formRef.current?.getData();
+                                            const data: IFormData = {
+                                                estado: formData?.estado,
+                                                uf: formData?.uf,
+                                                pais: formData?.pais
+                                            }
+                                            validate(data);
+                                        }
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
@@ -248,6 +259,39 @@ export const CadastroEstados: React.FC = () => {
                                     optionLabel="pais"
                                     TFLabel="País"
                                     getAll={PaisesService.getAll}
+                                    onInputchange={() => {
+                                        setIsValid(false);
+                                        setIsValidating('');
+                                        formRef.current?.setFieldError('estado', '');
+                                    }}
+                                    onChange={() => {
+                                        setIsValid(false);
+                                        setIsValidating('');
+                                        formRef.current?.setFieldError('estado', '');
+                                        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
+                                            const formData = formRef.current?.getData();
+                                            const data: IFormData = {
+                                                estado: formData?.estado,
+                                                uf: formData?.uf,
+                                                pais: formData?.pais
+                                            }
+                                            validate(data);
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        setIsValid(false);
+                                        setIsValidating('');
+                                        formRef.current?.setFieldError('estado', '');
+                                        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
+                                            const formData = formRef.current?.getData();
+                                            const data: IFormData = {
+                                                estado: formData?.estado,
+                                                uf: formData?.uf,
+                                                pais: formData?.pais
+                                            }
+                                            validate(data);
+                                        } 
+                                    }}
                                 />
                             </Grid>
                         </Grid>

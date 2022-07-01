@@ -19,10 +19,13 @@ type TVAutocompleteProps = {
     ) => Promise<TGenericList | Error>
     optionLabel: string,
     TFLabel: string,
-    isExternalLoading?: boolean
+    isExternalLoading?: boolean,
+    onChange?: () => void,
+    onInputchange?: () => void,
+    onBlur?: () => any
 }
 
-export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, optionLabel, TFLabel, isExternalLoading = false}) => {
+export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, optionLabel, TFLabel, isExternalLoading = false, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -81,7 +84,9 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
             renderInput={params => (
                 <TextField
                     {...params}
-                    label={TFLabel}
+                    label={TFLabel} 
+                    error={!!error}
+                    helperText={error}
                 />
             )}
 
@@ -89,17 +94,19 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
             disablePortal
             getOptionLabel={option => option[optionLabel]}
             autoComplete
-            blurOnSelect
+            blurOnSelect={true}
+
                 
 
             //LOADING PARAMS
             loading={isLoading}
             disabled={isExternalLoading}
             value={autoCompleteSelectedOption}
+            onBlur={() => {rest.onBlur?.()}}
 
             //ONCHANGE PARAMS
-            onInputChange={(_, newValue) => setBusca(newValue)}
-            onChange={(_: any, newValue: any) => setSelectedOption(newValue)}
+            onInputChange={(_, newValue) => {setBusca(newValue); rest.onInputchange?.()}}
+            onChange={(_: any, newValue: any) => {setSelectedOption(newValue); setBusca(''); clearError(); rest.onChange?.()}}
 
             //POPUP ICON
             popupIcon={(isExternalLoading || isLoading) ? <CircularProgress size={28}/> : undefined}
