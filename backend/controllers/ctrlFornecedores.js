@@ -38,7 +38,7 @@ async function buscarUm(req, res, id) {
         const mFornecedor = await daoFornecedores.buscarUm(id);
         if (!mFornecedor) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Cidade não encontrada.' }));
+            res.end(JSON.stringify({ message: 'Fornecedor não encontrado.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(mFornecedor));
@@ -72,7 +72,7 @@ async function salvar(req, res) {
             };
             const novoFornecedor = await daoFornecedores.salvar(mFornecedor);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novaCidade));
+            res.end(JSON.stringify(novoFornecedor));
         })
     } catch (error) {
         console.log(error);
@@ -86,7 +86,7 @@ async function alterar(req, res, id) {
         const mFornecedor = await daoFornecedores.buscarUm(id);
         if (!mFornecedor) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Cidade não encontrada.' })); 
+            res.end(JSON.stringify({ message: 'Fornecedor não encontrado.' })); 
         };
         let body = '';
         req.on('data', (chunk) => {
@@ -121,7 +121,7 @@ async function deletar(req, res, id) {
         const mFornecedor = await daoFornecedores.buscarUm(id);
         if (!mFornecedor) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Cidade não encontrada.' }));
+            res.end(JSON.stringify({ message: 'Fornecedor não encontrado.' }));
         }
         const response = await daoFornecedores.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });
