@@ -8,7 +8,7 @@ function cidadesRoutes(req, res) {
         if(req.url.match(/\/api\/cidades\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlCidades.buscarUm(req, res, id);
-        } else if (req.url.includes('filter')) {
+        } else if (req.url.includes('page=all')) {
             ctrlCidades.buscarTodosSemPg(req, res);
         } else {
             ctrlCidades.buscarTodosComPg(req, res);

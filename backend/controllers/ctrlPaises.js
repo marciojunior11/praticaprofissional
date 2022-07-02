@@ -5,8 +5,12 @@ const daoPaises = require('../daos/daoPaises');
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoPaises.buscarTodosSemPg(req.url);
+        console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(response));
+        res.end(JSON.stringify({
+            data: response,
+            totalCount: response.length
+        }));
     } catch (error) { 
         console.log(error);
     }
@@ -19,7 +23,10 @@ async function buscarTodosComPg(req, res) {
         const qtd = await daoPaises.getQtd(url);
         paises.rowCount = qtd;
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(paises));
+        res.end(JSON.stringify({
+            data: paises,
+            totalCount: qtd
+        }));
     } catch (error) {
         console.log(error);
     };
@@ -30,12 +37,12 @@ async function buscarTodosComPg(req, res) {
 async function buscarUm(req, res, id) {
     try {
         const pais = await daoPaises.buscarUm(id);
-        if (pais.rows.length === 0) {
+        if (!pais) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'País não encontrado.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(pais.rows[0]));
+            res.end(JSON.stringify(pais));
         };
     } catch (error) {
         console.log(error);

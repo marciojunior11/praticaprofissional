@@ -37,6 +37,8 @@ export const CadastroEstados: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
+    const [estado, setEstado] = useState<string>('');
+    const [pais, setPais] = useState<IPaises | null>(null);
     const [isValid, setIsValid] = useState(false);
 
     useEffect(() => {
@@ -58,14 +60,27 @@ export const CadastroEstados: React.FC = () => {
             formRef.current?.setData({
                 estado: '',
                 uf: '',
-                pais: ''
+                pais: null
             });
         }
     }, [id]);
 
+    useEffect(() => {
+        if (estado && pais) {
+            const formData = formRef.current?.getData();
+            const data: IFormData = {
+                estado: formData?.estado,
+                uf: formData?.uf,
+                pais: formData?.pais
+            }
+            validate(data);
+        }
+    }, [estado, pais])
+
     const validate = (dados: IFormData) => {
         setIsValidating(true);
-        EstadosService.validate(dados)
+        debounce(() => {
+            EstadosService.validate(dados)
             .then((result) => {
                 setIsValidating(false);
                 if (result instanceof Error) {
@@ -79,12 +94,11 @@ export const CadastroEstados: React.FC = () => {
                     }
                 }
             })
+        })
+        
     }
 
     const handleSave = (dados: IFormData) => {
-        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
-            validate(dados);
-        }
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -142,7 +156,10 @@ export const CadastroEstados: React.FC = () => {
                         console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
-                    validationErrors['pais'] = 'O campo é obrigatório';
+                    if (!pais) {
+                        validationErrors['pais'] = 'O campo é obrigatório';
+                    }
+                    
                     console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
@@ -223,21 +240,11 @@ export const CadastroEstados: React.FC = () => {
                                                 </InputAdornment>
                                         )
                                     }}
-                                    onChange={() => {
+                                    onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
                                         formRef.current?.setFieldError('estado', '');
-                                    }}
-                                    onBlur={(e) => {
-                                        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
-                                            const formData = formRef.current?.getData();
-                                            const data: IFormData = {
-                                                estado: formData?.estado,
-                                                uf: formData?.uf,
-                                                pais: formData?.pais
-                                            }
-                                            validate(data);
-                                        }
+                                        setEstado(e.target.value.toUpperCase());
                                     }}
                                 />
                             </Grid>
@@ -264,33 +271,8 @@ export const CadastroEstados: React.FC = () => {
                                         setIsValidating('');
                                         formRef.current?.setFieldError('estado', '');
                                     }}
-                                    onChange={() => {
-                                        setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('estado', '');
-                                        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
-                                            const formData = formRef.current?.getData();
-                                            const data: IFormData = {
-                                                estado: formData?.estado,
-                                                uf: formData?.uf,
-                                                pais: formData?.pais
-                                            }
-                                            validate(data);
-                                        }
-                                    }}
-                                    onBlur={() => {
-                                        setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('estado', '');
-                                        if (formRef.current?.getData().estado && formRef.current?.getData().pais) {
-                                            const formData = formRef.current?.getData();
-                                            const data: IFormData = {
-                                                estado: formData?.estado,
-                                                uf: formData?.uf,
-                                                pais: formData?.pais
-                                            }
-                                            validate(data);
-                                        } 
+                                    onChange={(newValue) => {
+                                        setPais(newValue);
                                     }}
                                 />
                             </Grid>

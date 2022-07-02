@@ -25,14 +25,22 @@ async function getQtd(url) {
 
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
-        const filter = url.split('=')[1]
-        console.log(filter);
-        pool.query(`select * from paises where pais like '%${filter.toUpperCase()}%'`, (err, res) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(res);
-        })
+        if (url.endsWith('all')) {
+            pool.query('select * from paises order by id asc', (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res.rows);
+            })
+        } else {
+            const filter = url.split('=')[2];
+            pool.query(`select * from paises order by id asc where pais like '%${filter.toUpperCase()}%'`, (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res.rows);
+            })
+        }
     })
 };
 
@@ -47,7 +55,7 @@ async function buscarTodosComPg (url) {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res);
+                return resolve(res.rows);
             })
         } else {
             var filter = url.split('=')[3];
@@ -56,7 +64,7 @@ async function buscarTodosComPg (url) {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res);
+                return resolve(res.rows);
             })
         }
     })
@@ -70,7 +78,10 @@ async function buscarUm (id) {
             if (err) {
                 return reject(err);
             }
-            return resolve(res);
+            if (res.rowCount != 0) {
+                return resolve(res.rows[0]);
+            }
+            return resolve(null);
         })
     })
 };

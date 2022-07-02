@@ -18,17 +18,19 @@ type TListaPaises = {
     qtd: number;
 }
 
-const getAll = async (page = 1, filter = ''): Promise<TListaPaises | Error> => {
+const getAll = async (page?: number, filter = ''): Promise<TListaPaises | Error> => {
     try {
+        var urlRelativa = '';
+        if (page != 0) urlRelativa = `/api/paises?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+        else urlRelativa = 'api/paises?_page=all'
+        console.log(urlRelativa);
 
-        const urlRelativa = `/api/paises?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
-
-        const response = await Api.get(urlRelativa);
-
-        if (response) {
+        const { data } = await Api.get(urlRelativa);
+        
+        if (data) {
             return {
-                data: response.data.rows,
-                qtd: response.data.rowCount
+                data: data.data,
+                qtd: data.totalCount
             };
         }
 

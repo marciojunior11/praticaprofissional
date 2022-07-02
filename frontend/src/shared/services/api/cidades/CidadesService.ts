@@ -5,6 +5,7 @@ import { Api } from "../axios-config";
 export interface ICidades {
     id: number;
     cidade: string;
+    uf: string;
     estado: IEstados;
 }
 
@@ -28,8 +29,8 @@ const getAll = async (page = 1, filter = ''): Promise<TListaCidades | Error> => 
 
         if (data) {
             return {
-                data: data.rows,
-                qtd: data.rowCount
+                data: data.data,
+                qtd: data.totalCount
             };
         }
 
@@ -90,8 +91,8 @@ const deleteById = async (id : number): Promise<void | Error> => {
 
 const validate = async (dados: Omit<IDetalhesCidades, 'id'>): Promise<boolean | Error> => {
     try {
-        const response = await Api.post(`/api/cidades/validate`, dados);
-        if (response.data.rowCount != 0) {
+        const { data } = await Api.post(`/api/cidades/validate`, dados);
+        if (data != 0) {
             return false;
         } else {
             return true;

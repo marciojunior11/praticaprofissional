@@ -26,8 +26,8 @@ async function getQtd(url) {
 
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
-        if (url.endsWith('=')) {
-            pool.query('select * from cidades', async (err, res) => {
+        if (url.endsWith('all')) {
+            pool.query('select * from cidades order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -43,7 +43,7 @@ async function buscarTodosSemPg(url) {
                 return resolve(mListaCidades);
             })
         } else {
-            const filter = url.split('=')[1]
+            const filter = url.split('=')[2]
             console.log(filter);
             pool.query(`select * from cidades where cidade like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {

@@ -26,8 +26,8 @@ async function getQtd(url) {
 
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
-        if (url.endsWith('=')) {
-            pool.query('select * from estados', async (err, res) => {
+        if (url.endsWith('all')) {
+            pool.query('select * from estados order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -44,7 +44,7 @@ async function buscarTodosSemPg(url) {
                 return resolve(mListaEstados);
             })
         } else {
-            const filter = url.split('=')[1]
+            const filter = url.split('=')[2]
             console.log(filter);
             pool.query(`select * from estados where estado like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {
@@ -84,7 +84,7 @@ async function buscarTodosComPg (url) {
                         id: res.rows[i].id,
                         estado: res.rows[i].estado,
                         uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        pais: mPais
                     })
                 }
                 return resolve(mListaEstados);
@@ -103,7 +103,7 @@ async function buscarTodosComPg (url) {
                         id: res.rows[i].id,
                         estado: res.rows[i].estado,
                         uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        pais: mPais
                     })
                 }
                 return resolve(mListaEstados);

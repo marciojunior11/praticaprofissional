@@ -21,10 +21,12 @@ type TListaEstados = {
     qtd: number;
 }
 
-const getAll = async (page = 1, filter = ''): Promise<TListaEstados | Error> => {
+const getAll = async (page?: number, filter = ''): Promise<TListaEstados | Error> => {
     try {
-
-        const urlRelativa = `/api/estados?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+        var urlRelativa = '';
+        if (page != 0) urlRelativa = `/api/estados?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+        else urlRelativa = `api/estados?_page=all`;
+        console.log(urlRelativa)
 
         const { data } = await Api.get(urlRelativa);
 

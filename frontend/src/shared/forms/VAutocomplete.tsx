@@ -2,7 +2,7 @@ import { Label, SettingsVoiceTwoTone } from "@mui/icons-material"
 import { Autocomplete, CircularProgress, TextField } from "@mui/material"
 import { useField } from "@unform/core"
 import { LoDashStatic } from "lodash"
-import { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { toast } from "react-toastify"
 import { useDebounce } from "../hooks"
 
@@ -20,9 +20,8 @@ type TVAutocompleteProps = {
     optionLabel: string,
     TFLabel: string,
     isExternalLoading?: boolean,
-    onChange?: () => void,
+    onChange?: (newValue: any) => void,
     onInputchange?: () => void,
-    onBlur?: () => any
 }
 
 export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, optionLabel, TFLabel, isExternalLoading = false, ...rest}) => {
@@ -34,7 +33,7 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
     //STATES
     const [busca, setBusca] = useState('');
     const [options, setOptions] = useState<any[]>([]);
-    const [selectedOption, setSelectedOption] = useState<any | undefined>(options[0]);
+    const [selectedOption, setSelectedOption] = useState<any | undefined>(defaultValue);
     const [isLoading, setIsLoading] = useState(false);
 
     //EFFECTS
@@ -54,7 +53,7 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
         setIsLoading(true);
 
         debounce(() => {
-            getAll(1, busca)
+            getAll(0, busca)
                 .then(result => {
                     setIsLoading(false);
                     if (result instanceof Error) {
@@ -64,7 +63,7 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
                     }
                 })
         })
-    }, [busca])
+    }, [])
 
     //MEMOS
     const autoCompleteSelectedOption = useMemo(() => {
@@ -102,11 +101,17 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
             loading={isLoading}
             disabled={isExternalLoading}
             value={autoCompleteSelectedOption}
-            onBlur={() => {rest.onBlur?.()}}
+            //onBlur={() => {rest.onBlur?.()}}
 
             //ONCHANGE PARAMS
             onInputChange={(_, newValue) => {setBusca(newValue); rest.onInputchange?.()}}
-            onChange={(_: any, newValue: any) => {setSelectedOption(newValue); setBusca(''); clearError(); rest.onChange?.()}}
+            onChange={(_: any, newValue: any) => {
+                console.log(selectedOption)
+                setSelectedOption(newValue); 
+                setBusca(''); 
+                clearError(); 
+                rest.onChange?.(newValue);
+            }}
 
             //POPUP ICON
             popupIcon={(isExternalLoading || isLoading) ? <CircularProgress size={28}/> : undefined}

@@ -36,7 +36,7 @@ export const ConsultaPaises: React.FC = () => {
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        console.log(result);
+                        console.log('RESULT', result);
                         setRows(result.data);
                         setQtd(result.qtd);
                     }

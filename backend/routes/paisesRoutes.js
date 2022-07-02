@@ -10,6 +10,8 @@ function paisesRoutes(req, res) {
             ctrlPaises.buscarUm(req, res, id);
         } else if (req.url.includes('filter')) {
             ctrlPaises.validate(req, res);
+        } else if (req.url.includes('page=all')) {
+            ctrlPaises.buscarTodosSemPg(req, res)
         } else {
             ctrlPaises.buscarTodosComPg(req, res);
         }
