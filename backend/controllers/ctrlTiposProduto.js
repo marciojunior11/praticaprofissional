@@ -24,7 +24,7 @@ async function buscarTodosComPg(req, res) {
         //tipos_produto.rowCount = qtd;
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-            data: tiposproduto,
+            data: tipos_produto,
             totalCount: qtd
         }));
     } catch (error) {
