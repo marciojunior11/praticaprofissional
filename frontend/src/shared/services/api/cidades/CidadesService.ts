@@ -5,7 +5,6 @@ import { Api } from "../axios-config";
 export interface ICidades {
     id: number;
     cidade: string;
-    uf: string;
     estado: IEstados;
 }
 
@@ -20,10 +19,12 @@ type TListaCidades = {
     qtd: number;
 }
 
-const getAll = async (page = 1, filter = ''): Promise<TListaCidades | Error> => {
+const getAll = async (page?: number, filter = ''): Promise<TListaCidades | Error> => {
     try {
-
-        const urlRelativa = `/api/cidades?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+        var urlRelativa = '';
+        if (page != 0) urlRelativa = `/api/cidades?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+        else urlRelativa = `api/cidades?_page=all`;
+        console.log(urlRelativa);
 
         const { data } = await Api.get(urlRelativa);
 

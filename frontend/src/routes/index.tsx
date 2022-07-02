@@ -6,9 +6,11 @@ import {
     Dashboard,
     ConsultaClientes, 
     ConsultaPaises,
-    CadastroEstados,
+    CadastroPaises,
     ConsultaEstados,
-    CadastroPaises
+    CadastroEstados,
+    ConsultaCidades,
+    CadastroCidades
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -36,6 +38,11 @@ export const AppRoutes = () => {
                 icon: 'location_on',
                 path: '/estados',
             },
+            {
+                label: 'Cidades',
+                icon: 'location_city',
+                path: '/cidades',
+            },
         ]);
     }, []);
 
@@ -51,6 +58,9 @@ export const AppRoutes = () => {
 
             <Route path="/estados" element={<ConsultaEstados/>}/>
             <Route path="/estados/cadastro/:id" element={<CadastroEstados/>}/>
+
+            <Route path="/cidades" element={<ConsultaCidades/>}/>
+            <Route path="/cidades/cadastro/:id" element={<CadastroCidades/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

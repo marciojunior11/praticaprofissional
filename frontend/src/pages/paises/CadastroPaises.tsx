@@ -30,6 +30,8 @@ export const CadastroPaises: React.FC = () => {
 
     const [isValid, setIsValid] = useState(false);
 
+    const [alterando, setAlterando] = useState(false);
+
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
@@ -43,6 +45,7 @@ export const CadastroPaises: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setAlterando(true);
                     }
                 });
         } else {
@@ -72,6 +75,10 @@ export const CadastroPaises: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
+        if (alterando) {
+            navigate('/paises');
+            return
+        }
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -151,7 +158,7 @@ export const CadastroPaises: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Novo País' : 'Editar País'}
+            titulo={id === 'novo' ? 'Cadastrar País' : 'Editar País'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -209,10 +216,11 @@ export const CadastroPaises: React.FC = () => {
                                                 </InputAdornment>
                                         )
                                     }}
-                                    onChange={() => {
+                                    onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
                                         formRef.current?.setFieldError('pais', '');
+                                        if (alterando) setAlterando(false);
                                     }}
                                     onBlur={(e) => {
                                         if (e.target.value) {
@@ -231,6 +239,7 @@ export const CadastroPaises: React.FC = () => {
                                     label="Sigla"
                                     disabled={isLoading}
                                     inputProps={{ maxLength: 2 }}
+                                    onChange={() => {if (alterando) setAlterando(false)}}
                                 />
                             </Grid>
                         </Grid>

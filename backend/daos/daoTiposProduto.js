@@ -1,12 +1,11 @@
 const { pool } = require('../datamodule/index');
-const daoEstados = require('./daoEstados');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/cidades
+// @route GET /api/tipos_produto
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from cidades', (err, res) => {
+            pool.query('select * from tipos_produto', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -14,7 +13,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from cidades where cidade like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from tipos_produto where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -27,39 +26,20 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from cidades order by id asc', async (err, res) => {
+            pool.query('select * from tipos_produto order by id asc', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaCidades = [];
-                for (let i = 0; i < res.rowCount ; i++) {
-                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
-                    mListaCidades.push({
-                        id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
-                    })
-                }
-                return resolve(mListaCidades);
+                return resolve(res.rows);
             })
         } else {
-            const filter = url.split('=')[2]
-            console.log(filter);
-            pool.query(`select * from cidades where cidade like '${filter.toUpperCase()}'`, async (err, res) => {
+            const filter = url.split('=')[2];
+            pool.query(`select * from tipos_produto order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaCidades = [];
-                for (let i = 0; i < res.rowCount ; i++) {
-                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
-                    mListaCidades.push({
-                        id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
-                    })
-                }
-                return resolve(mListaCidades);
-            })   
+                return resolve(res.rows);
+            })
         }
     })
 };
@@ -69,61 +49,37 @@ async function buscarTodosComPg (url) {
     var page = url.split('=')[1];
     limit = limit.replace(/[^0-9]/g, '');
     page = page.replace(/[^0-9]/g, '');
-    return new Promise( async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from cidades order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query(`select * from tipos_produto order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaCidades = [];
-                for (let i = 0; i < res.rowCount ; i++) {
-                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
-                    mListaCidades.push({
-                        id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
-                    })
-                }
-                return resolve(mListaCidades);
+                return resolve(res.rows);
             })
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from cidades where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from tipos_produto where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaCidades = [];
-                for (let i = 0; i < res.rowCount ; i++) {
-                    let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
-                    mListaCidades.push({
-                        id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
-                    })
-                }
-                return resolve(mListaCidades);
+                return resolve(res.rows);
             })
         }
     })
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/cidades
+// @route GET /api/tipos_produto
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from cidades where id = $1', [id], async (err, res) => {
+        pool.query('select * from tipos_produto where id = $1', [id], (err, res) => {
             if (err) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                const mEstado = await daoEstados.buscarUm(res.rows[0].fk_idestado);
-                const mCidade = {
-                    id: res.rows[0].id,
-                    cidade: res.rows[0].cidade,
-                    estado: mEstado
-                }
-                return resolve(mCidade);
+                return resolve(res.rows[0]);
             }
             return resolve(null);
         })
@@ -131,8 +87,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/cidades
-async function salvar (cidade) {
+// @route POST /api/tipos_produto
+async function salvar (tipo_produto) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -151,14 +107,14 @@ async function salvar (cidade) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into cidades (cidade, fk_idEstado) values($1, $2)', [cidade.cidade.toUpperCase(), cidade.estado.id], async (err, res) => {
+                client.query('insert into tipos_produto (descricao) values($1)', [tipo_produto.descricao.toUpperCase()], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from cidades where id = (select max(id) from cidades)');
+                        const response = await client.query('select * from tipos_produto where id = (select max(id) from tipos_produto)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -170,8 +126,8 @@ async function salvar (cidade) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/cidades/:id
-async function alterar (id, cidade) {
+// @route PUT /api/tipos_produto/:id
+async function alterar (id, tipo_produto) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -190,7 +146,7 @@ async function alterar (id, cidade) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update cidades set id = $1, cidade = $2, fk_idestado = $3 where id = $4 ', [cidade.id, cidade.cidade.toUpperCase(), cidade.estado.id, id], (err, res) => {
+                client.query('update tipos_produto set id = $1, descricao = $2 where id = $3 ', [tipo_produto.id, tipo_produto.descricao.toUpperCase(), id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -207,7 +163,7 @@ async function alterar (id, cidade) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/cidades/:id
+// @route GET /api/tipos_produto/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -227,7 +183,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from cidades where id = ${id}`, (err, res) => {
+                client.query(`delete from tipos_produto where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -240,13 +196,21 @@ async function deletar (id) {
                 })
             })
         })
+
+
+
+        // pool.query(`delete from tipos_produto where id = ${id}`, (err, res) => {
+        //     if (err) {
+        //         return reject(err);
+        //     }
+        //     return resolve(res);
+        // })
     })
 };
 
-async function validate(cidade) {
-    const mEstado = cidade.estado;
+async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from cidades where cidade like '${cidade.cidade.toUpperCase()}' and fk_idestado = ${mEstado.id}`, (err, res) => {
+        pool.query(`select * from tipos_produto where descricao like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

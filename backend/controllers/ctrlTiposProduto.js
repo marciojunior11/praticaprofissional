@@ -1,10 +1,10 @@
-const daoPaises = require('../daos/daoPaises');
+const daoTiposProduto = require('../daos/daoTiposProduto');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/paises
+// @route GET /api/tiposproduto
 async function buscarTodosSemPg(req, res) {
     try {
-        const response = await daoPaises.buscarTodosSemPg(req.url);
+        const response = await daoTiposProduto.buscarTodosSemPg(req.url);
         console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
@@ -19,12 +19,12 @@ async function buscarTodosSemPg(req, res) {
 async function buscarTodosComPg(req, res) {
     try {
         const url = req.url;
-        const paises = await daoPaises.buscarTodosComPg(url);
-        const qtd = await daoPaises.getQtd(url);
-        paises.rowCount = qtd;
+        const tipos_produto = await daoTiposProduto.buscarTodosComPg(url);
+        const qtd = await daoTiposProduto.getQtd(url);
+        //tipos_produto.rowCount = qtd;
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-            data: paises,
+            data: tiposproduto,
             totalCount: qtd
         }));
     } catch (error) {
@@ -33,16 +33,16 @@ async function buscarTodosComPg(req, res) {
 };
 
 // @descricao BUSCA UM REGISTROS
-// @route GET /api/paises/:id
+// @route GET /api/tiposproduto/:id
 async function buscarUm(req, res, id) {
     try {
-        const pais = await daoPaises.buscarUm(id);
-        if (!pais) {
+        const tipos_produto = await daoTiposProduto.buscarUm(id);
+        if (!tipos_produto) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'País não encontrado.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(pais));
+            res.end(JSON.stringify(tipos_produto));
         };
     } catch (error) {
         console.log(error);
@@ -50,7 +50,7 @@ async function buscarUm(req, res, id) {
 };
 
 // @descricao SALVA UM REGISTROS
-// @route POST /api/paises
+// @route POST /api/tiposproduto
 async function salvar(req, res) {
     try {
         let body = '';
@@ -60,14 +60,13 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { pais, sigla } = JSON.parse(body);
-            const mPais = {
-                pais,
-                sigla
+            const { descricao } = JSON.parse(body);
+            const mTipoProduto = {
+                descricao
             };
-            const novoPais = await daoPaises.salvar(mPais);
+            const novoTipoProduto = await daoTiposProduto.salvar(mTipoProduto);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novoPais));
+            res.end(JSON.stringify(novoTipoProduto));
         })
     } catch (error) {
         console.log(error);
@@ -75,11 +74,11 @@ async function salvar(req, res) {
 };
 
 // @descricao ALTERA UM REGISTROS
-// @route PUT /api/paises/:id
+// @route PUT /api/tiposproduto/:id
 async function alterar(req, res, id) {
     try {
-        const mPais = await daoPaises.buscarUm(id);
-        if (!mPais) {
+        const mTipoProduto = await daoTiposProduto.buscarUm(id);
+        if (!mTipoProduto) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'País não encontrado.' })); 
         };
@@ -88,15 +87,14 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { id, pais, sigla } = JSON.parse(body);
-            const mPais = {
+            const { descricao } = JSON.parse(body);
+            const mTipoProduto = {
                 id,
-                pais,
-                sigla
+                descricao
             };
-            const novoPais = await daoPaises.alterar(id, mPais)
+            const novoTipoProduto = await daoTiposProduto.alterar(id, mTipoProduto)
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novoPais));
+            res.end(JSON.stringify(novoTipoProduto));
         })
     } catch (error) {
         console.log(error);
@@ -104,15 +102,15 @@ async function alterar(req, res, id) {
 };
 
 // @descricao DELETA UM REGISTROS
-// @route GET /api/paises/:id
+// @route GET /api/tiposproduto/:id
 async function deletar(req, res, id) {
     try {
-        const pais = await daoPaises.buscarUm(id);
-        if (!pais) {
+        const mTipoProduto = await daoTiposProduto.buscarUm(id);
+        if (!mTipoProduto) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'País não encontrado.' }));
         }
-        const response = await daoPaises.deletar(id);
+        const response = await daoTiposProduto.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) {
@@ -123,7 +121,7 @@ async function deletar(req, res, id) {
 async function validate(req, res) {
     try {
             const filter = req.url.split('=')[1];
-            const resp = await daoPaises.validate(filter);
+            const resp = await daoTiposProduto.validate(filter);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(resp.rowCount));
     } catch (error) {

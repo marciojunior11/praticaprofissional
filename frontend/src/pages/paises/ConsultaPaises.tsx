@@ -65,7 +65,7 @@ export const ConsultaPaises: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo="Consulta de Países"
+            titulo="Consultar Países"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca

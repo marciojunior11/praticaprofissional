@@ -4,16 +4,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
-import { EstadosService, IEstados } from '../../shared/services/api/estados/EstadosService';
+import { CidadesService, ICidades } from '../../shared/services/api/cidades/CidadesService';
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 
-export const ConsultaEstados: React.FC = () => {
+export const ConsultaCidades: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
 
-    const [rows, setRows] = useState<IEstados[]>([]);
+    const [rows, setRows] = useState<ICidades[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +29,7 @@ export const ConsultaEstados: React.FC = () => {
         setIsLoading(true);
         console.log(busca, pagina);
         debounce(() => {
-            EstadosService.getAll(pagina, busca)
+            CidadesService.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -47,7 +47,7 @@ export const ConsultaEstados: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            EstadosService.deleteById(id)
+            CidadesService.deleteById(id)
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
@@ -65,13 +65,13 @@ export const ConsultaEstados: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo="Consultar Estados"
+            titulo="Consultar Cidades"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/estados/cadastro/novo')}
+                    onClickNew={() => navigate('/cidades/cadastro/novo')}
                 />
             }
         >
@@ -80,9 +80,8 @@ export const ConsultaEstados: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
+                            <TableCell>Cidade</TableCell>
                             <TableCell>Estado</TableCell>
-                            <TableCell>UF</TableCell>
-                            <TableCell>País</TableCell>
                             <TableCell align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>
@@ -90,14 +89,13 @@ export const ConsultaEstados: React.FC = () => {
                         {rows?.map(row => (
                             <TableRow key={row.id}>
                                 <TableCell>{row.id}</TableCell>
-                                <TableCell>{`${row.estado} - ${row.pais.sigla}`}</TableCell>
-                                <TableCell>{row.uf}</TableCell>
-                                <TableCell>{row.pais.pais}</TableCell>
+                                <TableCell>{`${row.cidade} - ${row.estado.uf}`}</TableCell>
+                                <TableCell>{row.estado.estado}</TableCell>
                                 <TableCell align="right">
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>
                                     </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
+                                    <IconButton color="primary" size="small" onClick={() => navigate(`/cidades/cadastro/${row.id}`)}>
                                         <Icon>edit</Icon>
                                     </IconButton>
                                 </TableCell>

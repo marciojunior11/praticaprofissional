@@ -38,7 +38,7 @@ async function buscarTodosSemPg(url) {
                         id: res.rows[i].id,
                         estado: res.rows[i].estado,
                         uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        pais: mPais
                     })
                 }
                 return resolve(mListaEstados);
@@ -57,7 +57,7 @@ async function buscarTodosSemPg(url) {
                         id: res.rows[i].id,
                         estado: res.rows[i].estado,
                         uf: res.rows[i].uf,
-                        pais: mPais.rows[0]
+                        pais: mPais
                     })
                 }
                 return resolve(mListaEstados);
@@ -126,7 +126,7 @@ async function buscarUm (id) {
                     id: res.rows[0].id,
                     estado: res.rows[0].estado,
                     uf: res.rows[0].uf,
-                    pais: mPais.rows[0]
+                    pais: mPais
                 }
                 return resolve(mEstado);
             }

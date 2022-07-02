@@ -17,14 +17,15 @@ type TVAutocompleteProps = {
         page?: number,
         filter?: string
     ) => Promise<TGenericList | Error>
-    optionLabel: string,
+    label: string,
+    secLabel?: string[],
     TFLabel: string,
     isExternalLoading?: boolean,
     onChange?: (newValue: any) => void,
     onInputchange?: () => void,
 }
 
-export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, optionLabel, TFLabel, isExternalLoading = false, ...rest}) => {
+export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, label, TFLabel, isExternalLoading = false, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -91,7 +92,7 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, opti
 
             //REST PARAMS
             disablePortal
-            getOptionLabel={option => option[optionLabel]}
+            getOptionLabel={option => rest.secLabel ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] : option[label]}
             autoComplete
             blurOnSelect={true}
 
