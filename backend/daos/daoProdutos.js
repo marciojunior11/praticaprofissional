@@ -134,13 +134,13 @@ async function buscarUm (id) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                const mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
-                const mTipoProduto = await daoTiposProduto.buscarUm(res.rows[i].fk_idtipoproduto);
+                const mFornecedor = await daoFornecedores.buscarUm(res.rows[0].fk_idfornecedor);
+                const mTipoProduto = await daoTiposProduto.buscarUm(res.rows[0].fk_idtipoproduto);
                 const mProduto = {
-                    id: res.rows[i].id,
-                    descricao: res.rows[i].descricao,
-                    valorCompra: res.rows[i].valorcompra,
-                    valorVenda: res.rows[i].valorvenda,
+                    id: res.rows[0].id,
+                    descricao: res.rows[0].descricao,
+                    valorCompra: res.rows[0].valorcompra,
+                    valorVenda: res.rows[0].valorvenda,
                     tipoProduto: mTipoProduto,
                     fornecedor: mFornecedor
                 }
@@ -172,7 +172,7 @@ async function salvar (produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into produtos (descricao, valorcompra, valorvenda, fk_idtipoproduto, fk_idfornecedor) values($1, $2, $3, $4, $5)', [produto.descricao, produto.valorCompra, produto.valorVenda, produto.tipoProduto.id, produto.Fornecedor.id], async (err, res) => {
+            client.query('insert into produtos (descricao, valorcompra, valorvenda, fk_idtipoproduto, fk_idfornecedor) values($1, $2, $3, $4, $5)', [produto.descricao, produto.valorCompra, produto.valorVenda, produto.tipoProduto.id, produto.fornecedor.id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
