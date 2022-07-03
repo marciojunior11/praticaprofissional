@@ -225,6 +225,7 @@ export const CadastroEstados: React.FC = () => {
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
                                 <VTextField 
+                                    required
                                     fullWidth
                                     name='estado' 
                                     label="Estado"
@@ -260,6 +261,7 @@ export const CadastroEstados: React.FC = () => {
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
                                 <VTextField 
+                                    required
                                     fullWidth
                                     name='uf' 
                                     label="UF"
@@ -275,6 +277,7 @@ export const CadastroEstados: React.FC = () => {
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
                                 <VAutocomplete
+                                    required
                                     name="pais"
                                     label="pais"
                                     TFLabel="País"

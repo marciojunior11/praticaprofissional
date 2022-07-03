@@ -188,6 +188,7 @@ export const CadastroTiposProduto: React.FC = () => {
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
                                 <VTextField 
+                                    required
                                     fullWidth
                                     name='descricao' 
                                     label="Descrição"
