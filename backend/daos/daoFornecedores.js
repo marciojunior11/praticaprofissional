@@ -181,7 +181,7 @@ async function salvar (fornecedor) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into fornecedores (razsocial, nomefantasia, cnpj, telefone, endereco, numend, bairro, fk_idcidade) values($1, $2, $3, $4, $5, $6, $7, $8)', [fornecedor.razSocial, fornecedor.nomeFantasia, fornecedor.cnpj, fornecedor.telefone, fornecedor.endereco, fornecedor.numEnd, fornecedor.bairro, fornecedor.cidade.id], async (err, res) => {
+            client.query('insert into fornecedores (razsocial, nomefantasia, cnpj, telefone, endereco, numend, bairro, fk_idcidade) values($1, $2, $3, $4, $5, $6, $7, $8)', [fornecedor.razSocial.toUpperCase(), fornecedor.nomeFantasia.toUpperCase(), fornecedor.cnpj, fornecedor.telefone, fornecedor.endereco.toUpperCase(), fornecedor.numEnd, fornecedor.bairro.toUpperCase(), fornecedor.cidade.id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -220,7 +220,7 @@ async function alterar (id, fornecedor) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update fornecedores set id = $1, razsocial = $2, nomefantasia = $3, cnpj = $4, telefone = $5, endereco = $6, numend = $7, bairro = $8, fk_idcidade = $9 where id = $10 ', [fornecedor.id, fornecedor.razSocial, fornecedor.nomeFantasia, fornecedor.cnpj, fornecedor.telefone, fornecedor.endereco, fornecedor.numEnd, fornecedor.bairro, fornecedor.cidade.id, id], (err, res) => {
+                client.query('update fornecedores set id = $1, razsocial = $2, nomefantasia = $3, cnpj = $4, telefone = $5, endereco = $6, numend = $7, bairro = $8, fk_idcidade = $9 where id = $10 ', [fornecedor.id, fornecedor.razSocial.toUpperCase(), fornecedor.nomeFantasia.toUpperCase(), fornecedor.cnpj, fornecedor.telefone, fornecedor.endereco.toUpperCase(), fornecedor.numEnd, fornecedor.bairro.toUpperCase(), fornecedor.cidade.id, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -274,11 +274,13 @@ async function deletar (id) {
 };
 
 async function validate(fornecedor) {
+    console.log(fornecedor.cnpj)
     return new Promise( async (resolve, reject) => {
         pool.query(`select * from fornecedores where cnpj like '${fornecedor.cnpj}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
+            console.log(res.rowCount);
             return resolve(res);
         })
     })

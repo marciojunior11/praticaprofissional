@@ -10,10 +10,12 @@ import {
     ConsultaEstados,
     CadastroEstados,
     ConsultaCidades,
-    CadastroCidades
+    CadastroCidades,
+    ConsultaTiposProduto,
+    CadastroTiposProduto,
+    ConsultaFornecedores,
+    CadastroFornecedores,
 } from "../pages";
-import { ConsultaTiposProduto } from "../pages/tiposProduto/ConsultaTiposProduto";
-import { CadastroTiposProduto } from "../pages/tiposProduto/CadastroTiposProduto";
 
 export const AppRoutes = () => {
     const { setDrawerOptions } = useDrawerContext();
@@ -50,6 +52,11 @@ export const AppRoutes = () => {
                 icon: 'fastfood',
                 path: '/tiposproduto',
             },
+            {
+                label: 'Fornecedores',
+                icon: 'handshake',
+                path: '/fornecedores',
+            },
         ]);
     }, []);
 
@@ -71,6 +78,9 @@ export const AppRoutes = () => {
 
             <Route path="/tiposproduto" element={<ConsultaTiposProduto/>}/>
             <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
+
+            <Route path="/fornecedores" element={<ConsultaFornecedores/>}/>
+            <Route path="/fornecedores/cadastro/:id" element={<CadastroFornecedores/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

@@ -5,4 +5,8 @@ export * from './estados/ConsultaEstados';
 export * from './estados/CadastroEstados';
 export * from './cidades/ConsultaCidades';
 export * from './cidades/CadastroCidades';
+export * from './tiposProduto/ConsultaTiposProduto';
+export * from './tiposProduto/CadastroTiposProduto';
+export * from './fornecedores/ConsultaFornecedores';
+export * from './fornecedores/CadastroFornecedores';;
 export * from './dashboard/Dashboard';

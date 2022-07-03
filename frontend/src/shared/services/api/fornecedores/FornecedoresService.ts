@@ -5,24 +5,24 @@ import { ICidades } from '../cidades/CidadesService';
 export interface IFornecedores {
     id: number;
     razSocial: string;
-    nomeFantasia: string;
+    nomeFantasia: string | undefined;
     cnpj: string;
-    telefone: string;
-    endereco: string;
-    numEnd: string;
-    bairro: string;
+    telefone: string | undefined;
+    endereco: string | undefined;
+    numEnd: string | undefined;
+    bairro: string | undefined;
     cidade: ICidades;
 }
 
 export interface IDetalhesFornecedores {
     id: number;
     razSocial: string;
-    nomeFantasia: string;
+    nomeFantasia: string | undefined;
     cnpj: string;
-    telefone: string;
-    endereco: string;
-    numEnd: string;
-    bairro: string;
+    telefone: string | undefined;
+    endereco: string | undefined;
+    numEnd: string | undefined;
+    bairro: string | undefined;
     cidade: ICidades;
 }
 
@@ -105,6 +105,7 @@ const deleteById = async (id : number): Promise<void | Error> => {
 const validate = async (dados: Omit<IDetalhesFornecedores, 'id'>): Promise<boolean | Error> => {
     try {
         const { data } = await Api.post(`/api/fornecedores/validate`, dados);
+        console.log(data);
         if (data != 0) {
             return false;
         } else {

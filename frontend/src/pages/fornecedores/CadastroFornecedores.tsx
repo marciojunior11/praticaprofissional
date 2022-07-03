@@ -5,32 +5,49 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { CidadesService, ICidades } from "../../shared/services/api/cidades/CidadesService";
+import { FornecedoresService, IFornecedores } from "../../shared/services/api/fornecedores/FornecedoresService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
 import { toast } from "react-toastify";
-import { IEstados, EstadosService } from "../../shared/services/api/estados/EstadosService";
+import { ICidades, CidadesService } from "../../shared/services/api/cidades/CidadesService";
 import { useDebounce } from "../../shared/hooks";
+import { number } from "../../shared/utils/validations";
 
 interface IFormData {
-    cidade: string;
-    estado: IEstados;
+    razSocial: string;
+    nomeFantasia: string | undefined;
+    cnpj: string;
+    telefone: string | undefined;
+    endereco: string | undefined;
+    numEnd: string | undefined;
+    bairro: string | undefined;
+    cidade: ICidades
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    cidade: yup.string().required(),
-    estado: yup.object().shape({
-        id: yup.number().positive().integer().required(),
-        estado: yup.string().required(),
-        uf: yup.string().required().min(2),
-        pais: yup.object().shape({
+    razSocial: yup.string().required(),
+    nomeFantasia: yup.string(),
+    cnpj: yup.string().required().max(20).matches(number, 'Apenas números são aceitos neste campo.'),
+    telefone: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
+    endereco: yup.string(),
+    numEnd: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
+    bairro: yup.string(),
+    cidade: yup.object().shape({
+        id: yup.number(),
+        cidade: yup.string(),
+        estado: yup.object().shape({
             id: yup.number(),
-            pais: yup.string(),
-            sigla: yup.string()
+            estado: yup.string(),
+            uf: yup.string(),
+            pais: yup.object({
+                id: yup.number(),
+                pais: yup.string(),
+                sigla: yup.string()
+            }),
         })
     }).required()
 })
 
-export const CadastroCidades: React.FC = () => {
+export const CadastroFornecedores: React.FC = () => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -40,8 +57,6 @@ export const CadastroCidades: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
-    const [cidade, setCidade] = useState<string>('');
-    const [estado, setEstado] = useState<IEstados | null>(null);
     const [isValid, setIsValid] = useState(false);
     const [alterando, setAlterando] = useState(false);
 
@@ -49,12 +64,12 @@ export const CadastroCidades: React.FC = () => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            CidadesService.getById(Number(id))
+            FornecedoresService.getById(Number(id))
                 .then((result) => {
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
-                        navigate('/cidades');
+                        navigate('/fornecedores');
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
@@ -69,21 +84,10 @@ export const CadastroCidades: React.FC = () => {
         }
     }, [id]);
 
-    useEffect(() => {
-        if (cidade && estado) {
-            const formData = formRef.current?.getData();
-            const data: IFormData = {
-                cidade: formData?.cidade,
-                estado: formData?.estado
-            }
-            validate(data);
-        }
-    }, [cidade, estado])
-
     const validate = (dados: IFormData) => {
         setIsValidating(true);
         debounce(() => {
-            CidadesService.validate(dados)
+            FornecedoresService.validate(dados)
             .then((result) => {
                 setIsValidating(false);
                 if (result instanceof Error) {
@@ -92,7 +96,7 @@ export const CadastroCidades: React.FC = () => {
                     setIsValid(result);
                     if (result === false) {
                         const validationErrors: IVFormErrors = {};
-                        validationErrors['cidade'] = 'Já existe uma cidade vinculado a este estado.';
+                        validationErrors['cnpj'] = 'Este cnpj já está cadastrado';
                         formRef.current?.setErrors(validationErrors);
                     }
                 }
@@ -112,7 +116,7 @@ export const CadastroCidades: React.FC = () => {
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            CidadesService.create(dadosValidados)
+                            FornecedoresService.create(dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -120,22 +124,22 @@ export const CadastroCidades: React.FC = () => {
                                     } else {
                                         toast.success('Cadastrado com sucesso!')
                                         if (isSaveAndClose()) {
-                                            navigate('/cidades');
+                                            navigate('/fornecedores');
                                         } else if (isSaveAndNew()) {
                                             setIsValidating(null);
-                                            navigate('/cidades/cadastro/novo');
+                                            navigate('/fornecedores/cadastro/novo');
                                             formRef.current?.setData({
                                                 estado: '',
                                                 uf: ''
                                             });
                                         } else {
                                             setIsValidating(null);
-                                            navigate(`/cidades/cadastro/${result}`);
+                                            navigate(`/fornecedores/cadastro/${result}`);
                                         }
                                     }
                                 });
                         } else {
-                            CidadesService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            FornecedoresService.updateById(Number(id), { id: Number(id), ...dadosValidados })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -143,7 +147,7 @@ export const CadastroCidades: React.FC = () => {
                                     } else {
                                         toast.success('Alterado com sucesso!');
                                         if (isSaveAndClose()) {
-                                            navigate('/cidades')
+                                            navigate('/fornecedores')
                                         } else {
                                             setIsValidating(null);
                                         }
@@ -163,10 +167,7 @@ export const CadastroCidades: React.FC = () => {
                         console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
-                    if (!estado) {
-                        validationErrors['estado'] = 'O campo é obrigatório';
-                    }
-                    
+                    validationErrors['cidade'] = 'O campo é obrigatório'
                     console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
@@ -175,13 +176,13 @@ export const CadastroCidades: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            CidadesService.deleteById(id)
+            FornecedoresService.deleteById(id)
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {         
                         toast.success('Apagado com sucesso!')
-                        navigate('/cidades');
+                        navigate('/fornecedores');
                     }
                 })
         }
@@ -201,8 +202,8 @@ export const CadastroCidades: React.FC = () => {
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
-                    onClickNovo={() => navigate('/cidades/cadastro/novo') }
-                    onClickVoltar={() => navigate('/cidades') }
+                    onClickNovo={() => navigate('/fornecedores/cadastro/novo') }
+                    onClickVoltar={() => navigate('/fornecedores') }
                 />
             }
         >
@@ -221,11 +222,25 @@ export const CadastroCidades: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
+                                <VTextField
+                                    fullWidth
+                                    name='razSocial'
+                                    label='Razão Social'
+                                    disabled={isLoading}
+                                    onChange={e => {
+                                        if (alterando) setAlterando(false);
+                                    }}
+                                    required
+                                />
+                            </Grid>
+
+                            <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
                                 <VTextField 
                                     fullWidth
-                                    name='cidade' 
-                                    label="Cidade"
+                                    required
+                                    name='cnpj' 
+                                    label="Cnpj"
                                     disabled={isLoading}                             
                                     InputProps={{
                                         endAdornment: (
@@ -247,11 +262,50 @@ export const CadastroCidades: React.FC = () => {
                                                 </InputAdornment>
                                         )
                                     }}
+                                    inputProps={{maxLength: 20}}
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
-                                        formRef.current?.setFieldError('cidade', '');
-                                        setCidade(e.target.value.toUpperCase());
+                                        formRef.current?.setFieldError('cnpj', '');
+                                        if (alterando) setAlterando(false);
+                                    }}
+                                    onBlur={(e) => {
+                                        const formData = formRef.current?.getData();
+                                        const data: IFormData = {
+                                            razSocial: formData?.razSocial,
+                                            nomeFantasia: formData?.nomeFantasia,
+                                            cnpj: formData?.cnpj,
+                                            telefone: formData?.telefone,
+                                            endereco: formData?.endereco,
+                                            numEnd: formData?.numEnd,
+                                            bairro: formData?.bairro,
+                                            cidade: formData?.cidade
+                                        }
+                                        validate(data);
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
+                                <VTextField
+                                    fullWidth
+                                    name='nomeFantasia'
+                                    label='Nome Fantasia'
+                                    disabled={isLoading}
+                                    onChange={e => {
+                                        if (alterando) setAlterando(false);
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
+                                <VTextField
+                                    fullWidth
+                                    name='telefone'
+                                    label='Telefone'
+                                    disabled={isLoading}
+                                    onChange={e => {
                                         if (alterando) setAlterando(false);
                                     }}
                                 />
@@ -259,20 +313,56 @@ export const CadastroCidades: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={5} sm={5} md={5} lg={5} xl={6}>
+                                <VTextField
+                                    fullWidth
+                                    name='endereco'
+                                    label='Endereço'
+                                    disabled={isLoading}
+                                    onChange={e => {
+                                        if (alterando) setAlterando(false);
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
+                                <VTextField
+                                    fullWidth
+                                    name='numEnd'
+                                    label='Numero'
+                                    disabled={isLoading}
+                                    onChange={e => {
+                                        if (alterando) setAlterando(false);
+                                    }}
+                                />
+                            </Grid>
+
+                            <Grid item xs={5} sm={5} md={5} lg={5} xl={5}>
+                                <VTextField
+                                    fullWidth
+                                    name='bairro'
+                                    label='Bairro'
+                                    disabled={isLoading}
+                                    onChange={e => {
+                                        if (alterando) setAlterando(false);
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
                                 <VAutocomplete
-                                    name="estado"
-                                    label='estado'
-                                    TFLabel="Estado"
-                                    secLabel={['pais', 'sigla']}
-                                    getAll={EstadosService.getAll}
+                                    required
+                                    name="cidade"
+                                    label='cidade'
+                                    TFLabel="Cidade"
+                                    secLabel={['estado', 'uf']}
+                                    tercLabel={['estado', 'pais', 'sigla']}
+                                    getAll={CidadesService.getAll}
                                     onInputchange={() => {
-                                        setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('estado', '');
+                                        formRef.current?.setFieldError('cidade', '');
                                     }}
                                     onChange={(newValue) => {
-                                        setEstado(newValue);
                                         if (alterando) setAlterando(false);
                                     }}
                                 />

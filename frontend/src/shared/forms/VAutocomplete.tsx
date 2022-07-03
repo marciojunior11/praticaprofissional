@@ -19,10 +19,12 @@ type TVAutocompleteProps = {
     ) => Promise<TGenericList | Error>
     label: string,
     secLabel?: string[],
+    tercLabel?: string[],
     TFLabel: string,
     isExternalLoading?: boolean,
     onChange?: (newValue: any) => void,
     onInputchange?: () => void,
+    required?: boolean
 }
 
 export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, label, TFLabel, isExternalLoading = false, ...rest}) => {
@@ -87,12 +89,13 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, labe
                     label={TFLabel} 
                     error={!!error}
                     helperText={error}
+                    required={rest.required}
                 />
             )}
 
             //REST PARAMS
             disablePortal
-            getOptionLabel={option => rest.secLabel ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] : option[label]}
+            getOptionLabel={option => (rest.tercLabel && rest.secLabel) ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] + ' - ' + option[rest.tercLabel[0]][rest.tercLabel[1]][rest.tercLabel[2]] : rest.secLabel ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] : option[label]}
             autoComplete
             blurOnSelect={true}
 
