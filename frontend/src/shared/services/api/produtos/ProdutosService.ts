@@ -7,9 +7,9 @@ import { ICidades } from '../cidades/CidadesService';
 export interface IProdutos {
     id: number,
     descricao: string,
-    valorCompra: number,
-    valorVenda: number,
-    tipoProduto: ITiposProduto,
+    valorCompra: number | undefined,
+    valorVenda: number | undefined,
+    tipoProduto: ITiposProduto | null,
     fornecedor: IFornecedores
 }
 
@@ -18,7 +18,7 @@ export interface IDetalhesProdutos {
     descricao: string,
     valorCompra: number | undefined,
     valorVenda: number | undefined,
-    tipoProduto: ITiposProduto | undefined,
+    tipoProduto: ITiposProduto | null,
     fornecedor: IFornecedores
 }
 

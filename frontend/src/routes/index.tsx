@@ -16,6 +16,8 @@ import {
     ConsultaFornecedores,
     CadastroFornecedores,
 } from "../pages";
+import { ConsultaProdutos } from "../pages/produtos/ConsultaProdutos";
+import { CadastroProdutos } from "../pages/produtos/CadastroProdutos";
 
 export const AppRoutes = () => {
     const { setDrawerOptions } = useDrawerContext();
@@ -57,6 +59,11 @@ export const AppRoutes = () => {
                 icon: 'handshake',
                 path: '/fornecedores',
             },
+            {
+                label: 'Produtos',
+                icon: 'shopping_cart',
+                path: '/produtos',
+            },
         ]);
     }, []);
 
@@ -81,6 +88,9 @@ export const AppRoutes = () => {
 
             <Route path="/fornecedores" element={<ConsultaFornecedores/>}/>
             <Route path="/fornecedores/cadastro/:id" element={<CadastroFornecedores/>}/>
+
+            <Route path="/produtos" element={<ConsultaProdutos/>}/>
+            <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

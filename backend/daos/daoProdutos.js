@@ -266,7 +266,7 @@ async function deletar (id) {
 
 async function validate(produto) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from produtos where descricao like '${produto.descricao}'`, (err, res) => {
+        pool.query(`select * from produtos where descricao like '${produto.descricao}' and fk_idfornecedor = ${produto.fornecedor.id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }
