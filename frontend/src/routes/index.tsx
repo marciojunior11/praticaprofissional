@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useDrawerContext } from "../shared/contexts";
 import { 
     Dashboard,
-    ConsultaClientes, 
     ConsultaPaises,
     CadastroPaises,
     ConsultaEstados,
@@ -15,9 +14,9 @@ import {
     CadastroTiposProduto,
     ConsultaFornecedores,
     CadastroFornecedores,
+    ConsultaProdutos,
+    CadastroProdutos,
 } from "../pages";
-import { ConsultaProdutos } from "../pages/produtos/ConsultaProdutos";
-import { CadastroProdutos } from "../pages/produtos/CadastroProdutos";
 
 export const AppRoutes = () => {
     const { setDrawerOptions } = useDrawerContext();
@@ -28,11 +27,6 @@ export const AppRoutes = () => {
                 label: 'Página inicial',
                 icon: 'home',
                 path: '/home',
-            },
-            {
-                label: 'Clientes',
-                icon: 'people',
-                path: '/clientes',
             },
             {
                 label: 'Paises',
@@ -70,9 +64,6 @@ export const AppRoutes = () => {
     return (
         <Routes>
             <Route path="/home" element={<Dashboard/>}/>
-            
-            <Route path="/clientes" element={<ConsultaClientes/>}/>
-            {/*<Route path="/cidades/detalhe/:id" element={<Dashboard/>}/>*/}
 
             <Route path="/paises" element={<ConsultaPaises/>}/>
             <Route path="/paises/cadastro/:id" element={<CadastroPaises/>}/>

@@ -1,4 +1,3 @@
-export * from './clientes/ConsultaClientes';
 export * from './paises/ConsultaPaises';
 export * from './paises/CadastroPaises';
 export * from './estados/ConsultaEstados';
@@ -8,5 +7,7 @@ export * from './cidades/CadastroCidades';
 export * from './tiposProduto/ConsultaTiposProduto';
 export * from './tiposProduto/CadastroTiposProduto';
 export * from './fornecedores/ConsultaFornecedores';
-export * from './fornecedores/CadastroFornecedores';;
+export * from './fornecedores/CadastroFornecedores';
+export * from './produtos/ConsultaProdutos';
+export * from './produtos/CadastroProdutos';
 export * from './dashboard/Dashboard';
