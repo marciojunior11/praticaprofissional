@@ -4,6 +4,7 @@ const { cidadesRoutes } = require('./cidadesRoutes');
 const { tiposProdutoRoutes } = require('./tiposProdutoRoutes');
 const { fornecedoresRoutes } = require('./fornecedoresRoutes');
 const { produtosRoutes } = require('./produtosRoutes');
+const { clientesRoutes } = require('./clientesRoutes');
 
 function router(req, res) {
     if (req.url.includes('/paises')) {
@@ -18,6 +19,8 @@ function router(req, res) {
         fornecedoresRoutes(req, res);
     } else if (req.url.includes('/produtos')) {
         produtosRoutes(req, res);
+    } else if (req.url.includes('/clientes')) {
+        clientesRoutes(req, res);
     }
 }
 
