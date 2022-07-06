@@ -5,7 +5,7 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
 
@@ -24,6 +24,8 @@ export const CadastroPaises: React.FC = () => {
     const navigate = useNavigate();
 
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+
+    const [obj, setObj] = useState<IPaises | null>(null); 
 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
@@ -45,6 +47,7 @@ export const CadastroPaises: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
@@ -56,29 +59,35 @@ export const CadastroPaises: React.FC = () => {
         }
     }, [id]);
 
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
+
     const validate = (filter: string) => {
-        setIsValidating(true);
-        PaisesService.validate(filter)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['pais'] = 'Este país já está cadastrado.';
-                        formRef.current?.setErrors(validationErrors);
+        if (filter != obj?.pais) {
+            setIsValidating(true);
+            PaisesService.validate(filter)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['pais'] = 'Este país já está cadastrado.';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
-            })
+                })
+        } else {
+            setIsValid(true);
+        }
     }
 
     const handleSave = (dados: IFormData) => {
-        if (alterando) {
-            navigate('/paises');
-            return
-        }
+        validate(dados.pais);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {

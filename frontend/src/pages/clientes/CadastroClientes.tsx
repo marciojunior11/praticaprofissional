@@ -54,6 +54,8 @@ export const CadastroClientes: React.FC = () => {
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
 
+    const [obj, setObj] = useState<IClientes | null>(null)
+
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
@@ -73,44 +75,78 @@ export const CadastroClientes: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
         } else {
             formRef.current?.setData({
-                cidade: '',
-                estado: null
+                nome: '',
+                cpf: '',
+                rg: '',
+                telefone: '',
+                endereco: '',
+                numEnd: '',
+                bairro: '',
+                cidade: null
             });
         }
     }, [id]);
 
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
+
     const validate = (dados: IFormData) => {
-        setIsValidating(true);
-        debounce(() => {
-            ClientesService.validate(dados)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['cpf'] = 'Este CPF já está cadastrado.';
-                        formRef.current?.setErrors(validationErrors);
+        const obj1 = {
+            id: obj?.id,
+            nome: obj?.nome,
+            cpf: obj?.cpf,
+            rg: obj?.rg,
+            telefone: obj?.telefone,
+            endereco: obj?.endereco,
+            numEnd: obj?.numEnd,
+            bairro: obj?.bairro,
+            cidade: obj?.cidade
+        }
+        const obj2 = {
+            id: Number(id),
+            nome: dados.nome,
+            cpf: dados.cpf,
+            rg: dados.rg,
+            telefone: dados.telefone,
+            endereco: dados.endereco,
+            numEnd: dados.numEnd,
+            bairro: dados.bairro,
+            cidade: dados.cidade
+        }
+        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+            setIsValidating(true);
+            debounce(() => {
+                ClientesService.validate(dados)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['cnpj'] = 'Este CNPJ já está cadastrado.';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
+                })
             })
-        })
+        } else {
+            setIsValid(true);
+        }
         
     }
 
     const handleSave = (dados: IFormData) => {
-        console.log(formRef.current?.getData());
-        if (alterando) {
-            navigate('/estados');
-            return
-        }
+        validate(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -229,9 +265,6 @@ export const CadastroClientes: React.FC = () => {
                                     name='nome'
                                     label='Nome Completo'
                                     disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
                                     required
                                 />
                             </Grid>
@@ -268,7 +301,6 @@ export const CadastroClientes: React.FC = () => {
                                         setIsValid(false);
                                         setIsValidating('');
                                         formRef.current?.setFieldError('cpf', '');
-                                        if (alterando) setAlterando(false);
                                     }}
                                     onBlur={(e) => {
                                         const formData = formRef.current?.getData();
@@ -295,9 +327,6 @@ export const CadastroClientes: React.FC = () => {
                                     name='rg'
                                     label='RG'
                                     disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
                                 />
                             </Grid>
                             <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
@@ -306,9 +335,6 @@ export const CadastroClientes: React.FC = () => {
                                     name='telefone'
                                     label='Telefone'
                                     disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -320,9 +346,6 @@ export const CadastroClientes: React.FC = () => {
                                     name='endereco'
                                     label='Endereço'
                                     disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
                                 />
                             </Grid>
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
@@ -331,9 +354,6 @@ export const CadastroClientes: React.FC = () => {
                                     name='numEnd'
                                     label='Numero'
                                     disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
                                 />
                             </Grid>
 
@@ -343,9 +363,6 @@ export const CadastroClientes: React.FC = () => {
                                     name='bairro'
                                     label='Bairro'
                                     disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -362,9 +379,6 @@ export const CadastroClientes: React.FC = () => {
                                     getAll={CidadesService.getAll}
                                     onInputchange={() => {
                                         formRef.current?.setFieldError('cidade', '');
-                                    }}
-                                    onChange={(newValue) => {
-                                        if (alterando) setAlterando(false);
                                     }}
                                 />
                             </Grid>

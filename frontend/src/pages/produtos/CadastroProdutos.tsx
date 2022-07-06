@@ -62,6 +62,8 @@ export const CadastroProdutos: React.FC = () => {
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
 
+    const [obj, setObj] = useState<IProdutos | null>(null)
+
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
@@ -84,16 +86,25 @@ export const CadastroProdutos: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
         } else {
             formRef.current?.setData({
-                cidade: '',
-                estado: null
+                descricao: '',
+                tipoProduto: null,
+                fornecedor: '',
+                valorCompra: 0.00,
+                valorVenda: 0.00
             });
         }
     }, [id]);
+
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
 
     useEffect(() => {
         if (descricao && fornecedor) {
@@ -110,32 +121,49 @@ export const CadastroProdutos: React.FC = () => {
     }, [descricao, fornecedor])
 
     const validate = (dados: IFormData) => {
-        setIsValidating(true);
-        debounce(() => {
-            ProdutosService.validate(dados)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['descricao'] = 'Este produto já está cadastrado a este fornecedor';
-                        validationErrors['fornecedor'] = 'Este fornecedor já tem este produto cadastrado.';
-                        formRef.current?.setErrors(validationErrors);
+        const obj1 = {
+            id: obj?.id,
+            descricao: obj?.descricao,
+            valorCompra: obj?.valorCompra,
+            valorVenda: obj?.valorVenda,
+            tipoProduto: obj?.tipoProduto,
+            fornecedor: obj?.fornecedor
+        }
+        const obj2 = {
+            id: Number(id),
+            descricao: dados.descricao,
+            valorCompra: dados.valorCompra,
+            valorVenda: dados.valorVenda,
+            tipoProduto: dados.tipoProduto,
+            fornecedor: dados.fornecedor
+        }
+        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+            setIsValidating(true);
+            debounce(() => {
+                ProdutosService.validate(dados)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['descricao'] = 'Este produto já está cadastrado com o fornecedor';
+                            validationErrors['fornecedor'] = 'Este fornecedor já tem este produto cadastrado';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
+                })
             })
-        })
+        } else {
+            setIsValid(true);
+        }
         
     }
 
     const handleSave = (dados: IFormData) => {
-        if (alterando) {
-            navigate('/estados');
-            return
-        }
+        validate(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -259,7 +287,6 @@ export const CadastroProdutos: React.FC = () => {
                                         setIsValidating('');
                                         formRef.current?.setFieldError('descricao', '');
                                         setDescricao(e.target.value.toUpperCase());
-                                        if (alterando) setAlterando(false);
                                     }}
                                     required
                                     InputProps={{
@@ -305,7 +332,6 @@ export const CadastroProdutos: React.FC = () => {
                                     required
                                     onChange={(newValue) => {
                                         setFornecedor(newValue);
-                                        if (alterando) setAlterando(false);
                                     }}
                                     onInputchange={() => {
                                         setIsValid(false);

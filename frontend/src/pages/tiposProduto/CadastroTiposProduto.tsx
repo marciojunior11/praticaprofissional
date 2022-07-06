@@ -5,7 +5,7 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { TiposProdutoService } from "../../shared/services/api/tiposProduto/TiposProdutoService";
+import { ITiposProduto, TiposProdutoService } from "../../shared/services/api/tiposProduto/TiposProdutoService";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
 
@@ -22,6 +22,8 @@ export const CadastroTiposProduto: React.FC = () => {
     const navigate = useNavigate();
 
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+
+    const [obj, setObj] = useState<ITiposProduto | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
@@ -43,6 +45,7 @@ export const CadastroTiposProduto: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
@@ -53,29 +56,35 @@ export const CadastroTiposProduto: React.FC = () => {
         }
     }, [id]);
 
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
+
     const validate = (filter: string) => {
-        setIsValidating(true);
-        TiposProdutoService.validate(filter)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['descricao'] = 'Este tipo de produto já está cadastrado.';
-                        formRef.current?.setErrors(validationErrors);
+        if (filter != obj?.descricao) {
+            setIsValidating(true);
+            TiposProdutoService.validate(filter)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['descricao'] = 'Este tipo de produto já está cadastrado';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
-            })
+                })
+        } else {
+            setIsValid(true);
+        }
     }
 
     const handleSave = (dados: IFormData) => {
-        if (alterando) {
-            navigate('/tiposproduto');
-            return
-        }
+        validate(dados.descricao);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -217,7 +226,6 @@ export const CadastroTiposProduto: React.FC = () => {
                                         setIsValid(false);
                                         setIsValidating('');
                                         formRef.current?.setFieldError('descricao', '');
-                                        if (alterando) setAlterando(false);
                                     }}
                                     onBlur={(e) => {
                                         if (e.target.value) {

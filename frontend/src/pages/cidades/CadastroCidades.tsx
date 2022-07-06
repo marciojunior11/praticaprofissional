@@ -37,6 +37,8 @@ export const CadastroCidades: React.FC = () => {
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
 
+    const [obj, setObj] = useState<ICidades | null>(null);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
@@ -58,6 +60,7 @@ export const CadastroCidades: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
@@ -68,6 +71,11 @@ export const CadastroCidades: React.FC = () => {
             });
         }
     }, [id]);
+
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
 
     useEffect(() => {
         if (cidade && estado) {
@@ -81,31 +89,43 @@ export const CadastroCidades: React.FC = () => {
     }, [cidade, estado])
 
     const validate = (dados: IFormData) => {
-        setIsValidating(true);
-        debounce(() => {
-            CidadesService.validate(dados)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['cidade'] = 'Já existe uma cidade vinculado a este estado.';
-                        formRef.current?.setErrors(validationErrors);
+        const obj1 = {
+            id: obj?.id,
+            cidade: obj?.cidade,
+            estado: obj?.estado
+        }
+        const obj2 = {
+            id: Number(id),
+            cidade: dados.cidade,
+            estado: dados.estado
+        }
+        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+            setIsValidating(true);
+            debounce(() => {
+                CidadesService.validate(dados)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['cidade'] = 'Já existe uma cidade vinculada a este estado.';
+                            validationErrors['estado'] = 'Já existe um estado vinculado a esta cidade.';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
+                })
             })
-        })
+        } else {
+            setIsValid(true);
+        }
         
     }
 
     const handleSave = (dados: IFormData) => {
-        if (alterando) {
-            navigate('/estados');
-            return
-        }
+        validate(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {

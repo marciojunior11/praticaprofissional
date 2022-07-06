@@ -54,6 +54,8 @@ export const CadastroFornecedores: React.FC = () => {
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
 
+    const [obj, setObj] = useState<IFornecedores | null>(null);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
@@ -73,43 +75,77 @@ export const CadastroFornecedores: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
         } else {
             formRef.current?.setData({
-                cidade: '',
-                estado: null
+                razSocial: '',
+                cnpj: '',
+                nomeFantasia: '',
+                telefone: '',
+                endereco: '',
+                numEnd: '',
+                bairro: '',
+                cidade: null
             });
         }
     }, [id]);
 
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
+
     const validate = (dados: IFormData) => {
-        setIsValidating(true);
-        debounce(() => {
-            FornecedoresService.validate(dados)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['cnpj'] = 'Este cnpj já está cadastrado';
-                        formRef.current?.setErrors(validationErrors);
+        const obj1 = {
+            id: obj?.id,
+            razSocial: obj?.razSocial,
+            nomeFantasia: obj?.nomeFantasia,
+            cnpj: obj?.cnpj,
+            telefone: obj?.telefone,
+            endereco: obj?.endereco,
+            numEnd: obj?.numEnd,
+            bairro: obj?.bairro,
+            cidade: obj?.cidade
+        }
+        const obj2 = {
+            id: Number(id),
+            razSocial: dados.razSocial,
+            nomeFantasia: dados.nomeFantasia,
+            cnpj: dados.cnpj,
+            telefone: dados.telefone,
+            endereco: dados.endereco,
+            numEnd: dados.numEnd,
+            bairro: dados.bairro,
+            cidade: dados.cidade
+        }
+        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+            setIsValidating(true);
+            debounce(() => {
+                FornecedoresService.validate(dados)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['cnpj'] = 'Este CNPJ já está cadastrado.';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
+                })
             })
-        })
-        
+        } else {
+            setIsValid(true);
+        }
     }
 
     const handleSave = (dados: IFormData) => {
-        if (alterando) {
-            navigate('/estados');
-            return
-        }
+        validate(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -240,7 +276,7 @@ export const CadastroFornecedores: React.FC = () => {
                                     fullWidth
                                     required
                                     name='cnpj' 
-                                    label="Cnpj"
+                                    label="CNPJ"
                                     disabled={isLoading}                             
                                     InputProps={{
                                         endAdornment: (

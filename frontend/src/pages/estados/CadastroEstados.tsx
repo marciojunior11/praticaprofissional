@@ -34,6 +34,8 @@ export const CadastroEstados: React.FC = () => {
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
 
+    const [obj, setObj] = useState<IEstados | null>(null);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
@@ -57,6 +59,7 @@ export const CadastroEstados: React.FC = () => {
                         formRef.current?.setData(result);
                         setEstado(formRef.current?.getData().estado);
                         setPais(formRef.current?.getData().pais);
+                        setObj(result);
                         setAlterando(true);
                     }
                 });
@@ -68,6 +71,11 @@ export const CadastroEstados: React.FC = () => {
             });
         }
     }, [id]);
+
+    useEffect(() => {
+        if (obj) setIsValid(true)
+        else setIsValid(false);
+    }, [obj])
 
     useEffect(() => {
         if (estado && pais) {
@@ -82,32 +90,41 @@ export const CadastroEstados: React.FC = () => {
     }, [estado, pais])
 
     const validate = (dados: IFormData) => {
-        setIsValidating(true);
-        debounce(() => {
-            EstadosService.validate(dados)
-            .then((result) => {
-                setIsValidating(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                } else {
-                    setIsValid(result);
-                    if (result === false) {
-                        const validationErrors: IVFormErrors = {};
-                        validationErrors['estado'] = 'Já existe um estado vinculado a este país.';
-                        formRef.current?.setErrors(validationErrors);
+        const obj1 = {
+            id: obj?.id,
+            estado: obj?.estado,
+            pais: obj?.pais
+        }
+        const obj2 = {
+            id: Number(id),
+            estado: dados.estado,
+            pais: dados.pais
+        }
+        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+            setIsValidating(true);
+            debounce(() => {
+                EstadosService.validate(dados)
+                .then((result) => {
+                    setIsValidating(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setIsValid(result);
+                        if (result === false) {
+                            const validationErrors: IVFormErrors = {};
+                            validationErrors['estado'] = 'Já existe um estado vinculado a este país.';
+                            formRef.current?.setErrors(validationErrors);
+                        }
                     }
-                }
+                })
             })
-        })
-        
+        } else {
+            setIsValid(true);
+        }
     }
 
     const handleSave = (dados: IFormData) => {
-        console.log(alterando);
-        if (alterando) {
-            navigate('/estados');
-            return
-        }
+        validate(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -255,7 +272,17 @@ export const CadastroEstados: React.FC = () => {
                                         setIsValidating('');
                                         formRef.current?.setFieldError('estado', '');
                                         setEstado(e.target.value.toUpperCase());
-                                        if (alterando) setAlterando(false);
+                                    }}
+                                    onBlur={() => {
+                                        if (pais) {
+                                            const formData = formRef.current?.getData();
+                                            const data = {
+                                                estado: formData?.estado,
+                                                uf: formData?.uf,
+                                                pais: formData?.pais
+                                            }
+                                            validate(data);
+                                        }
                                     }}
                                 />
                             </Grid>
@@ -267,8 +294,16 @@ export const CadastroEstados: React.FC = () => {
                                     label="UF"
                                     disabled={isLoading}
                                     inputProps={{ maxLength: 2 }}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
+                                    onBlur={() => {
+                                        if (alterando) {
+                                            const formData = formRef.current?.getData();
+                                            const data = {
+                                                estado: formData?.estado,
+                                                uf: formData?.uf,
+                                                pais: formData?.pais
+                                            }
+                                            validate(data);
+                                        }
                                     }}
                                 />
                             </Grid>
@@ -289,7 +324,6 @@ export const CadastroEstados: React.FC = () => {
                                     }}
                                     onChange={(newValue) => {
                                         setPais(newValue);
-                                        if (alterando) setAlterando(false);
                                     }}
                                 />
                             </Grid>
