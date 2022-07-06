@@ -5,7 +5,7 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { FornecedoresService, IFornecedores } from "../../shared/services/api/fornecedores/FornecedoresService";
+import { ClientesService, IClientes } from "../../shared/services/api/clientes/ClientesService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { ICidades, CidadesService } from "../../shared/services/api/cidades/CidadesService";
@@ -13,20 +13,20 @@ import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
 
 interface IFormData {
-    razSocial: string;
-    nomeFantasia: string | undefined;
-    cnpj: string;
-    telefone: string | undefined;
-    endereco: string | undefined;
-    numEnd: string | undefined;
-    bairro: string | undefined;
-    cidade: ICidades
+    nome: string,
+    cpf: string,
+    rg: string | undefined,
+    telefone: string | undefined,
+    endereco: string | undefined,
+    numEnd: string | undefined,
+    bairro: string | undefined,
+    cidade: ICidades,
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    razSocial: yup.string().required(),
-    nomeFantasia: yup.string(),
-    cnpj: yup.string().required().max(20).matches(number, 'Apenas números são aceitos neste campo.'),
+    nome: yup.string().required(),
+    cpf: yup.string().required().max(11).matches(number, 'Apenas números são aceitos neste campo.'),
+    rg: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
     telefone: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
     endereco: yup.string(),
     numEnd: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
@@ -47,7 +47,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     }).required()
 })
 
-export const CadastroFornecedores: React.FC = () => {
+export const CadastroClientes: React.FC = () => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -64,12 +64,12 @@ export const CadastroFornecedores: React.FC = () => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            FornecedoresService.getById(Number(id))
+            ClientesService.getById(Number(id))
                 .then((result) => {
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
-                        navigate('/fornecedores');
+                        navigate('/clientes');
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
@@ -87,7 +87,7 @@ export const CadastroFornecedores: React.FC = () => {
     const validate = (dados: IFormData) => {
         setIsValidating(true);
         debounce(() => {
-            FornecedoresService.validate(dados)
+            ClientesService.validate(dados)
             .then((result) => {
                 setIsValidating(false);
                 if (result instanceof Error) {
@@ -96,7 +96,7 @@ export const CadastroFornecedores: React.FC = () => {
                     setIsValid(result);
                     if (result === false) {
                         const validationErrors: IVFormErrors = {};
-                        validationErrors['cnpj'] = 'Este cnpj já está cadastrado';
+                        validationErrors['cpf'] = 'Este CPF já está cadastrado.';
                         formRef.current?.setErrors(validationErrors);
                     }
                 }
@@ -106,6 +106,7 @@ export const CadastroFornecedores: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
+        console.log(formRef.current?.getData());
         if (alterando) {
             navigate('/estados');
             return
@@ -116,7 +117,7 @@ export const CadastroFornecedores: React.FC = () => {
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            FornecedoresService.create(dadosValidados)
+                            ClientesService.create({associado: false, ...dadosValidados})
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -124,22 +125,22 @@ export const CadastroFornecedores: React.FC = () => {
                                     } else {
                                         toast.success('Cadastrado com sucesso!')
                                         if (isSaveAndClose()) {
-                                            navigate('/fornecedores');
+                                            navigate('/clientes');
                                         } else if (isSaveAndNew()) {
                                             setIsValidating(null);
-                                            navigate('/fornecedores/cadastro/novo');
+                                            navigate('/clientes/cadastro/novo');
                                             formRef.current?.setData({
                                                 estado: '',
                                                 uf: ''
                                             });
                                         } else {
                                             setIsValidating(null);
-                                            navigate(`/fornecedores/cadastro/${result}`);
+                                            navigate(`/clientes/cadastro/${result}`);
                                         }
                                     }
                                 });
                         } else {
-                            FornecedoresService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            ClientesService.updateById(Number(id), { id: Number(id), associado: false, ...dadosValidados })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -147,7 +148,7 @@ export const CadastroFornecedores: React.FC = () => {
                                     } else {
                                         toast.success('Alterado com sucesso!');
                                         if (isSaveAndClose()) {
-                                            navigate('/fornecedores')
+                                            navigate('/clientes')
                                         } else {
                                             setIsValidating(null);
                                         }
@@ -176,13 +177,13 @@ export const CadastroFornecedores: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            FornecedoresService.deleteById(id)
+            ClientesService.deleteById(id)
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {         
                         toast.success('Apagado com sucesso!')
-                        navigate('/fornecedores');
+                        navigate('/clientes');
                     }
                 })
         }
@@ -190,7 +191,7 @@ export const CadastroFornecedores: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Cidade' : 'Editar Cidade'}
+            titulo={id === 'novo' ? 'Cadastrar Cliente' : 'Editar Cliente'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -202,8 +203,8 @@ export const CadastroFornecedores: React.FC = () => {
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
-                    onClickNovo={() => navigate('/fornecedores/cadastro/novo') }
-                    onClickVoltar={() => navigate('/fornecedores') }
+                    onClickNovo={() => navigate('/clientes/cadastro/novo') }
+                    onClickVoltar={() => navigate('/clientes') }
                 />
             }
         >
@@ -225,8 +226,8 @@ export const CadastroFornecedores: React.FC = () => {
                             <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
                                 <VTextField
                                     fullWidth
-                                    name='razSocial'
-                                    label='Razão Social'
+                                    name='nome'
+                                    label='Nome Completo'
                                     disabled={isLoading}
                                     onChange={e => {
                                         if (alterando) setAlterando(false);
@@ -239,8 +240,8 @@ export const CadastroFornecedores: React.FC = () => {
                                 <VTextField 
                                     fullWidth
                                     required
-                                    name='cnpj' 
-                                    label="Cnpj"
+                                    name='cpf' 
+                                    label="CPF"
                                     disabled={isLoading}                             
                                     InputProps={{
                                         endAdornment: (
@@ -266,20 +267,20 @@ export const CadastroFornecedores: React.FC = () => {
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
-                                        formRef.current?.setFieldError('cnpj', '');
+                                        formRef.current?.setFieldError('cpf', '');
                                         if (alterando) setAlterando(false);
                                     }}
                                     onBlur={(e) => {
                                         const formData = formRef.current?.getData();
                                         const data: IFormData = {
-                                            razSocial: formData?.razSocial,
-                                            nomeFantasia: formData?.nomeFantasia,
-                                            cnpj: formData?.cnpj,
+                                            nome: formData?.nome,
+                                            cpf: formData?.cpf,
+                                            rg: formData?.rg,
                                             telefone: formData?.telefone,
                                             endereco: formData?.endereco,
                                             numEnd: formData?.numEnd,
                                             bairro: formData?.bairro,
-                                            cidade: formData?.cidade
+                                            cidade: formData?.cidade,
                                         }
                                         validate(data);
                                     }}
@@ -291,8 +292,8 @@ export const CadastroFornecedores: React.FC = () => {
                             <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
                                 <VTextField
                                     fullWidth
-                                    name='nomeFantasia'
-                                    label='Nome Fantasia'
+                                    name='rg'
+                                    label='RG'
                                     disabled={isLoading}
                                     onChange={e => {
                                         if (alterando) setAlterando(false);

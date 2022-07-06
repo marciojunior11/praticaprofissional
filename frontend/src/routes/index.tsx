@@ -15,6 +15,7 @@ import {
     ConsultaFornecedores,
     CadastroFornecedores,
     ConsultaClientes,
+    CadastroClientes,
     ConsultaProdutos,
     CadastroProdutos,
 } from "../pages";
@@ -87,7 +88,7 @@ export const AppRoutes = () => {
             <Route path="/fornecedores/cadastro/:id" element={<CadastroFornecedores/>}/>
 
             <Route path="/clientes" element={<ConsultaClientes/>}/>
-            <Route path="/clientes/cadastro/:id" element={<CadastroFornecedores/>}/>
+            <Route path="/clientes/cadastro/:id" element={<CadastroClientes/>}/>
 
             <Route path="/produtos" element={<ConsultaProdutos/>}/>
             <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>

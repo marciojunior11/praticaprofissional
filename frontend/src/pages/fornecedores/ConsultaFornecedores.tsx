@@ -80,7 +80,7 @@ export const ConsultaFornecedores: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
-                            <TableCell>Nome Fantasia</TableCell>
+                            <TableCell>Razão Social</TableCell>
                             <TableCell>CNPJ</TableCell>
                             <TableCell>Telefone</TableCell>
                             <TableCell>Endereço</TableCell>

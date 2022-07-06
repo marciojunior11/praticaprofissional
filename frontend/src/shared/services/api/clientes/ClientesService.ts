@@ -25,7 +25,6 @@ export interface IDetalhesClientes {
     numEnd: string | undefined,
     bairro: string | undefined,
     cidade: ICidades,
-    associado: boolean
 }
 
 type TListaClientes = {
@@ -74,7 +73,7 @@ const getById = async (id : number): Promise<IClientes | Error> => {
     }    
 }
 
-const create = async (dados: Omit<IDetalhesClientes, 'id'>): Promise<number | undefined | Error> => {
+const create = async (dados: Omit<IClientes, 'id'>): Promise<number | undefined | Error> => {
     try {
         const { data } = await Api.post<IClientes>('/api/clientes', dados);
         if (data) {
@@ -86,7 +85,7 @@ const create = async (dados: Omit<IDetalhesClientes, 'id'>): Promise<number | un
     }     
 }
 
-const updateById = async (id : number, dados : IDetalhesClientes): Promise<void | Error> => {
+const updateById = async (id : number, dados : IClientes): Promise<void | Error> => {
     try {
         await Api.put(`/api/clientes/${id}`, dados);
     } catch (error) {
