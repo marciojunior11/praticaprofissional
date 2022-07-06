@@ -10,12 +10,12 @@ import {
     CadastroEstados,
     ConsultaCidades,
     CadastroCidades,
-    ConsultaTiposProduto,
-    CadastroTiposProduto,
     ConsultaFornecedores,
     CadastroFornecedores,
     ConsultaClientes,
     CadastroClientes,
+    ConsultaTiposProduto,
+    CadastroTiposProduto,
     ConsultaProdutos,
     CadastroProdutos,
 } from "../pages";
@@ -46,11 +46,6 @@ export const AppRoutes = () => {
                 path: '/cidades',
             },
             {
-                label: 'Tipos de Produto',
-                icon: 'fastfood',
-                path: '/tiposproduto',
-            },
-            {
                 label: 'Fornecedores',
                 icon: 'handshake',
                 path: '/fornecedores',
@@ -59,6 +54,11 @@ export const AppRoutes = () => {
                 label: 'Clientes',
                 icon: 'person',
                 path: '/clientes',
+            },
+            {
+                label: 'Tipos de Produto',
+                icon: 'fastfood',
+                path: '/tiposproduto',
             },
             {
                 label: 'Produtos',
@@ -81,14 +81,14 @@ export const AppRoutes = () => {
             <Route path="/cidades" element={<ConsultaCidades/>}/>
             <Route path="/cidades/cadastro/:id" element={<CadastroCidades/>}/>
 
-            <Route path="/tiposproduto" element={<ConsultaTiposProduto/>}/>
-            <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
-
             <Route path="/fornecedores" element={<ConsultaFornecedores/>}/>
             <Route path="/fornecedores/cadastro/:id" element={<CadastroFornecedores/>}/>
 
             <Route path="/clientes" element={<ConsultaClientes/>}/>
             <Route path="/clientes/cadastro/:id" element={<CadastroClientes/>}/>
+
+            <Route path="/tiposproduto" element={<ConsultaTiposProduto/>}/>
+            <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
 
             <Route path="/produtos" element={<ConsultaProdutos/>}/>
             <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>
