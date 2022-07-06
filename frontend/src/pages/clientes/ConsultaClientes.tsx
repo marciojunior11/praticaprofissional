@@ -4,16 +4,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
-import { FornecedoresService, IFornecedores } from '../../shared/services/api/fornecedores/FornecedoresService';
+import { ClientesService, IClientes } from '../../shared/services/api/clientes/ClientesService';
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 
-export const ConsultaFornecedores: React.FC = () => {
+export const ConsultaClientes: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
 
-    const [rows, setRows] = useState<IFornecedores[]>([]);
+    const [rows, setRows] = useState<IClientes[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +29,7 @@ export const ConsultaFornecedores: React.FC = () => {
         setIsLoading(true);
         console.log(busca, pagina);
         debounce(() => {
-            FornecedoresService.getAll(pagina, busca)
+            ClientesService.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -47,7 +47,7 @@ export const ConsultaFornecedores: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            FornecedoresService.deleteById(id)
+            ClientesService.deleteById(id)
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
@@ -65,13 +65,13 @@ export const ConsultaFornecedores: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo="Consultar Fornecedores"
+            titulo="Consultar Clientes"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/fornecedores/cadastro/novo')}
+                    onClickNew={() => navigate('/clientes/cadastro/novo')}
                 />
             }
         >
@@ -80,8 +80,8 @@ export const ConsultaFornecedores: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
-                            <TableCell>Nome Fantasia</TableCell>
-                            <TableCell>CNPJ</TableCell>
+                            <TableCell>Nome Completo</TableCell>
+                            <TableCell>CPF</TableCell>
                             <TableCell>Telefone</TableCell>
                             <TableCell>Endereço</TableCell>
                             <TableCell>Cidade</TableCell>
@@ -92,8 +92,8 @@ export const ConsultaFornecedores: React.FC = () => {
                         {rows?.map(row => (
                             <TableRow key={row.id}>
                                 <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.razSocial}</TableCell>
-                                <TableCell>{row.cnpj}</TableCell>
+                                <TableCell>{row.nome}</TableCell>
+                                <TableCell>{row.cpf}</TableCell>
                                 <TableCell>{row.telefone}</TableCell>
                                 <TableCell>{`${row.endereco}, ${row.numEnd}, ${row.bairro}`}</TableCell>
                                 <TableCell>{`${row.cidade.cidade} - ${row.cidade.estado.uf} - ${row.cidade.estado.pais.sigla}`}</TableCell>
@@ -101,7 +101,7 @@ export const ConsultaFornecedores: React.FC = () => {
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>
                                     </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/fornecedores/cadastro/${row.id}`)}>
+                                    <IconButton color="primary" size="small" onClick={() => navigate(`/clientes/cadastro/${row.id}`)}>
                                         <Icon>edit</Icon>
                                     </IconButton>
                                 </TableCell>

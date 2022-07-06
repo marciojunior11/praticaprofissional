@@ -8,6 +8,7 @@ export * from './tiposProduto/ConsultaTiposProduto';
 export * from './tiposProduto/CadastroTiposProduto';
 export * from './fornecedores/ConsultaFornecedores';
 export * from './fornecedores/CadastroFornecedores';
+export * from './clientes/ConsultaClientes';
 export * from './produtos/ConsultaProdutos';
 export * from './produtos/CadastroProdutos';
 export * from './dashboard/Dashboard';
