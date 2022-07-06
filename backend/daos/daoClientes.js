@@ -1,13 +1,12 @@
 const { pool } = require('../datamodule/index');
-const daoFornecedores = require('./daoFornecedores');
-const daoTiposProduto = require('./daoTiposProduto');
+const daoCidades = require('../daos/daoCidades');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/produtos
+// @route GET /api/clientes
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from produtos', (err, res) => {
+            pool.query('select * from clientes', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -15,7 +14,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from produtos where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from clientes where nome like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -28,46 +27,50 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from produtos order by id asc', async (err, res) => {
+            pool.query('select * from clientes order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaProdutos = [];
+                const mListaClientes = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
-                    let mTipoProduto = await daoTiposProduto.buscarUm(res.rows[i].fk_idtipoproduto);
-                    mListaProdutos.push({
+                    let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    mListaClientes.push({
                         id: res.rows[i].id,
-                        descricao: res.rows[i].descricao,
-                        valorCompra: res.rows[i].valorcompra,
-                        valorVenda: res.rows[i].valorvenda,
-                        tipoProduto: mTipoProduto,
-                        fornecedor: mFornecedor
+                        nome : res.rows[i].nome,
+                        cpf: res.rows[i].cpf,
+                        rg: res.rows[i].rg,
+                        telefone: res.rows[i].telefone,
+                        endereco: res.rows[i].endereco,
+                        numEnd: res.rows[i].numend,
+                        bairro: res.rows[i].bairro,
+                        cidade: mCidade
                     })
                 }
-                return resolve(mListaProdutos);
+                return resolve(mListaClientes);
             })
         } else {
             const filter = url.split('=')[2]
             console.log(filter);
-            pool.query(`select * from produtos where descricao like '${filter.toUpperCase()}'`, async (err, res) => {
+            pool.query(`select * from clientes where nome like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaProdutos = [];
+                const mListaClientes = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
-                    let mTipoProduto = await daoTiposProduto.buscarUm(res.rows[i].fk_idtipoproduto);
-                    mListaProdutos.push({
+                    let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    mListaClientes.push({
                         id: res.rows[i].id,
-                        descricao: res.rows[i].descricao,
-                        valorCompra: res.rows[i].valorcompra,
-                        valorVenda: res.rows[i].valorvenda,
-                        tipoProduto: mTipoProduto,
-                        fornecedor: mFornecedor
+                        nome : res.rows[i].nome,
+                        cpf: res.rows[i].cpf,
+                        rg: res.rows[i].rg,
+                        telefone: res.rows[i].telefone,
+                        endereco: res.rows[i].endereco,
+                        numEnd: res.rows[i].numend,
+                        bairro: res.rows[i].bairro,
+                        cidade: mCidade
                     })
                 }
-                return resolve(mListaProdutos);
+                return resolve(mListaClientes);
             })   
         }
     })
@@ -80,71 +83,77 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise( async (resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from produtos order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query(`select * from clientes order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaProdutos = [];
+                const mListaClientes = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
-                    let mTipoProduto = await daoTiposProduto.buscarUm(res.rows[i].fk_idtipoproduto);
-                    mListaProdutos.push({
+                    let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    mListaClientes.push({
                         id: res.rows[i].id,
-                        descricao: res.rows[i].descricao,
-                        valorCompra: res.rows[i].valorcompra,
-                        valorVenda: res.rows[i].valorvenda,
-                        tipoProduto: mTipoProduto,
-                        fornecedor: mFornecedor
+                        nome : res.rows[i].nome,
+                        cpf: res.rows[i].cpf,
+                        rg: res.rows[i].rg,
+                        telefone: res.rows[i].telefone,
+                        endereco: res.rows[i].endereco,
+                        numEnd: res.rows[i].numend,
+                        bairro: res.rows[i].bairro,
+                        cidade: mCidade
                     })
                 }
-                return resolve(mListaProdutos);
+                return resolve(mListaClientes);
             })
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from produtos where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from clientes where nome like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                const mListaProdutos = [];
+                const mListaClientes = [];
                 for (let i = 0; i < res.rowCount ; i++) {
-                    let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
-                    let mTipoProduto = await daoTiposProduto.buscarUm(res.rows[i].fk_idtipoproduto);
-                    mListaProdutos.push({
+                    let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    mListaClientes.push({
                         id: res.rows[i].id,
-                        descricao: res.rows[i].descricao,
-                        valorCompra: res.rows[i].valorcompra,
-                        valorVenda: res.rows[i].valorvenda,
-                        tipoProduto: mTipoProduto,
-                        fornecedor: mFornecedor
+                        nome : res.rows[i].nome,
+                        cpf: res.rows[i].cpf,
+                        rg: res.rows[i].rg,
+                        telefone: res.rows[i].telefone,
+                        endereco: res.rows[i].endereco,
+                        numEnd: res.rows[i].numend,
+                        bairro: res.rows[i].bairro,
+                        cidade: mCidade
                     })
                 }
-                return resolve(mListaProdutos);
+                return resolve(mListaClientes);
             })
         }
     })
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/produtos
+// @route GET /api/clientes
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from produtos where id = $1', [id], async (err, res) => {
+        pool.query('select * from clientes where id = $1', [id], async (err, res) => {
             if (err) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                const mFornecedor = await daoFornecedores.buscarUm(res.rows[0].fk_idfornecedor);
-                const mTipoProduto = await daoTiposProduto.buscarUm(res.rows[0].fk_idtipoproduto);
-                const mProduto = {
+                const mCidade = await daoCidades.buscarUm(res.rows[0].fk_idcidade);
+                const mCliente = {
                     id: res.rows[0].id,
-                    descricao: res.rows[0].descricao,
-                    valorCompra: res.rows[0].valorcompra,
-                    valorVenda: res.rows[0].valorvenda,
-                    tipoProduto: mTipoProduto,
-                    fornecedor: mFornecedor
+                        nome : res.rows[0].nome,
+                        cpf: res.rows[0].cpf,
+                        rg: res.rows[0].rg,
+                        telefone: res.rows[0].telefone,
+                        endereco: res.rows[0].endereco,
+                        numEnd: res.rows[0].numend,
+                        bairro: res.rows[0].bairro,
+                        cidade: mCidade
                 }
-                return resolve(mProduto);
+                return resolve(mCliente);
             }
             return resolve(null);
         })
@@ -152,8 +161,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/produtos
-async function salvar (produto) {
+// @route POST /api/clientes
+async function salvar (cliente) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -172,14 +181,14 @@ async function salvar (produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into produtos (descricao, valorcompra, valorvenda, fk_idtipoproduto, fk_idfornecedor) values($1, $2, $3, $4, $5)', [produto.descricao, produto.valorCompra, produto.valorVenda, produto.tipoProduto.id, produto.fornecedor.id], async (err, res) => {
+            client.query('insert into clientes (nome, cpf, rg, telefone, endereco, numend, bairro, fk_idcidade, associado) values($1, $2, $3, $4, $5, $6, $7, $8, $9)', [cliente.nome, cliente.cpf, cliente.rg, cliente.telefone, cliente.endereco, cliente.numEnd, cliente.bairro, cliente.cidade.id, cliente.associado], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from produtos where id = (select max(id) from produtos)');
+                        const response = await client.query('select * from clientes where id = (select max(id) from clientes)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -191,8 +200,8 @@ async function salvar (produto) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/produtos/:id
-async function alterar (id, produto) {
+// @route PUT /api/clientes/:id
+async function alterar (id, cliente) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -211,7 +220,7 @@ async function alterar (id, produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update produtos set id = $1, descricao = $2, valorcompra = $3, valorvenda = $4, fk_idtipoproduto = $5, fk_idfornecedor = $6 where id = $7 ', [produto.id, produto.descricao, produto.valorCompra, produto.valorVenda, produto.tipoProduto.id, produto.fornecedor.id, id], (err, res) => {
+                client.query('update clientes set  id = $1, nome = $2, cpf = $3, rg = $4, telefone = $5, endereco = $6, numend = $7, bairro = $8, fk_idcidade = $9, associado = $10 where id = $11', [cliente.id, cliente.nome, cliente.cpf, cliente.rg, cliente. telefone, cliente.endereco, cliente.numEnd, cliente.bairro, cliente.cidade.id, cliente.associado, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -228,7 +237,7 @@ async function alterar (id, produto) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/produtos/:id
+// @route GET /api/clientes/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -248,7 +257,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from produtos where id = ${id}`, (err, res) => {
+                client.query(`delete from clientes where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -264,9 +273,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(produto) {
+async function validate(cliente) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from produtos where descricao like '${produto.descricao}' and fk_idfornecedor = ${produto.fornecedor.id}`, (err, res) => {
+        pool.query(`select * from clientes where cpf like '${cliente.cpf}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
