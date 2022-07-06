@@ -163,11 +163,18 @@ export const CadastroClientes: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/clientes');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating('');
+                                            setIsValid(false);
                                             navigate('/clientes/cadastro/novo');
                                             formRef.current?.setData({
-                                                estado: '',
-                                                uf: ''
+                                                nome: '',
+                                                cpf: '',
+                                                rg: '',
+                                                telefone: '',
+                                                endereco: '',
+                                                numero: '',
+                                                bairro: '',
+                                                cidade: null
                                             });
                                         } else {
                                             setIsValidating(null);

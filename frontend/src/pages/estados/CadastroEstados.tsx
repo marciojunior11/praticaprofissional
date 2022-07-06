@@ -144,8 +144,9 @@ export const CadastroEstados: React.FC = () => {
                                             setIsValidating(null);
                                             navigate('/estados/cadastro/novo');
                                             formRef.current?.setData({
-                                                pais: '',
-                                                sigla: ''
+                                                estado: '',
+                                                uf: '',
+                                                pais: null
                                             });
                                         } else {
                                             setIsValidating(null);

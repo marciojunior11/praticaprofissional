@@ -142,11 +142,12 @@ export const CadastroCidades: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/cidades');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating('');
+                                            setIsValid(false);
                                             navigate('/cidades/cadastro/novo');
                                             formRef.current?.setData({
-                                                estado: '',
-                                                uf: ''
+                                                cidade: '',
+                                                estado: null
                                             });
                                         } else {
                                             setIsValidating(null);
