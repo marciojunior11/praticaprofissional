@@ -104,12 +104,13 @@ export const CadastroPaises: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/paises');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating('');
                                             navigate('/paises/cadastro/novo');
                                             formRef.current?.setData({
                                                 pais: '',
                                                 sigla: ''
                                             });
+                                            setIsValid(false);
                                         } else {
                                             setIsValidating(null);
                                             navigate(`/paises/cadastro/${result}`);

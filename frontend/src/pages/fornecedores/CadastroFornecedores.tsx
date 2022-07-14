@@ -162,11 +162,18 @@ export const CadastroFornecedores: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/fornecedores');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating('');
+                                            setIsValid(false);
                                             navigate('/fornecedores/cadastro/novo');
                                             formRef.current?.setData({
-                                                estado: '',
-                                                uf: ''
+                                                razSocial: '',
+                                                nomeFantasia: '',
+                                                cnpj: '',
+                                                telefone: '',
+                                                endereco: '',
+                                                numero: '',
+                                                bairro: '',
+                                                cidade: null
                                             });
                                         } else {
                                             setIsValidating(null);

@@ -17,14 +17,14 @@ CREATE TABLE Cidades (
 CREATE TABLE Clientes (
 	id integer PRIMARY KEY DEFAULT nextval('clientes_seq'),
 	nome varchar NOT NULL,
-	cpf char(15) NOT NULL,
+	cpf varchar NOT NULL,
 	rg char(13),
 	telefone varchar,
 	endereco varchar,
 	numEnd varchar,
 	bairro varchar,
 	fk_idCidade integer NOT NULL REFERENCES Cidades(id),
-	associado bit NOT NULL
+	associado boolean NOT NULL
 );
 CREATE TABLE Fornecedores (
 	id integer PRIMARY KEY DEFAULT nextval('fornecedores_seq'),

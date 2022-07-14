@@ -180,11 +180,15 @@ export const CadastroProdutos: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/produtos');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating('');
+                                            setIsValid(false);
                                             navigate('/produtos/cadastro/novo');
                                             formRef.current?.setData({
-                                                estado: '',
-                                                uf: ''
+                                                descricao: '',
+                                                tipoProduto: null,
+                                                fornecedor: null,
+                                                valorCompra: 0,
+                                                valorVenda: 0
                                             });
                                         } else {
                                             setIsValidating(null);

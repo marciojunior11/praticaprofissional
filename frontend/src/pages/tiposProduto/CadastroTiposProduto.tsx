@@ -101,7 +101,8 @@ export const CadastroTiposProduto: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/tiposproduto');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating('');
+                                            setIsValid(false);
                                             navigate('/tiposproduto/cadastro/novo');
                                             formRef.current?.setData({
                                                 descricao: ''
