@@ -8,6 +8,7 @@ import { LayoutBase } from "../../shared/layouts";
 import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
+import { useDebounce } from "../../shared/hooks";
 
 interface IFormData {
     pais: string;
@@ -23,6 +24,8 @@ export const CadastroPaises: React.FC = () => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
+    const { debounce } = useDebounce();
+
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
 
     const [obj, setObj] = useState<IPaises | null>(null); 
@@ -31,8 +34,6 @@ export const CadastroPaises: React.FC = () => {
     const [isValidating, setIsValidating] = useState<any>(null);
 
     const [isValid, setIsValid] = useState(false);
-
-    const [alterando, setAlterando] = useState(false);
 
     useEffect(() => {
         if (id !== 'novo') {
@@ -48,7 +49,6 @@ export const CadastroPaises: React.FC = () => {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
                         setObj(result);
-                        setAlterando(true);
                     }
                 });
         } else {
@@ -67,7 +67,8 @@ export const CadastroPaises: React.FC = () => {
     const validate = (filter: string) => {
         if (filter != obj?.pais) {
             setIsValidating(true);
-            PaisesService.validate(filter)
+            debounce(() => {
+                PaisesService.validate(filter)
                 .then((result) => {
                     setIsValidating(false);
                     if (result instanceof Error) {
@@ -81,13 +82,13 @@ export const CadastroPaises: React.FC = () => {
                         }
                     }
                 })
+            });
         } else {
             setIsValid(true);
         }
     }
 
     const handleSave = (dados: IFormData) => {
-        validate(dados.pais);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -210,18 +211,14 @@ export const CadastroPaises: React.FC = () => {
                                     InputProps={{
                                         endAdornment: (
                                                 <InputAdornment position='start'>
-                                                    { isValidating === true && (
+                                                    { (isValidating && formRef.current?.getData().pais) && (
                                                         <Box sx={{ display: 'flex',  }}>
                                                             <CircularProgress size={24}/>
                                                         </Box>
                                                     )}
-                                                    { isValidating === false && (
+                                                    { (!isValidating && formRef.current?.getData().pais && isValid) && (
                                                         <Box sx={{ display: 'flex' }}>
-                                                            { isValid === true ? (
-                                                                <Icon color="success">done</Icon>
-                                                            ) : (
-                                                                <Icon color="error">close</Icon>
-                                                            )}
+                                                            <Icon color="success">done</Icon>
                                                         </Box>
                                                     )}
                                                 </InputAdornment>
@@ -231,12 +228,9 @@ export const CadastroPaises: React.FC = () => {
                                         setIsValid(false);
                                         setIsValidating('');
                                         formRef.current?.setFieldError('pais', '');
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                    onBlur={(e) => {
-                                        if (e.target.value) {
-                                            validate(e.target.value)
-                                        }
+                                        debounce(() => {
+                                            validate(e.target.value);
+                                        });
                                     }}
                                 />
                             </Grid>
@@ -251,7 +245,6 @@ export const CadastroPaises: React.FC = () => {
                                     label="Sigla"
                                     disabled={isLoading}
                                     inputProps={{ maxLength: 2 }}
-                                    onChange={() => {if (alterando) setAlterando(false)}}
                                 />
                             </Grid>
                         </Grid>
