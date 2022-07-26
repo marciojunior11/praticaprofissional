@@ -40,7 +40,14 @@ CREATE SEQUENCE IF NOT EXISTS produtos_seq
 	start 1
 	cache 1;
 
-CREATE SEQUENCE IF NOT EXISTS tipos_produto_seq
+CREATE SEQUENCE IF NOT EXISTS formas_pagamento_seq
+    increment 1
+	minvalue 1
+	no maxvalue
+	start 1
+	cache 1;
+
+CREATE SEQUENCE IF NOT EXISTS condicoes_pagamento_seq
     increment 1
 	minvalue 1
 	no maxvalue
