@@ -6,6 +6,7 @@ CREATE TABLE Paises (
 	dataCad timestamp NOT NULL,
 	ultAlt timestamp NOT NULL
 );
+
 CREATE TABLE Estados (
 	id integer PRIMARY KEY DEFAULT nextval('estados_seq'),
 	nmEstado varchar NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE Estados (
 	dataCad timestamp NOT NULL,
 	ultAlt timestamp NOT NULL
 );
+
 CREATE TABLE Cidades (
 	id integer PRIMARY KEY DEFAULT nextval('cidades_seq'),
 	nmCidade varchar NOT NULL,
@@ -22,6 +24,17 @@ CREATE TABLE Cidades (
 	dataCad timestamp NOT NULL,
 	ultAlt timestamp NOT NULL
 );
+
+CREATE TABLE Condicoes_Pagamento (
+	id integer PRIMARY KEY DEFAULT nextval('condicoes_pagamento_seq'),
+	descricao varchar NOT NULL,
+	txDesc real NOT NULL,
+	txMulta real NOT NULL,
+	txJuros real NOT NULL,
+	dataCad timestamp NOT NULL,
+	ultAlt timestamp NOT NULL
+);
+
 CREATE TABLE Clientes (
 	id integer PRIMARY KEY DEFAULT nextval('clientes_seq'),
 	nome varchar NOT NULL,
@@ -37,9 +50,11 @@ CREATE TABLE Clientes (
 	bairro varchar,
 	fk_idCidade integer NOT NULL REFERENCES Cidades(id),
 	associado boolean NOT NULL,
+	fk_idCondPgto integer REFERENCES Condicoes_Pagamento(id),
 	dataCad timestamp NOT NULL,
 	ult timestamp NOT NULL
 );
+
 CREATE TABLE Fornecedores (
 	id integer PRIMARY KEY DEFAULT nextval('fornecedores_seq'),
 	razSocial varchar NOT NULL,
@@ -54,28 +69,89 @@ CREATE TABLE Fornecedores (
 	numEnd varchar,
 	bairro varchar,
 	fk_idCidade integer NOT NULL REFERENCES Cidades(id),
+	fk_idCondPgto integer REFERENCES Condicoes_Pagamento(id),
 	dataCad timestamp NOT NULL,
-	ultAlt timestamp NOT NULL,
+	ultAlt timestamp NOT NULL
 );
-CREATE TABLE Tipos_Produto (
-	id integer PRIMARY KEY DEFAULT nextval('tipos_produto_seq'),
-	descricao varchar NOT NULL
+
+CREATE TABLE Tributacoes (
+	id integer PRIMARY KEY DEFAULT nextval('tributacoes_seq'),
+	descricao varchar,
+	dataCad timestamp NOT NULL,
+	ultalt timestamp NOT NULL
 );
-CREATE TABLE Produtos (
-	id integer PRIMARY KEY DEFAULT nextval('produtos_seq'),
+
+CREATE TABLE Origens (
+	id integer PRIMARY KEY DEFAULT nextval('origens_seq'),
+	descricao varchar,
+	dataCad timestamp NOT NULL,
+	ultalt timestamp NOT NULL
+);
+
+CREATE TABLE Grades (
+	id integer PRIMARY KEY DEFAULT nextval('grades_seq'),
+	descricao varchar,
+	dataCad timestamp NOT NULL,
+	ultalt timestamp NOT NULL
+);
+
+CREATE TABLE Caracteristicas (
+	id integer PRIMARY KEY DEFAULT nextval('caracteristicas_seq'),
+	descricao varchar,
+	fk_idGrade integer REFERENCES Grades(id),
+	dataCad timestamp NOT NULL,
+	ultalt timestamp NOT NULL
+);
+
+CREATE TABLE Variacoes (
+	id integer PRIMARY KEY DEFAULT nextval('variacoes_seq'),
+	descricao varchar,
+	fk_idCaracteristica integer REFERENCES Caracteristicas(id),
+	dataCad timestamp NOT NULL,
+	ultalt timestamp NOT NULL
+);
+
+CREATE TABLE Itens (
+	id integer PRIMARY KEY DEFAULT nextval('itens_seq'),
+	gtin varchar(14),
+	numFabricante varchar,
 	descricao varchar NOT NULL,
-	valorCompra decimal(7,2),
-	valorVenda decimal(7,2),
-	fk_idTipoProduto integer REFERENCES Tipos_Produto(id),
-	fk_idFornecedor integer NOT NULL REFERENCES Fornecedores(id)
+	apelido varchar,
+	marca varchar,
+	undMedida varchar,
+	unidade real,
+	vlCusto decimal(7,2),
+	vlVenda decimal(7,2),
+	lucro real,
+	pesoBruto real,
+	pesoLiq real,
+	ncm varchar,
+	cfop varchar,
+	percIcmsSaida real,
+	percIpi real,
+	cargaTrib real,
+	fk_idTributacao integer REFERENCES Tributacoes(id),
+	fk_idOrigem integer REFERENCES Origens(id),
+	fk_idGrade integer REFERENCES Grades(id),
+	dataCad timestamp NOT NULL,
+	ultAlt timestamp NOT NULL
 );
 
 CREATE TABLE Formas_Pagamento (
 	id integer PRIMARY KEY DEFAULT nextval('formas_pagamento_seq'),
 	descricao varchar NOT NULL,
-	valorCompra decimal(7,2),
-	valorVenda decimal(7,2),
-	fk_idTipoProduto integer REFERENCES Tipos_Produto(id),
-	fk_idFornecedor integer NOT NULL REFERENCES Fornecedores(id)
-)
+	dataCad timestamp NOT NULL,
+	ultAlt timestamp NOT NULL
+);
+
+CREATE TABLE PARCELAS (
+	fk_idCondPgto integer REFERENCES Condicoes_Pagamento(id),
+	numero integer,
+	dias integer,
+	percentual real,
+	PRIMARY KEY (fk_idCondPgto, numero),
+	fk_idFormaPgto integer REFERENCES Formas_Pagamento(id),
+	dataCad timestamp NOT NULL,
+	ultAlt timestamp NOT NULL
+);
 
