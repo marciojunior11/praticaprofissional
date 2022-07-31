@@ -12,4 +12,5 @@ export * from './tiposProduto/ConsultaTiposProduto';
 export * from './tiposProduto/CadastroTiposProduto';
 export * from './produtos/ConsultaProdutos';
 export * from './produtos/CadastroProdutos';
+export * from './formasPagamento/ConsultaFormasPagamento';
 export * from './dashboard/Dashboard';

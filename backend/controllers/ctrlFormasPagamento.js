@@ -58,9 +58,11 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { descricao } = JSON.parse(body);
+            const { descricao, dataCad, ultAlt } = JSON.parse(body);
             const mFormaPagamento = {
-                descricao
+                descricao,
+                dataCad,
+                ultAlt
             };
             const novaFormaPagamento = await daoFormasPagamento.salvar(mFormaPagamento);
             res.writeHead(201, { 'Content-Type': 'application/json'});

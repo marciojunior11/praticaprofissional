@@ -108,7 +108,7 @@ async function salvar (formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into formas_pagamento (descricao, dataCad, ultAlt) values($1, now(), now())', [formaPagamento.descricao.toUpperCase()], async (err, res) => {
+                client.query('insert into formas_pagamento (descricao, dataCad, ultAlt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.dataCad, formaPagamento.ultAlt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -147,7 +147,7 @@ async function alterar (id, formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update formas_pagamento set id = $1, descricao = $2, ultAlt = now() where id = $3 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), id], (err, res) => {
+                client.query('update formas_pagamento set id = $1, descricao = $2, ultAlt = $3 where id = $4 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), formaPagamento.ultAlt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
