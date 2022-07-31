@@ -19,6 +19,7 @@ import {
     ConsultaProdutos,
     CadastroProdutos,
     ConsultaFormasPagamento,
+    CadastroFormasPagamento,
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -97,7 +98,7 @@ export const AppRoutes = () => {
             <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
 
             <Route path="/formaspagamento" element={<ConsultaFormasPagamento/>}/>
-            <Route path="/formaspagamento/cadastro/:id" element={<CadastroTiposProduto/>}/>
+            <Route path="/formaspagamento/cadastro/:id" element={<CadastroFormasPagamento/>}/>
 
             <Route path="/produtos" element={<ConsultaProdutos/>}/>
             <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>

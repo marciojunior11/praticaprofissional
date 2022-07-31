@@ -1,22 +1,6 @@
 import { Environment } from "../../../environment";
 import { Api } from "../axios-config";
-
-export interface IPaises {
-    id: number;
-    pais: string;
-    sigla: string;
-}
-
-export interface IDetalhesPaises {
-    id: number;
-    pais: string;
-    sigla: string;
-}
-
-type TListaPaises = {
-    data: IPaises[];
-    qtd: number;
-}
+import { IPaises, IDetalhesPaises, TListaPaises } from "../../../models/ModelPaises";
 
 const getAll = async (page?: number, filter = ''): Promise<TListaPaises | Error> => {
     try {

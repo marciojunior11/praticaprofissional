@@ -5,19 +5,26 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { IPaises } from "../../shared/models/ModelPaises";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
 
 interface IFormData {
-    pais: string;
+    nmpais: string;
     sigla: string;
+    ddi: string;
+    dataCad: string;
+    ultAlt: string;
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    pais: yup.string().required(),
-    sigla: yup.string().required().min(2)
+    nmpais: yup.string().required(),
+    sigla: yup.string().required().min(2),
+    ddi: yup.string().required(),
+    dataCad: yup.string().required(),
+    ultAlt: yup.string().required()
 })
 
 export const CadastroPaises: React.FC = () => {
@@ -65,23 +72,23 @@ export const CadastroPaises: React.FC = () => {
     }, [obj])
 
     const validate = (filter: string) => {
-        if (filter != obj?.pais) {
+        if (filter != obj?.nmpais) {
             setIsValidating(true);
             debounce(() => {
                 PaisesService.validate(filter)
-                .then((result) => {
-                    setIsValidating(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setIsValid(result);
-                        if (result === false) {
-                            const validationErrors: IVFormErrors = {};
-                            validationErrors['pais'] = 'Este país já está cadastrado.';
-                            formRef.current?.setErrors(validationErrors);
+                    .then((result) => {
+                        setIsValidating(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            setIsValid(result);
+                            if (result === false) {
+                                const validationErrors: IVFormErrors = {};
+                                validationErrors['pais'] = 'Este país já está cadastrado.';
+                                formRef.current?.setErrors(validationErrors);
+                            }
                         }
-                    }
-                })
+                    })
             });
         } else {
             setIsValid(true);
@@ -89,6 +96,10 @@ export const CadastroPaises: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
+        let data = new Date();
+        dados.dataCad = data.toLocaleString();
+        dados.ultAlt = data.toLocaleString();
+        console.log(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -205,14 +216,14 @@ export const CadastroPaises: React.FC = () => {
                                 <VTextField 
                                     required
                                     fullWidth
-                                    name='pais' 
+                                    name='nmpais' 
                                     label="País"
                                     disabled={isLoading}                             
                                     InputProps={{
                                         endAdornment: (
                                                 <InputAdornment position='start'>
                                                     { (isValidating && formRef.current?.getData().pais) && (
-                                                        <Box sx={{ display: 'flex',  }}>
+                                                        <Box sx={{ display: 'flex' }}>
                                                             <CircularProgress size={24}/>
                                                         </Box>
                                                     )}
@@ -237,7 +248,7 @@ export const CadastroPaises: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
                                 <VTextField
                                     required
                                     fullWidth
@@ -245,6 +256,16 @@ export const CadastroPaises: React.FC = () => {
                                     label="Sigla"
                                     disabled={isLoading}
                                     inputProps={{ maxLength: 2 }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                                <VTextField
+                                    required
+                                    fullWidth
+                                    name='ddi' 
+                                    label="DDI"
+                                    disabled={isLoading}
+                                    inputProps={{ maxLength: 4 }}
                                 />
                             </Grid>
                         </Grid>

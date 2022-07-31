@@ -108,7 +108,7 @@ async function salvar (formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into formas_pagamento (descricao, dataCad, ultAlt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.dataCad, formaPagamento.ultAlt], async (err, res) => {
+                client.query('insert into formas_pagamento (descricao, datacad, ultalt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.dataCad, formaPagamento.ultAlt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {

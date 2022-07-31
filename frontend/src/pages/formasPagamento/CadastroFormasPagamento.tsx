@@ -5,48 +5,52 @@ import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { ITiposProduto, TiposProdutoService } from "../../shared/services/api/tiposProduto/TiposProdutoService";
+import { FormasPagamentoService } from "../../shared/services/api/formasPagamento/FormasPagamentoService";
+import { IFormasPagamento } from "../../shared/models/ModelFormasPagamento";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
+import { useDebounce } from "../../shared/hooks";
 
 interface IFormData {
-    descricao: string
+    descricao: string,
+    dataCad: string,
+    ultAlt: string
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    descricao: yup.string().required()
+    descricao: yup.string().required(),
+    dataCad: yup.string().required(),
+    ultAlt: yup.string().required(),
 })
 
-export const CadastroTiposProduto: React.FC = () => {
+export const CadastroFormasPagamento: React.FC = () => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+    const { debounce } = useDebounce();
 
-    const [obj, setObj] = useState<ITiposProduto | null>(null);
+    const [obj, setObj] = useState<IFormasPagamento | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
     const [isValid, setIsValid] = useState(false);
 
-    const [alterando, setAlterando] = useState(false);
-
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            TiposProdutoService.getById(Number(id))
+            FormasPagamentoService.getById(Number(id))
                 .then((result) => {
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
-                        navigate('/tiposproduto');
+                        navigate('/formaspagamento');
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
                         setObj(result);
-                        setAlterando(true);
                     }
                 });
         } else {
@@ -64,34 +68,38 @@ export const CadastroTiposProduto: React.FC = () => {
     const validate = (filter: string) => {
         if (filter != obj?.descricao) {
             setIsValidating(true);
-            TiposProdutoService.validate(filter)
-                .then((result) => {
-                    setIsValidating(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setIsValid(result);
-                        if (result === false) {
-                            const validationErrors: IVFormErrors = {};
-                            validationErrors['descricao'] = 'Este tipo de produto já está cadastrado';
-                            formRef.current?.setErrors(validationErrors);
+            debounce(() => {
+                FormasPagamentoService.validate(filter)
+                    .then((result) => {
+                        setIsValidating(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            setIsValid(result);
+                            if (result === false) {
+                                const validationErrors: IVFormErrors = {};
+                                validationErrors['descricao'] = 'Esta forma de pagamento já está cadastrada';
+                                formRef.current?.setErrors(validationErrors);
+                            }
                         }
-                    }
-                })
+                    })
+            })
         } else {
             setIsValid(true);
         }
     }
 
     const handleSave = (dados: IFormData) => {
-        validate(dados.descricao);
+        let data = new Date();
+        dados.dataCad = data.toLocaleString();
+        dados.ultAlt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            TiposProdutoService.create(dadosValidados)
+                            FormasPagamentoService.create(dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -99,22 +107,22 @@ export const CadastroTiposProduto: React.FC = () => {
                                     } else {
                                         toast.success('Cadastrado com sucesso!')
                                         if (isSaveAndClose()) {
-                                            navigate('/tiposproduto');
+                                            navigate('/formaspagamento');
                                         } else if (isSaveAndNew()) {
                                             setIsValidating('');
                                             setIsValid(false);
-                                            navigate('/tiposproduto/cadastro/novo');
+                                            navigate('/formaspagamento/cadastro/novo');
                                             formRef.current?.setData({
                                                 descricao: ''
                                             });
                                         } else {
                                             setIsValidating(null);
-                                            navigate(`/tiposproduto/cadastro/${result}`);
+                                            navigate(`/formaspagamento/cadastro/${result}`);
                                         }
                                     }
                                 });
                         } else {
-                            TiposProdutoService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            FormasPagamentoService.updateById(Number(id), { id: Number(id), ...dadosValidados })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -122,7 +130,7 @@ export const CadastroTiposProduto: React.FC = () => {
                                     } else {
                                         toast.success('Alterado com sucesso!');
                                         if (isSaveAndClose()) {
-                                            navigate('/tiposproduto')
+                                            navigate('/formaspagamento')
                                         } else {
                                             setIsValidating(null);
                                         }
@@ -150,13 +158,13 @@ export const CadastroTiposProduto: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            TiposProdutoService.deleteById(id)
+            FormasPagamentoService.deleteById(id)
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {         
                         toast.success('Apagado com sucesso!')
-                        navigate('/tiposProduto');
+                        navigate('/formasPagamento');
                     }
                 })
         }
@@ -164,7 +172,7 @@ export const CadastroTiposProduto: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Tipo de Produto' : 'Editar Tipo de Produto'}
+            titulo={id === 'novo' ? 'Cadastrar Forma de Pagamento' : 'Editar Forma de Pagamento'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -176,8 +184,8 @@ export const CadastroTiposProduto: React.FC = () => {
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
-                    onClickNovo={() => navigate('/tiposproduto/cadastro/novo') }
-                    onClickVoltar={() => navigate('/tiposproduto') }
+                    onClickNovo={() => navigate('/formaspagamento/cadastro/novo') }
+                    onClickVoltar={() => navigate('/formaspagamento') }
                 />
             }
         >
@@ -197,41 +205,35 @@ export const CadastroTiposProduto: React.FC = () => {
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                <VTextField 
+                                <VTextField
                                     required
                                     fullWidth
-                                    name='descricao' 
+                                    name="descricao"
                                     label="Descrição"
-                                    disabled={isLoading}                             
-                                    InputProps={{
+                                    disabled={isLoading}
+                                    inputProps={{
                                         endAdornment: (
-                                                <InputAdornment position='start'>
-                                                    { isValidating === true && (
-                                                        <Box sx={{ display: 'flex',  }}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    )}
-                                                    { isValidating === false && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            { isValid === true ? (
-                                                                <Icon color="success">done</Icon>
-                                                            ) : (
-                                                                <Icon color="error">close</Icon>
-                                                            )}
-                                                        </Box>
-                                                    )}
-                                                </InputAdornment>
+                                            <InputAdornment position="start">
+                                                { (isValidating && formRef.current?.getData().descricao) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <CircularProgress size={24}/>
+                                                    </Box>
+                                                ) }
+                                                { (!isValidating && formRef.current?.getData().descricao && isValid) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <Icon color="success">done</Icon>
+                                                    </Box>
+                                                ) }
+                                            </InputAdornment>
                                         )
                                     }}
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
-                                        formRef.current?.setFieldError('descricao', '');
-                                    }}
-                                    onBlur={(e) => {
-                                        if (e.target.value) {
+                                        formRef.current?.setFieldError('pais', '');
+                                        debounce(() => {
                                             validate(e.target.value)
-                                        }
+                                        })
                                     }}
                                 />
                             </Grid>

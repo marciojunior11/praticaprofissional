@@ -60,7 +60,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from paises where nmPais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -91,6 +91,8 @@ async function buscarUm (id) {
 async function salvar (pais) {
     return new Promise((resolve, reject) => {
 
+        console.log(pais);
+
         pool.connect((err, client, done) => {
             const shouldAbort = err => {
                 if (err) {
@@ -107,7 +109,7 @@ async function salvar (pais) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into paises (pais, sigla) values($1, $2)', [pais.pais.toUpperCase(), pais.sigla.toUpperCase()], async (err, res) => {
+                client.query('insert into paises (nmpais, sigla, ddi, datacad, ultalt) values($1, $2, $3, $4, $5)', [pais.nmpais.toUpperCase(), pais.sigla.toUpperCase(), pais.ddi, pais.dataCad, pais.ultAlt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -146,7 +148,7 @@ async function alterar (id, pais) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update paises set id = $1, pais = $2, sigla = $3 where id = $4 ', [pais.id, pais.pais.toUpperCase(), pais.sigla.toUpperCase(), id], (err, res) => {
+                client.query('update paises set id = $1, nmPais = $2, sigla = $3, ddi = $4, ultalt = $5 where id = $6 ', [pais.id, pais.nmpais.toUpperCase(), pais.sigla.toUpperCase(), pais.ddi.toUpperCase(), pais.ultAlt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -210,7 +212,7 @@ async function deletar (id) {
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from paises where pais like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from paises where nmpais like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

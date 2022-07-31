@@ -92,7 +92,7 @@ export const ConsultaEstados: React.FC = () => {
                                 <TableCell>{row.id}</TableCell>
                                 <TableCell>{`${row.estado} - ${row.pais.sigla}`}</TableCell>
                                 <TableCell>{row.uf}</TableCell>
-                                <TableCell>{row.pais.pais}</TableCell>
+                                <TableCell>{row.pais.nmpais}</TableCell>
                                 <TableCell align="right">
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>

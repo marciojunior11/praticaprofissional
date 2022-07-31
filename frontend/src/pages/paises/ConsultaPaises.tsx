@@ -4,7 +4,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
-import { PaisesService, IPaises } from '../../shared/services/api/paises/PaisesService';
+import { PaisesService } from '../../shared/services/api/paises/PaisesService';
+import { IPaises } from "../../shared/models/ModelPaises";
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 
@@ -44,6 +45,12 @@ export const ConsultaPaises: React.FC = () => {
         })
     }, [busca, pagina]);
 
+    useEffect(() => {
+        rows.map((item) => {
+            console.log(item);
+        })
+    }, [rows]);
+
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
@@ -82,6 +89,7 @@ export const ConsultaPaises: React.FC = () => {
                             <TableCell>ID</TableCell>
                             <TableCell>País</TableCell>
                             <TableCell>Sigla</TableCell>
+                            <TableCell>DDI</TableCell>
                             <TableCell align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>
@@ -89,8 +97,9 @@ export const ConsultaPaises: React.FC = () => {
                         {rows?.map(row => (
                             <TableRow key={row.id}>
                                 <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.pais}</TableCell>
+                                <TableCell>{row.nmpais}</TableCell>
                                 <TableCell>{row.sigla}</TableCell>
+                                <TableCell>{row.ddi}</TableCell>
                                 <TableCell align="right">
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>

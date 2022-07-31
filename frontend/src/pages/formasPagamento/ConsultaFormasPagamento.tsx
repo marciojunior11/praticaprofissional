@@ -74,7 +74,7 @@ export const ConsultaFormasPagamento: React.FC = () => {
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/formasPagamento/cadastro/novo')}
+                    onClickNew={() => navigate('/formaspagamento/cadastro/novo')}
                 />
             }
         >

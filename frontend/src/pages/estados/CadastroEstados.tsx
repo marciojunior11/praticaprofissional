@@ -8,7 +8,8 @@ import { LayoutBase } from "../../shared/layouts";
 import { EstadosService, IEstados } from "../../shared/services/api/estados/EstadosService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
 import { toast } from "react-toastify";
-import { IPaises, PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { PaisesService } from "../../shared/services/api/paises/PaisesService";
+import { IPaises } from "../../shared/models/ModelPaises";
 import { useDebounce } from "../../shared/hooks";
 
 interface IFormData {
