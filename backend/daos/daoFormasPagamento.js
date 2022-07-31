@@ -64,6 +64,7 @@ async function buscarTodosComPg (url) {
                 if (err) {
                     return reject(err);
                 }
+                console.log(res);
                 return resolve(res.rows);
             })
         }
@@ -146,7 +147,7 @@ async function alterar (id, formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update formas_pagamento set id = $1, descricao = $2, ultAlt = now() where id = $4 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), id], (err, res) => {
+                client.query('update formas_pagamento set id = $1, descricao = $2, ultAlt = now() where id = $3 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {

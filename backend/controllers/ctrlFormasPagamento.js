@@ -20,7 +20,6 @@ async function buscarTodosComPg(req, res) {
     try {
         const response = await daoFormasPagamento.buscarTodosComPg(req.url);
         const qtd = await daoFormasPagamento.getQtd(req.url);
-        paises.rowCount = qtd;
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,

@@ -1,6 +1,6 @@
 const ctrlFormasPagamento = require('../controllers/ctrlFormasPagamento');
 
-function formaspagamentoRoutes(req, res) {
+function formasPagamentoRoutes(req, res) {
     if(req.method === 'OPTIONS') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end();
@@ -30,5 +30,5 @@ function formaspagamentoRoutes(req, res) {
 }
 
 module.exports = {
-    formaspagamentoRoutes
+    formasPagamentoRoutes
 }
