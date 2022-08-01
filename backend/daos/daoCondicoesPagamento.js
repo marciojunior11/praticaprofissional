@@ -168,20 +168,6 @@ async function alterar (id, condicaoPagamento) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        client.query('BEGIN', err => {
-                            if (shouldAbort(err)) return reject(err);
-                            condicaoPagamento.parcelas.forEach((item, index) => {
-                                client.query('update parcelas set ', [response.id, item.numero, item.dias, item.percentual, item.formapgto.id, item.datacad, item.ultAlt], (err, res) => {
-                                    if (shouldAbort(err)) return reject(err);
-                                    client.query('COMMIT', err => {
-                                        if (err) {
-                                            console.error('Erro durante o commit da transação', err.stack);
-                                            reject(err);
-                                        }
-                                    })
-                                })
-                            })
-                        })
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -219,6 +205,18 @@ async function deletar (id) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
+                        client.query('BEGIN', err => {
+                            if (shouldAbort(err)) return reject(err);
+                            client.query(`delete from parcelas where fk_idcondpgto = ${id}`, (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                                client.query('COMMIT', err => {
+                                    if (err) {
+                                        console.error('Erro durante o commit da transação', err.stack);
+                                        reject(err);
+                                    }
+                                })
+                            })
+                        })
                         done();
                         return resolve(res);
                     })

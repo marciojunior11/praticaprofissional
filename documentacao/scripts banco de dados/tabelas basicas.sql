@@ -144,7 +144,7 @@ CREATE TABLE Formas_Pagamento (
 	ultAlt timestamp(0) NOT NULL
 );
 
-CREATE TABLE PARCELAS (
+CREATE TABLE parcelas (
 	fk_idCondPgto integer REFERENCES Condicoes_Pagamento(id),
 	numero integer,
 	dias integer,
