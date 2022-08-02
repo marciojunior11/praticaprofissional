@@ -271,7 +271,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from condicoes_pagamento where id = ${id}`, (err, res) => {
+                client.query('delete from parcelas where fk_idcondpgto = $1', [id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -280,7 +280,7 @@ async function deletar (id) {
                         }
                         client.query('BEGIN', err => {
                             if (shouldAbort(err)) return reject(err);
-                            client.query(`delete from parcelas where fk_idcondpgto = ${id}`, (err, res) => {
+                            client.query('delete from condicoes_pagamento where id = $1', [id], (err, res) => {
                                 if (shouldAbort(err)) return reject(err);
                                 client.query('COMMIT', err => {
                                     if (err) {
