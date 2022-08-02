@@ -26,11 +26,26 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from condicoes_pagamento order by id asc', (err, res) => {
+            pool.query('select * from condicoes_pagamento order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaCondicoesPagamento = [];
+                for (let i = 0; i < res.rowCount; i++) {
+                    let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
+                    let mListaParcelas = responseParcelas.rows;
+                    mListaCondicoesPagamento.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        txdesc: res.rows[i].txdesc,
+                        txmulta: res.rows[i].txmulta,
+                        txjuros: res.rows[i].txjuros,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
+                        listaParcelas: mListaParcelas
+                    })
+                }
+                return resolve(mListaCondicoesPagamento);
             })
         } else {
             const filter = url.split('=')[2];
@@ -38,7 +53,22 @@ async function buscarTodosSemPg(url) {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaCondicoesPagamento = [];
+                for (let i = 0; i < res.rowCount; i++) {
+                    let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
+                    let mListaParcelas = responseParcelas.rows;
+                    mListaCondicoesPagamento.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        txdesc: res.rows[i].txdesc,
+                        txmulta: res.rows[i].txmulta,
+                        txjuros: res.rows[i].txjuros,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
+                        listaParcelas: mListaParcelas
+                    })
+                }
+                return resolve(mListaCondicoesPagamento);
             })
         }
     })
@@ -55,7 +85,22 @@ async function buscarTodosComPg (url) {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaCondicoesPagamento = [];
+                for (let i = 0; i < res.rowCount; i++) {
+                    let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
+                    let mListaParcelas = responseParcelas.rows;
+                    mListaCondicoesPagamento.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        txdesc: res.rows[i].txdesc,
+                        txmulta: res.rows[i].txmulta,
+                        txjuros: res.rows[i].txjuros,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
+                        listaParcelas: mListaParcelas
+                    })
+                }
+                return resolve(mListaCondicoesPagamento);
             })
         } else {
             var filter = url.split('=')[3];
@@ -64,8 +109,22 @@ async function buscarTodosComPg (url) {
                 if (err) {
                     return reject(err);
                 }
-                console.log(res);
-                return resolve(res.rows);
+                const mListaCondicoesPagamento = [];
+                for (let i = 0; i < res.rowCount; i++) {
+                    let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
+                    let mListaParcelas = responseParcelas.rows;
+                    mListaCondicoesPagamento.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        txdesc: res.rows[i].txdesc,
+                        txmulta: res.rows[i].txmulta,
+                        txjuros: res.rows[i].txjuros,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
+                        listaParcelas: mListaParcelas
+                    })
+                }
+                return resolve(mListaCondicoesPagamento);
             })
         }
     })
@@ -80,7 +139,19 @@ async function buscarUm (id) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                return resolve(res.rows[0]);
+                const responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[0].id]);
+                const mListaParcelas = responseParcelas.rows;
+                const mCondicaoPagamento = {
+                    id: res.rows[0].id,
+                    descricao: res.rows[0].descricao,
+                    txdesc: res.rows[0].txdesc,
+                    txmulta: res.rows[0].txmulta,
+                    txjuros: res.rows[0].txjuros,
+                    datacad: res.rows[0].datacad,
+                    ultalt: res.rows[0].ultalt,
+                    listaParcelas: mListaParcelas
+                }
+                return resolve(mCondicaoPagamento);
             }
             return resolve(null);
         })
