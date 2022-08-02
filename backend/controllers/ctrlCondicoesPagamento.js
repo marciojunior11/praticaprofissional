@@ -57,12 +57,13 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { descricao, txdesc, txmulta, txjuros, datacad, ultalt } = JSON.parse(body);
+            const { descricao, txdesc, txmulta, txjuros, listaparcelas, datacad, ultalt } = JSON.parse(body);
             const mCondicaoPagamento = {
                 descricao,
                 txdesc,
                 txmulta,
                 txjuros,
+                listaparcelas,
                 datacad,
                 ultalt
             };
@@ -89,12 +90,14 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { descricao, txdesc, txmulta, txjuros, datacad, ultalt } = JSON.parse(body);
+            const { id, descricao, txdesc, txmulta, txjuros, listaparcelas, datacad, ultalt } = JSON.parse(body);
             const mCondicaoPagamento = {
+                id,
                 descricao,
                 txdesc,
                 txmulta,
                 txjuros,
+                listaparcelas,
                 datacad,
                 ultalt
             };

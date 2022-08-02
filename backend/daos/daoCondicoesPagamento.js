@@ -42,14 +42,14 @@ async function buscarTodosSemPg(url) {
                         txjuros: res.rows[i].txjuros,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaParcelas: mListaParcelas
+                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from condicoes_pagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
+            pool.query(`select * from condicoes_pagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -65,7 +65,7 @@ async function buscarTodosSemPg(url) {
                         txjuros: res.rows[i].txjuros,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaParcelas: mListaParcelas
+                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -81,7 +81,7 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from condicoes_pagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from condicoes_pagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -97,7 +97,7 @@ async function buscarTodosComPg (url) {
                         txjuros: res.rows[i].txjuros,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaParcelas: mListaParcelas
+                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -105,7 +105,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from condicoes_pagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from condicoes_pagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -121,7 +121,7 @@ async function buscarTodosComPg (url) {
                         txjuros: res.rows[i].txjuros,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaParcelas: mListaParcelas
+                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -134,7 +134,7 @@ async function buscarTodosComPg (url) {
 // @route GET /api/condicoes_pagamento
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from condicoes_pagamento where id = $1', [id], (err, res) => {
+        pool.query('select * from condicoes_pagamento where id = $1', [id], async (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -149,7 +149,7 @@ async function buscarUm (id) {
                     txjuros: res.rows[0].txjuros,
                     datacad: res.rows[0].datacad,
                     ultalt: res.rows[0].ultalt,
-                    listaParcelas: mListaParcelas
+                    listaparcelas: mListaParcelas
                 }
                 return resolve(mCondicaoPagamento);
             }
@@ -162,7 +162,6 @@ async function buscarUm (id) {
 // @route POST /api/condicoes_pagamento
 async function salvar (condicaoPagamento) {
     return new Promise((resolve, reject) => {
-
         pool.connect((err, client, done) => {
             const shouldAbort = err => {
                 if (err) {
@@ -179,7 +178,7 @@ async function salvar (condicaoPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into condicoes_pagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt) values($1, $2, $3, $4, $5, $6)', [condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.dataCad, condicaoPagamento.ultAlt], async (err, res) => {
+                client.query('insert into condicoes_pagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt) values($1, $2, $3, $4, $5, $6)', [condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.datacad, condicaoPagamento.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -187,10 +186,11 @@ async function salvar (condicaoPagamento) {
                             reject(err);
                         }
                         const response = await client.query('select * from condicoes_pagamento where id = (select max(id) from condicoes_pagamento)');
+                        console.log(response.rows[0]);
                         client.query('BEGIN', err => {
                             if (shouldAbort(err)) return reject(err);
-                            condicaoPagamento.parcelas.forEach((item, index) => {
-                                client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [response.id, item.numero, item.dias, item.percentual, item.formapagamento.id, item.datacad, item.ultAlt], (err, res) => {
+                            for (let i = 0; i < condicaoPagamento.listaparcelas.length; i++) {
+                                client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [response.rows[0].id, condicaoPagamento.listaparcelas[i].numero, condicaoPagamento.listaparcelas[i].dias, condicaoPagamento.listaparcelas[i].percentual, condicaoPagamento.listaparcelas[i].formapagamento.id, condicaoPagamento.listaparcelas[i].datacad, condicaoPagamento.listaparcelas[i].ultalt], (err, res) => {
                                     if (shouldAbort(err)) return reject(err);
                                     client.query('COMMIT', err => {
                                         if (err) {
@@ -199,7 +199,7 @@ async function salvar (condicaoPagamento) {
                                         }
                                     })
                                 })
-                            })
+                            }
                         })
                         done();
                         return resolve(response.rows[0]);
@@ -232,7 +232,9 @@ async function alterar (id, condicaoPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update condicoes_pagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6 where id = $7', [condicaoPagamento.id, condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.ultAlt, id], async (err, res) => {
+                client.query('update condicoes_pagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6 where id = $7', [condicaoPagamento.id, condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.ultalt, id], async (err, res) => {
+                    console.log("ID", id);
+                    console.log("COND PGTO", condicaoPagamento);
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -240,7 +242,7 @@ async function alterar (id, condicaoPagamento) {
                             reject(err);
                         }
                         done();
-                        return resolve(response.rows[0]);
+                        return resolve(res);
                     })
                 })
             })

@@ -1,4 +1,4 @@
-const ctrlTiposProduto = require('../controllers/ctrlTiposProduto');
+const ctrlCondicoesPagamento = require('../controllers/ctrlCondicoesPagamento');
 
 function condicoesPagamentoRoutes(req, res) {
     if(req.method === 'OPTIONS') {
@@ -7,22 +7,22 @@ function condicoesPagamentoRoutes(req, res) {
     } else if(req.method === 'GET') {
         if(req.url.match(/\/api\/condicoespagamento\/([0-9+])/)) {
             const id = req.url.split('/')[3];
-            ctrlTiposProduto.buscarUm(req, res, id);
+            ctrlCondicoesPagamento.buscarUm(req, res, id);
         } else if (req.url.includes('filter')) {
-            ctrlTiposProduto.validate(req, res);
+            ctrlCondicoesPagamento.validate(req, res);
         } else if (req.url.includes('page=all')) {
-            ctrlTiposProduto.buscarTodosSemPg(req, res)
+            ctrlCondicoesPagamento.buscarTodosSemPg(req, res)
         } else {
-            ctrlTiposProduto.buscarTodosComPg(req, res);
+            ctrlCondicoesPagamento.buscarTodosComPg(req, res);
         }
     } else if(req.url === '/api/condicoespagamento' && req.method === 'POST') {
-        ctrlTiposProduto.salvar(req, res);
+        ctrlCondicoesPagamento.salvar(req, res);
     } else if(req.url.match(/\/api\/condicoespagamento\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
-        ctrlTiposProduto.alterar(req, res, id);
+        ctrlCondicoesPagamento.alterar(req, res, id);
     } else if(req.url.match(/\/api\/condicoespagamento\/([0-9+])/) && req.method === 'DELETE') {
         const id = req.url.split('/')[3];
-        ctrlTiposProduto.deletar(req, res, id);
+        ctrlCondicoesPagamento.deletar(req, res, id);
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ message: 'Rota não encontrada.'}));
