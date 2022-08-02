@@ -18,8 +18,9 @@ import {
     CadastroTiposProduto,
     ConsultaProdutos,
     CadastroProdutos,
-    ConsultaFormasPagamento,
+    ConsultacondicoesPagamento,
     CadastroFormasPagamento,
+    CadastroCondicoesPagamento,
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -69,8 +70,13 @@ export const AppRoutes = () => {
             },
             {
                 label: 'Formas de Pagamento',
-                icon: 'payments',
+                icon: 'local_atm',
                 path: '/formaspagamento',
+            },
+            {
+                label: 'Condições de Pagamento',
+                icon: 'request_quote',
+                path: '/condicoespagamento',
             },
         ]);
     }, []);
@@ -97,8 +103,11 @@ export const AppRoutes = () => {
             <Route path="/tiposproduto" element={<ConsultaTiposProduto/>}/>
             <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
 
-            <Route path="/formaspagamento" element={<ConsultaFormasPagamento/>}/>
+            <Route path="/formaspagamento" element={<ConsultacondicoesPagamento/>}/>
             <Route path="/formaspagamento/cadastro/:id" element={<CadastroFormasPagamento/>}/>
+
+            <Route path="/condicoespagamento" element={<ConsultacondicoesPagamento/>}/>
+            <Route path="/condicoespagamento/cadastro/:id" element={<CadastroCondicoesPagamento/>}/>
 
             <Route path="/produtos" element={<ConsultaProdutos/>}/>
             <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>
