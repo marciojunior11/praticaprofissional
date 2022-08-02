@@ -6,6 +6,7 @@ const { fornecedoresRoutes } = require('./fornecedoresRoutes');
 const { produtosRoutes } = require('./produtosRoutes');
 const { clientesRoutes } = require('./clientesRoutes');
 const { formasPagamentoRoutes } = require('./formasPagamentoRoutes');
+const { condicoesPagamentoRoutes } = require('./condicoesPagamentoRoutes');
 
 function router(req, res) {
     if (req.url.includes('/paises')) {
@@ -24,6 +25,8 @@ function router(req, res) {
         clientesRoutes(req, res);
     } else if (req.url.includes('/formaspagamento')) {
         formasPagamentoRoutes(req, res);
+    } else if (req.url.includes('condicoespagamento')) {
+        condicoesPagamentoRoutes(req, res);
     }
 }
 
