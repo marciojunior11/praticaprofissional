@@ -18,9 +18,10 @@ import {
     CadastroTiposProduto,
     ConsultaProdutos,
     CadastroProdutos,
-    ConsultacondicoesPagamento,
+    ConsultaCondicoesPagamento,
     CadastroFormasPagamento,
     CadastroCondicoesPagamento,
+    ConsultaFormasPagamento,
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -103,10 +104,10 @@ export const AppRoutes = () => {
             <Route path="/tiposproduto" element={<ConsultaTiposProduto/>}/>
             <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
 
-            <Route path="/formaspagamento" element={<ConsultacondicoesPagamento/>}/>
+            <Route path="/formaspagamento" element={<ConsultaFormasPagamento/>}/>
             <Route path="/formaspagamento/cadastro/:id" element={<CadastroFormasPagamento/>}/>
 
-            <Route path="/condicoespagamento" element={<ConsultacondicoesPagamento/>}/>
+            <Route path="/condicoespagamento" element={<ConsultaCondicoesPagamento/>}/>
             <Route path="/condicoespagamento/cadastro/:id" element={<CadastroCondicoesPagamento/>}/>
 
             <Route path="/produtos" element={<ConsultaProdutos/>}/>

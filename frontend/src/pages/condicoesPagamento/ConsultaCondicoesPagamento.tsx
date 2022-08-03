@@ -9,7 +9,7 @@ import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 
-export const ConsultacondicoesPagamento: React.FC = () => {
+export const ConsultaCondicoesPagamento: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();

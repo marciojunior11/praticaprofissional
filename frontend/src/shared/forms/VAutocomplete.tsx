@@ -12,6 +12,7 @@ type TGenericList = {
 }
 
 type TVAutocompleteProps = {
+    size?: 'medium' | 'small',
     name: string,
     getAll: (
         page?: number,
@@ -27,7 +28,7 @@ type TVAutocompleteProps = {
     required?: boolean
 }
 
-export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, label, TFLabel, isExternalLoading = false, ...rest}) => {
+export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -82,6 +83,7 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({name, getAll, labe
     return (
         <Autocomplete
             //REQUIRED PARAMS
+            size={size}
             options={options}
             renderInput={params => (
                 <TextField

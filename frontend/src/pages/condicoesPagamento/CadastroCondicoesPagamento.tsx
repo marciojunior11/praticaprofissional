@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
@@ -191,8 +191,8 @@ export const CadastroCondicoesPagamento: React.FC = () => {
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
-                    <Grid container direction="column" padding={2} spacing={2}>
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
+                    <Grid item container xl={6} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -204,9 +204,10 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                             <Typography variant="h6">Dados Gerais</Typography>
                         </Grid>
 
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
+                        <Grid container item direction="row" spacing={2} justifyContent="center">
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
                                 <VTextField
+                                    size="small"
                                     required
                                     fullWidth
                                     name="descricao"
@@ -240,9 +241,10 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                             </Grid>
                         </Grid>
 
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                        <Grid container item direction="row" spacing={2} justifyContent="center">
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
                                 <VTextField
+                                    size="small"
                                     required
                                     fullWidth
                                     name="txdesc"
@@ -250,8 +252,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     disabled={isLoading}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
                                 <VTextField
+                                    size="small"
                                     required
                                     fullWidth
                                     name="txmulta"
@@ -259,8 +262,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     disabled={isLoading}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
                                 <VTextField
+                                    size="small"
                                     required
                                     fullWidth
                                     name="txjuros"
@@ -271,9 +275,10 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                         </Grid>
 
                         { id == 'novo' && (
-                            <Grid container item direction="row" spacing={2}>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                            <Grid container item direction="row" spacing={2} justifyContent="center">
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
                                     <VTextField
+                                        size="small"
                                         required
                                         fullWidth
                                         name="dias"
@@ -281,8 +286,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                         disabled={isLoading}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
                                     <VTextField
+                                        size="small"
                                         required
                                         fullWidth
                                         name="percentual"
@@ -290,14 +296,30 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                         disabled={isLoading}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
                                     <VAutocomplete
+                                        size="small"
                                         required
                                         name="formapagamento"
                                         label="descricao"
                                         TFLabel="Forma de Pagamento"
                                         getAll={FormasPagamentoService.getAll}
                                     />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                    <Button variant="contained" color="success">
+                                        <Icon>add</Icon>
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                    <Button variant="contained" color="success">
+                                        <Icon>add</Icon>
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                    <Button variant="contained" color="success">
+                                        <Icon>add</Icon>
+                                    </Button>
                                 </Grid>
                             </Grid>
                         )}
