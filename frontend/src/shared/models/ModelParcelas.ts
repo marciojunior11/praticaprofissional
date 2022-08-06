@@ -3,8 +3,8 @@ export interface IParcelas {
     dias: number;
     percentual: number;
     formapagamento: number;
-    dataCad: string;
-    ultAlt: string
+    datacad: string;
+    ultalt: string
 }
 
 export interface IDetalhesParcelas {
@@ -12,8 +12,8 @@ export interface IDetalhesParcelas {
     dias: number;
     percentual: number;
     formapagamento: number;
-    dataCad: string;
-    ultAlt: string
+    datacad: string;
+    ultalt: string
 }
 
 export type TListaParcelas = {

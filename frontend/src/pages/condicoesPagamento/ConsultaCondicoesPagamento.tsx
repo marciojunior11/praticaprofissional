@@ -102,7 +102,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                                     <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                         <Icon>delete</Icon>
                                     </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/formasPagamento/cadastro/${row.id}`)}>
+                                    <IconButton color="primary" size="small" onClick={() => navigate(`/condicoespagamento/cadastro/${row.id}`)}>
                                         <Icon>edit</Icon>
                                     </IconButton>
                                 </TableCell>

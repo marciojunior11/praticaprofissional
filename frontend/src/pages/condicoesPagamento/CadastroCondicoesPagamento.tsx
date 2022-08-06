@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Divider, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
@@ -8,20 +8,28 @@ import { LayoutBase } from "../../shared/layouts";
 import { CondicoesPagamentoService } from "../../shared/services/api/condicoesPagamento/CondicoesPagamentoService";
 import { FormasPagamentoService } from "../../shared/services/api/formasPagamento/FormasPagamentoService";
 import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
+import { IParcelas, TListaParcelas } from "../../shared/models/ModelParcelas";
+import { Environment } from "../../shared/environment";
 
 interface IFormData {
-    descricao: string,
-    dataCad: string,
-    ultAlt: string
+    descricao: string;
+    txdesc: number;
+    txmulta: number;
+    txjuros: number;
+    datacad: string;
+    ultalt: string;
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     descricao: yup.string().required(),
-    dataCad: yup.string().required(),
-    ultAlt: yup.string().required(),
+    txdesc: yup.number().required(),
+    txmulta: yup.number().required(),
+    txjuros: yup.number().required(),
+    datacad: yup.string().required(),
+    ultalt: yup.string().required(),
 })
 
 export const CadastroCondicoesPagamento: React.FC = () => {
@@ -32,6 +40,8 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const { debounce } = useDebounce();
 
     const [obj, setObj] = useState<ICondicoesPagamento | null>(null);
+    const [listaParcelas, setListaParcelas] = useState<IParcelas[]>([]);
+    const [parcela, setParcela] = useState<IParcelas | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
@@ -52,6 +62,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
                         setObj(result);
+                        setListaParcelas(result.listaparcelas);
                     }
                 });
         } else {
@@ -92,15 +103,15 @@ export const CadastroCondicoesPagamento: React.FC = () => {
 
     const handleSave = (dados: IFormData) => {
         let data = new Date();
-        dados.dataCad = data.toLocaleString();
-        dados.ultAlt = data.toLocaleString();
+        dados.datacad = data.toLocaleString();
+        dados.ultalt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            CondicoesPagamentoService.create(dadosValidados)
+                            CondicoesPagamentoService.create({ listaparcelas: listaParcelas, ...dadosValidados})
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -123,7 +134,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     }
                                 });
                         } else {
-                            CondicoesPagamentoService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            CondicoesPagamentoService.updateById(Number(id), { id: Number(id), listaparcelas: listaParcelas, ...dadosValidados })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -192,7 +203,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
         >
             <VForm ref={formRef} onSubmit={handleSave}>
                 <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
-                    <Grid item container xl={6} direction="column" padding={2} spacing={2} alignItems="left">
+                    <Grid item container xl={8} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -275,55 +286,122 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                         </Grid>
 
                         { id == 'novo' && (
-                            <Grid container item direction="row" spacing={2} justifyContent="center">
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                    <VTextField
-                                        size="small"
-                                        required
-                                        fullWidth
-                                        name="dias"
-                                        label="Dias"
-                                        disabled={isLoading}
-                                    />
+                            <>
+                                <Grid item>
+                                    <Divider orientation="horizontal"/>
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
-                                    <VTextField
-                                        size="small"
-                                        required
-                                        fullWidth
-                                        name="percentual"
-                                        label="Percentual"
-                                        disabled={isLoading}
-                                    />
+                                <Grid item>
+                                    <Typography variant="h6">Dados da Parcela</Typography>
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                    <VAutocomplete
-                                        size="small"
-                                        required
-                                        name="formapagamento"
-                                        label="descricao"
-                                        TFLabel="Forma de Pagamento"
-                                        getAll={FormasPagamentoService.getAll}
-                                    />
+
+                                <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                                        <VTextField
+                                            size="small"
+                                            required
+                                            fullWidth
+                                            name="parcela.dias"
+                                            label="Dias"
+                                            disabled={isLoading}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                                        <VTextField
+                                            size="small"
+                                            required
+                                            fullWidth
+                                            name="parcela.percentual"
+                                            label="Percentual"
+                                            disabled={isLoading}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={7}>
+                                        <VAutocompleteSearch
+                                            size="small"
+                                            required
+                                            name="parcela.formapagamento"
+                                            label="descricao"
+                                            TFLabel="Forma de Pagamento"
+                                            getAll={FormasPagamentoService.getAll}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                        <Button 
+                                            variant="contained" 
+                                            color="success" 
+                                            size="large"
+                                            onClick={(e) => {
+                                                let data = new Date();
+                                                console.log(listaParcelas);
+                                                setListaParcelas([
+                                                    ...listaParcelas,
+                                                    {
+                                                        numero: listaParcelas.length + 1,
+                                                        dias: formRef.current?.getData().parcela.dias,
+                                                        percentual: formRef.current?.getData().parcela.percentual,
+                                                        formapagamento: formRef.current?.getData().parcela.formapagamento,
+                                                        datacad: data.toLocaleString(),
+                                                        ultalt: data.toLocaleString()
+                                                    }
+                                                ]);
+                                                formRef.current?.setFieldValue('parcela.dias', '');
+                                                formRef.current?.setFieldValue('parcela.percentual', '');
+                                                formRef.current?.setFieldValue('parcela.formapagamento', null);
+                                            }}
+                                        >
+                                            <Icon>add</Icon>
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                    <Button variant="contained" color="success">
-                                        <Icon>add</Icon>
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                    <Button variant="contained" color="success">
-                                        <Icon>add</Icon>
-                                    </Button>
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                    <Button variant="contained" color="success">
-                                        <Icon>add</Icon>
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            </>
                         )}
 
+                        <Grid item>
+                            <Divider orientation="horizontal"/>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="h6">Parcelas</Typography>
+                        </Grid>
+                        <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
+                                <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Número</TableCell>
+                                                <TableCell>Dias</TableCell>
+                                                <TableCell>Percentual</TableCell>
+                                                { id == 'novo' && (
+                                                    <TableCell align="right">Ações</TableCell>
+                                                )}
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {listaParcelas?.map(row => (
+                                                <TableRow key={row.numero}>
+                                                    <TableCell >{row.numero}</TableCell>
+                                                    <TableCell>{row.dias}</TableCell>
+                                                    <TableCell>{row.percentual}</TableCell>
+                                                    { id == 'novo' && (
+                                                        <TableCell align="right">
+                                                            <IconButton color="error" size="small">
+                                                                <Icon>delete</Icon>
+                                                            </IconButton>
+                                                            <IconButton color="primary" size="small">
+                                                                <Icon>edit</Icon>
+                                                            </IconButton>
+                                                        </TableCell>
+                                                    ) }
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                        { listaParcelas.length === 0 && !isLoading && (
+                                            <caption>{Environment.LISTAGEM_VAZIA}</caption>
+                                        )}
+                                    </Table>
+                                </TableContainer>                                
+                            </Grid>
+                        </Grid>
                     </Grid>
 
                 </Box>

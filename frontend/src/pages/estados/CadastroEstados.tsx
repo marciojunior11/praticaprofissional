@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { EstadosService, IEstados } from "../../shared/services/api/estados/EstadosService";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { IPaises } from "../../shared/models/ModelPaises";
@@ -313,7 +313,7 @@ export const CadastroEstados: React.FC = () => {
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                <VAutocomplete
+                                <VAutocompleteSearch
                                     required
                                     name="pais"
                                     label="pais"

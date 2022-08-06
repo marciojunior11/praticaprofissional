@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { ProdutosService, IProdutos } from "../../shared/services/api/produtos/ProdutosService";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
@@ -318,7 +318,7 @@ export const CadastroProdutos: React.FC = () => {
                         </Grid> 
                         <Grid container item direction='row' spacing={2}>
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                                <VAutocomplete
+                                <VAutocompleteSearch
                                     name='tipoProduto'
                                     label='descricao'
                                     getAll={TiposProdutoService.getAll}
@@ -328,7 +328,7 @@ export const CadastroProdutos: React.FC = () => {
                         </Grid>
                         <Grid container item direction='row' spacing={2}>
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                                <VAutocomplete
+                                <VAutocompleteSearch
                                     name='fornecedor'
                                     label='razSocial'
                                     getAll={FornecedoresService.getAll}

@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { FornecedoresService, IFornecedores } from "../../shared/services/api/fornecedores/FornecedoresService";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocomplete } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { ICidades, CidadesService } from "../../shared/services/api/cidades/CidadesService";
 import { useDebounce } from "../../shared/hooks";
@@ -394,7 +394,7 @@ export const CadastroFornecedores: React.FC = () => {
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
-                                <VAutocomplete
+                                <VAutocompleteSearch
                                     required
                                     name="cidade"
                                     label='cidade'
