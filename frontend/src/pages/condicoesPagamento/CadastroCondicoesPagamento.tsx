@@ -403,6 +403,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                 <TableCell>Número</TableCell>
                                                 <TableCell>Dias</TableCell>
                                                 <TableCell>Percentual</TableCell>
+                                                <TableCell>Forma de pagamento</TableCell>
                                                 { id == 'novo' && (
                                                     <TableCell align="right">Ações</TableCell>
                                                 )}
@@ -414,6 +415,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                     <TableCell >{row.numero}</TableCell>
                                                     <TableCell>{row.dias}</TableCell>
                                                     <TableCell>{row.percentual}</TableCell>
+                                                    <TableCell>{row.formapagamento.descricao}</TableCell>
                                                     { id == 'novo' && (
                                                         <TableCell align="right">
                                                             <IconButton 

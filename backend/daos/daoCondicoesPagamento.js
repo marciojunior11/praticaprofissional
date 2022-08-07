@@ -1,4 +1,5 @@
 const { pool } = require('../datamodule/index');
+const { daoFormasPagamento } = require('./daoFormasPagamento');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/condicoes_pagamento
@@ -33,7 +34,18 @@ async function buscarTodosSemPg(url) {
                 const mListaCondicoesPagamento = [];
                 for (let i = 0; i < res.rowCount; i++) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
-                    let mListaParcelas = responseParcelas.rows;
+                    let mListaParcelas = [];
+                    for (let j = 0; j < responseParcelas.rowCount; j++) {
+                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        mListaParcelas.push({
+                            numero: responseParcelas.rows[j].numero,
+                            dias: responseParcelas.rows[j].dias,
+                            percentual: responseParcelas.rows[j].percentual,
+                            formapagamento : responseFormaPgto.rows[0],
+                            datacad: responseParcelas.rows[j].datacad,
+                            ultalt: responseParcelas.rows[j].ultalt,
+                        })
+                    }
                     mListaCondicoesPagamento.push({
                         id: res.rows[i].id,
                         descricao: res.rows[i].descricao,
@@ -56,7 +68,18 @@ async function buscarTodosSemPg(url) {
                 const mListaCondicoesPagamento = [];
                 for (let i = 0; i < res.rowCount; i++) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
-                    let mListaParcelas = responseParcelas.rows;
+                    let mListaParcelas = [];
+                    for (let j = 0; j < responseParcelas.rowCount; j++) {
+                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        mListaParcelas.push({
+                            numero: responseParcelas.rows[j].numero,
+                            dias: responseParcelas.rows[j].dias,
+                            percentual: responseParcelas.rows[j].percentual,
+                            formapagamento : responseFormaPgto.rows[0],
+                            datacad: responseParcelas.rows[j].datacad,
+                            ultalt: responseParcelas.rows[j].ultalt,
+                        })
+                    }
                     mListaCondicoesPagamento.push({
                         id: res.rows[i].id,
                         descricao: res.rows[i].descricao,
@@ -88,7 +111,18 @@ async function buscarTodosComPg (url) {
                 const mListaCondicoesPagamento = [];
                 for (let i = 0; i < res.rowCount; i++) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
-                    let mListaParcelas = responseParcelas.rows;
+                    let mListaParcelas = [];
+                    for (let j = 0; j < responseParcelas.rowCount; j++) {
+                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        mListaParcelas.push({
+                            numero: responseParcelas.rows[j].numero,
+                            dias: responseParcelas.rows[j].dias,
+                            percentual: responseParcelas.rows[j].percentual,
+                            formapagamento : responseFormaPgto.rows[0],
+                            datacad: responseParcelas.rows[j].datacad,
+                            ultalt: responseParcelas.rows[j].ultalt,
+                        })
+                    }
                     mListaCondicoesPagamento.push({
                         id: res.rows[i].id,
                         descricao: res.rows[i].descricao,
@@ -112,7 +146,18 @@ async function buscarTodosComPg (url) {
                 const mListaCondicoesPagamento = [];
                 for (let i = 0; i < res.rowCount; i++) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
-                    let mListaParcelas = responseParcelas.rows;
+                    let mListaParcelas = [];
+                    for (let j = 0; j < responseParcelas.rowCount; j++) {
+                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        mListaParcelas.push({
+                            numero: responseParcelas.rows[j].numero,
+                            dias: responseParcelas.rows[j].dias,
+                            percentual: responseParcelas.rows[j].percentual,
+                            formapagamento : responseFormaPgto.rows[0],
+                            datacad: responseParcelas.rows[j].datacad,
+                            ultalt: responseParcelas.rows[j].ultalt,
+                        })
+                    }
                     mListaCondicoesPagamento.push({
                         id: res.rows[i].id,
                         descricao: res.rows[i].descricao,
@@ -140,7 +185,18 @@ async function buscarUm (id) {
             }
             if (res.rowCount != 0) {
                 const responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[0].id]);
-                const mListaParcelas = responseParcelas.rows;
+                const mListaParcelas = [];
+                for (let j = 0; j < responseParcelas.rowCount; j++) {
+                    let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                    mListaParcelas.push({
+                        numero: responseParcelas.rows[j].numero,
+                        dias: responseParcelas.rows[j].dias,
+                        percentual: responseParcelas.rows[j].percentual,
+                        formapagamento: responseFormaPgto.rows[0],
+                        datacad: responseParcelas.rows[j].datacad,
+                        ultalt: responseParcelas.rows[j].ultalt,
+                    })
+                }
                 const mCondicaoPagamento = {
                     id: res.rows[0].id,
                     descricao: res.rows[0].descricao,

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
@@ -8,6 +8,7 @@ import { CondicoesPagamentoService } from '../../shared/services/api/condicoesPa
 import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento";
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
+import { Box } from "@mui/system";
 
 export const ConsultaCondicoesPagamento: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -15,6 +16,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
     const navigate = useNavigate();
 
     const [rows, setRows] = useState<ICondicoesPagamento[]>([]);
+    const [rowOpen, setRowOpen] = useState(false);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -82,6 +84,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell/>
                             <TableCell>ID</TableCell>
                             <TableCell>Descrição</TableCell>
                             <TableCell>Desconto</TableCell>
@@ -92,21 +95,59 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                     </TableHead>
                     <TableBody>
                         {rows?.map(row => (
-                            <TableRow key={row.id}>
-                                <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.descricao}</TableCell>
-                                <TableCell>{row.txdesc}</TableCell>
-                                <TableCell>{row.txmulta}</TableCell>
-                                <TableCell>{row.txjuros}</TableCell>
-                                <TableCell align="right">
-                                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                        <Icon>delete</Icon>
-                                    </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/condicoespagamento/cadastro/${row.id}`)}>
-                                        <Icon>edit</Icon>
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
+                            <React.Fragment>
+                                <TableRow key={row.id}>
+                                    <TableCell>
+                                        <IconButton aria-label="expand-row" size="small" onClick={() => setRowOpen(!rowOpen)}>
+                                            <Icon>{rowOpen ? "keyboard_arrow_up_icon" : "keyboard_arrow_down_icon"}</Icon>
+                                        </IconButton>
+                                    </TableCell>
+                                    <TableCell>{row.id}</TableCell>
+                                    <TableCell>{row.descricao}</TableCell>
+                                    <TableCell>{row.txdesc}</TableCell>
+                                    <TableCell>{row.txmulta}</TableCell>
+                                    <TableCell>{row.txjuros}</TableCell>
+                                    <TableCell align="right">
+                                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                                            <Icon>delete</Icon>
+                                        </IconButton>
+                                        <IconButton color="primary" size="small" onClick={() => navigate(`/condicoespagamento/cadastro/${row.id}`)}>
+                                            <Icon>edit</Icon>
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                                        <Collapse in={rowOpen} timeout="auto" unmountOnExit>
+                                            <Box sx={{ margin: 1 }}>
+                                                <Typography variant="h6">
+                                                    Parcelas
+                                                </Typography>
+                                                <Table size="small">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Número</TableCell>
+                                                            <TableCell>Dias</TableCell>
+                                                            <TableCell>Percentual</TableCell>
+                                                            <TableCell>Forma de pagamento</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {row.listaparcelas?.map((item) => (
+                                                            <TableRow key={item.numero}>
+                                                                <TableCell>{item.numero}</TableCell>
+                                                                <TableCell>{item.dias}</TableCell>
+                                                                <TableCell>{item.percentual}</TableCell>
+                                                                <TableCell>{item.formapagamento.descricao}</TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </Box>
+                                        </Collapse>
+                                    </TableCell>
+                                </TableRow>
+                            </React.Fragment>
                         ))}
                     </TableBody>
                     { qtd === 0 && !isLoading && (
