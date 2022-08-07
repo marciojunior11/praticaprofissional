@@ -81,7 +81,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
     }, [selectedOption, options])
 
     return (
-        <Grid container direction="row" spacing={0} alignItems="center">
+        <Grid container direction="row" spacing={0} alignItems="start">
             <Grid item xl={10}>
                 <Autocomplete
                     //REQUIRED PARAMS
@@ -132,7 +132,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                 />
             </Grid>
             <Grid item xl={2}>
-                <Button variant="outlined" size="large">
+                <Button variant="outlined" size="large" color={!!error ? 'error' : 'primary'}>
                     <Icon>search</Icon>
                 </Button>
             </Grid>
