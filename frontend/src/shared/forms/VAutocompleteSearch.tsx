@@ -25,10 +25,11 @@ type TVAutocompleteProps = {
     isExternalLoading?: boolean,
     onChange?: (newValue: any) => void,
     onInputchange?: () => void,
-    required?: boolean
+    required?: boolean,
+    onClickSearch?: () => void,
 }
 
-export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, ...rest}) => {
+export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -132,7 +133,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                 />
             </Grid>
             <Grid item xl={2}>
-                <Button variant="outlined" size="large" color={!!error ? 'error' : 'primary'}>
+                <Button variant="outlined" size="large" color={!!error ? 'error' : 'primary'} onClick={onClickSearch}>
                     <Icon>search</Icon>
                 </Button>
             </Grid>

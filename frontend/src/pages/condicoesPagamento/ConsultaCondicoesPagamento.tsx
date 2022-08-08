@@ -40,7 +40,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                         </IconButton>
                     </TableCell>
                 </TableRow>
-                <TableRow sx={{ backgroundColor: "darkgrey" }}>
+                <TableRow sx={{ backgroundColor: "#ECECEC" }}>
                     <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
                         <Collapse in={open} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 1 }}>
