@@ -414,7 +414,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                 <TableRow key={row.numero}>
                                                     <TableCell >{row.numero}</TableCell>
                                                     <TableCell>{row.dias}</TableCell>
-                                                    <TableCell>{row.percentual}</TableCell>
+                                                    <TableCell>{row.percentual+"%"}</TableCell>
                                                     <TableCell>{row.formapagamento.descricao}</TableCell>
                                                     { id == 'novo' && (
                                                         <TableCell align="right">

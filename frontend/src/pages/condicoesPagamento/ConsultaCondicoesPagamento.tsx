@@ -11,6 +11,69 @@ import { toast } from "react-toastify";
 import { Box } from "@mui/system";
 
 export const ConsultaCondicoesPagamento: React.FC = () => {
+    const Row = (props: { row: ICondicoesPagamento }) => {
+        const { row } = props;
+        const [open, setOpen] = useState(false);
+        return (
+            <React.Fragment>
+                <TableRow key={row.id}>
+                    <TableCell>
+                        <IconButton 
+                            aria-label="expand-row" 
+                            size="small" 
+                            onClick={() => setOpen(!open)}
+                        >
+                            <Icon>{open ? "keyboard_arrow_up_icon" : "keyboard_arrow_down_icon"}</Icon>
+                        </IconButton>
+                    </TableCell>
+                    <TableCell>{row.id}</TableCell>
+                    <TableCell>{row.descricao}</TableCell>
+                    <TableCell>{row.txdesc}</TableCell>
+                    <TableCell>{row.txmulta}</TableCell>
+                    <TableCell>{row.txjuros}</TableCell>
+                    <TableCell align="right">
+                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                            <Icon>delete</Icon>
+                        </IconButton>
+                        <IconButton color="primary" size="small" onClick={() => navigate(`/condicoespagamento/cadastro/${row.id}`)}>
+                            <Icon>edit</Icon>
+                        </IconButton>
+                    </TableCell>
+                </TableRow>
+                <TableRow sx={{ backgroundColor: "darkgrey" }}>
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                        <Collapse in={open} timeout="auto" unmountOnExit>
+                            <Box sx={{ margin: 1 }}>
+                                <Typography variant="h6">
+                                    Parcelas
+                                </Typography>
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Número</TableCell>
+                                            <TableCell>Dias</TableCell>
+                                            <TableCell>Percentual</TableCell>
+                                            <TableCell>Forma de pagamento</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {row.listaparcelas?.map((item) => (
+                                            <TableRow key={item.numero}>
+                                                <TableCell>{item.numero}</TableCell>
+                                                <TableCell>{item.dias}</TableCell>
+                                                <TableCell>{item.percentual+"%"}</TableCell>
+                                                <TableCell>{item.formapagamento.descricao}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Box>
+                        </Collapse>
+                    </TableCell>
+                </TableRow>
+            </React.Fragment>
+        )
+    }
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
@@ -94,60 +157,8 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows?.map(row => (
-                            <React.Fragment>
-                                <TableRow key={row.id}>
-                                    <TableCell>
-                                        <IconButton aria-label="expand-row" size="small" onClick={() => setRowOpen(!rowOpen)}>
-                                            <Icon>{rowOpen ? "keyboard_arrow_up_icon" : "keyboard_arrow_down_icon"}</Icon>
-                                        </IconButton>
-                                    </TableCell>
-                                    <TableCell>{row.id}</TableCell>
-                                    <TableCell>{row.descricao}</TableCell>
-                                    <TableCell>{row.txdesc}</TableCell>
-                                    <TableCell>{row.txmulta}</TableCell>
-                                    <TableCell>{row.txjuros}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                            <Icon>delete</Icon>
-                                        </IconButton>
-                                        <IconButton color="primary" size="small" onClick={() => navigate(`/condicoespagamento/cadastro/${row.id}`)}>
-                                            <Icon>edit</Icon>
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
-                                        <Collapse in={rowOpen} timeout="auto" unmountOnExit>
-                                            <Box sx={{ margin: 1 }}>
-                                                <Typography variant="h6">
-                                                    Parcelas
-                                                </Typography>
-                                                <Table size="small">
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Número</TableCell>
-                                                            <TableCell>Dias</TableCell>
-                                                            <TableCell>Percentual</TableCell>
-                                                            <TableCell>Forma de pagamento</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {row.listaparcelas?.map((item) => (
-                                                            <TableRow key={item.numero}>
-                                                                <TableCell>{item.numero}</TableCell>
-                                                                <TableCell>{item.dias}</TableCell>
-                                                                <TableCell>{item.percentual}</TableCell>
-                                                                <TableCell>{item.formapagamento.descricao}</TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </Box>
-                                        </Collapse>
-                                    </TableCell>
-                                </TableRow>
-                            </React.Fragment>
+                        {rows?.map((row) => (
+                            <Row key={row.id} row={row}/>
                         ))}
                     </TableBody>
                     { qtd === 0 && !isLoading && (
