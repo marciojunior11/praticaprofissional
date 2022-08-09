@@ -3,26 +3,15 @@ import React, { useCallback, useState } from "react"
 
 interface IDialogProps {
     title: string;
+    handleClose: () => void,
+    open: boolean,
     children?: React.ReactNode;
 }
 
-export const useDialog = () => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false); 
-
-    const toggleDialogOpen = () => {
-        console.log(isDialogOpen);
-        setIsDialogOpen(oldValue => !oldValue);
-    }
-
-    return {toggleDialogOpen, isDialogOpen}
-}
-
-export const CustomDialog: React.FC<IDialogProps> = ({ title, children }) => {
-
-    const { toggleDialogOpen, isDialogOpen } = useDialog();
+export const CustomDialog: React.FC<IDialogProps> = ({ title, handleClose, open, children }) => {
 
     return (
-        <Dialog onClose={toggleDialogOpen} open={isDialogOpen}>
+        <Dialog onClose={handleClose} open={open}>
             <DialogTitle sx={{ m: 0, p: 2 }}>
                 <Typography>
                     {title}
@@ -32,10 +21,10 @@ export const CustomDialog: React.FC<IDialogProps> = ({ title, children }) => {
                 {children}
             </DialogContent>
             <DialogActions>
-                <Button startIcon={<Icon>save</Icon>} variant="contained" color="primary" onClick={toggleDialogOpen}>
+                <Button startIcon={<Icon>save</Icon>} variant="contained" color="primary" onClick={handleClose}>
                     Salvar
                 </Button>
-                <Button startIcon={<Icon>calcel</Icon>} variant="contained" color="error" onClick={toggleDialogOpen}>
+                <Button startIcon={<Icon>calcel</Icon>} variant="contained" color="error" onClick={handleClose}>
                     Cancelar
                 </Button>
             </DialogActions>

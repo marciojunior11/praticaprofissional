@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Box, Button, CircularProgress, Collapse, Divider, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import * as yup from 'yup';
 
-import { CustomDialog, DetailTools, useDialog } from "../../shared/components";
+import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { CondicoesPagamentoService } from "../../shared/services/api/condicoesPagamento/CondicoesPagamentoService";
 import { FormasPagamentoService } from "../../shared/services/api/formasPagamento/FormasPagamentoService";
@@ -44,7 +44,10 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const [listaParcelas, setListaParcelas] = useState<IParcelas[]>([]);
     const [parcela, setParcela] = useState<IParcelas | null>(null);
 
-    const { toggleDialogOpen } = useDialog();
+    const [isFormaPgtoDialogOpen, setIsFormaPgtoDialogOpen] = useState(false);
+    const toggleFormaPgtoDialogOpen = () => {
+        setIsFormaPgtoDialogOpen(oldValue => !oldValue);
+    }
 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
@@ -347,7 +350,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                             label="descricao"
                                             TFLabel="Forma de Pagamento"
                                             getAll={FormasPagamentoService.getAll}
-                                            onClickSearch={toggleDialogOpen}
+                                            onClickSearch={() => {
+                                                toggleFormaPgtoDialogOpen();
+                                            }}
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
@@ -452,7 +457,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <CustomDialog title="Teste">
+                    <CustomDialog handleClose={toggleFormaPgtoDialogOpen} open={isFormaPgtoDialogOpen} title="Teste">
                         AAA
                     </CustomDialog>
                 </Box>
