@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ListTools } from "../../shared/components";
+import { CustomDialog, ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { FormasPagamentoService } from '../../shared/services/api/formasPagamento/FormasPagamentoService';
 import { IFormasPagamento } from "../../shared/models/ModelFormasPagamento";
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
+import { CadastroFormasPagamento } from "./CadastroFormasPagamento";
 
-export const ConsultaFormasPagamento: React.FC = () => {
+interface IConsultaProps {
+    isDialog?: boolean;
+}
+
+export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = false }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
@@ -17,6 +22,11 @@ export const ConsultaFormasPagamento: React.FC = () => {
     const [rows, setRows] = useState<IFormasPagamento[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [isCadastroFormaPgtoDialogOpen, setIsCadastroFormaPgtoDialogOpen] = useState(false);
+    const toggleCadastroFormaPgtoDialogOpen = () => {
+        setIsCadastroFormaPgtoDialogOpen(oldValue => !oldValue);
+    }
 
     const busca = useMemo(() => {
         return searchParams.get('busca')?.toUpperCase() || ''; 
@@ -68,13 +78,19 @@ export const ConsultaFormasPagamento: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo="Consultar Formas de Pagamento"
+            titulo={!isDialog ? "Consultar Formas de Pagamento" : ""}
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/formaspagamento/cadastro/novo')}
+                    onClickNew={() => {
+                        isDialog ? (
+                            toggleCadastroFormaPgtoDialogOpen()
+                        ) : (
+                            navigate('/formaspagamento/cadastro/novo')
+                        )
+                    }}
                 />
             }
         >
@@ -128,6 +144,17 @@ export const ConsultaFormasPagamento: React.FC = () => {
                     </TableFooter>
                 </Table>
             </TableContainer>
+            <CustomDialog
+                onClose={toggleCadastroFormaPgtoDialogOpen}
+                handleClose={toggleCadastroFormaPgtoDialogOpen} 
+                open={isCadastroFormaPgtoDialogOpen} 
+                title="Cadastrar Forma de Pagamento"
+            >
+                <CadastroFormasPagamento 
+                    isDialog
+                    handleClose={toggleCadastroFormaPgtoDialogOpen}
+                />
+            </CustomDialog>
         </LayoutBase>
     );
 };

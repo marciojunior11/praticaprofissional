@@ -17,13 +17,18 @@ interface IFormData {
     ultAlt: string
 }
 
+interface ICadastroProps {
+    isDialog?: boolean;
+    handleClose?: () => void;
+}
+
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     descricao: yup.string().required(),
     dataCad: yup.string().required(),
     ultAlt: yup.string().required(),
 })
 
-export const CadastroFormasPagamento: React.FC = () => {
+export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, handleClose}) => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -107,7 +112,7 @@ export const CadastroFormasPagamento: React.FC = () => {
                                     } else {
                                         toast.success('Cadastrado com sucesso!')
                                         if (isSaveAndClose()) {
-                                            navigate('/formaspagamento');
+                                            navigate('/formaspagamento');  
                                         } else if (isSaveAndNew()) {
                                             setIsValidating('');
                                             setIsValid(false);
@@ -172,13 +177,14 @@ export const CadastroFormasPagamento: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Forma de Pagamento' : 'Editar Forma de Pagamento'}
+            titulo={!isDialog ? (id === 'novo' ? 'Cadastrar Forma de Pagamento' : 'Editar Forma de Pagamento') : ""}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo={id == 'novo'}
-                    mostrarBotaoApagar={id !== 'novo'}
-                    mostrarBotaoNovo={id !== 'novo'}
+                    mostrarBotaoSalvar={id == 'novo' && !isDialog}
+                    mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
+                    mostrarBotaoApagar={id !== 'novo' && !isDialog}
+                    mostrarBotaoNovo={id !== 'novo' && !isDialog}
                     
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}

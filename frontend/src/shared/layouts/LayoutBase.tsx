@@ -4,7 +4,7 @@ import React, { ReactNode } from "react"
 import { useDrawerContext } from "../contexts";
 
 interface ILayoutBaseProps {
-    titulo: string,
+    titulo?: string,
     barraDeFerramentas?: ReactNode,
     children: ReactNode,
 };

@@ -1,18 +1,44 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Icon, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle, Icon, IconButton, Slide, Typography } from "@mui/material";
+import { TransitionProps } from "@mui/material/transitions";
 import React, { useCallback, useState } from "react"
 
-interface IDialogProps {
+interface IDialogProps extends DialogProps{
     title: string;
     handleClose: () => void,
     open: boolean,
     children?: React.ReactNode;
 }
 
-export const CustomDialog: React.FC<IDialogProps> = ({ title, handleClose, open, children }) => {
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+      children: React.ReactElement<any, any>;
+    },
+    ref: React.Ref<unknown>,
+  ) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+
+export const CustomDialog: React.FC<IDialogProps> = ({ title, handleClose, open, children, ...rest }) => {
 
     return (
-        <Dialog onClose={handleClose} open={open}>
+        <Dialog onClose={handleClose} open={open} {...rest} TransitionComponent={Transition}>
             <DialogTitle sx={{ m: 0, p: 2 }}>
+                { rest.onClose && (
+                    <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                    >
+                        <Icon>
+                            close
+                        </Icon>
+                    </IconButton>
+                ) }
                 <Typography>
                     {title}
                 </Typography>
@@ -20,14 +46,6 @@ export const CustomDialog: React.FC<IDialogProps> = ({ title, handleClose, open,
             <DialogContent dividers>
                 {children}
             </DialogContent>
-            <DialogActions>
-                <Button startIcon={<Icon>save</Icon>} variant="contained" color="primary" onClick={handleClose}>
-                    Salvar
-                </Button>
-                <Button startIcon={<Icon>calcel</Icon>} variant="contained" color="error" onClick={handleClose}>
-                    Cancelar
-                </Button>
-            </DialogActions>
         </Dialog>
     )
 }

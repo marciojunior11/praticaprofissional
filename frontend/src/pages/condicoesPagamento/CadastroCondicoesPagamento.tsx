@@ -14,6 +14,7 @@ import { useDebounce } from "../../shared/hooks";
 import { IParcelas, TListaParcelas } from "../../shared/models/ModelParcelas";
 import { Environment } from "../../shared/environment";
 import { CadastroPaises } from "../paises/CadastroPaises";
+import { ConsultaFormasPagamento } from "../formasPagamento/ConsultaFormasPagamento";
 
 interface IFormData {
     descricao: string;
@@ -44,9 +45,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const [listaParcelas, setListaParcelas] = useState<IParcelas[]>([]);
     const [parcela, setParcela] = useState<IParcelas | null>(null);
 
-    const [isFormaPgtoDialogOpen, setIsFormaPgtoDialogOpen] = useState(false);
+    const [isConsultaFormasPgtoDialogOpen, setIsConsultaFormasPgtoDialogOpen] = useState(false);
     const toggleFormaPgtoDialogOpen = () => {
-        setIsFormaPgtoDialogOpen(oldValue => !oldValue);
+        setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
     }
 
     const [isLoading, setIsLoading] = useState(false);
@@ -457,8 +458,14 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <CustomDialog handleClose={toggleFormaPgtoDialogOpen} open={isFormaPgtoDialogOpen} title="Teste">
-                        AAA
+                    <CustomDialog 
+                        onClose={toggleFormaPgtoDialogOpen}
+                        handleClose={toggleFormaPgtoDialogOpen} 
+                        open={isConsultaFormasPgtoDialogOpen} 
+                        title="Cadastrar Forma de Pagamento"
+                        fullScreen
+                    >
+                        <ConsultaFormasPagamento isDialog/>
                     </CustomDialog>
                 </Box>
             </VForm>
