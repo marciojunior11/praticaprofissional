@@ -28,19 +28,21 @@ export const ConsultaPaises: React.FC = () => {
             name: "sigla",  
         },
         {
+            label: "Ações",
             name: ' ',
-            render: (
-                <>
-                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                        <Icon>delete</Icon>
-                    </IconButton>
-                    <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
-                        <Icon>edit</Icon>
-                    </IconButton>
-                </>
-            )
+            render: (row) => {
+                return (
+                    <>
+                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                            <Icon>delete</Icon>
+                        </IconButton>
+                        <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
+                            <Icon>edit</Icon>
+                        </IconButton>
+                    </>
+                )
+            }
         }
-
     ]
     const [rows, setRows] = useState<IPaises[]>([]);
     const [qtd, setQtd] = useState(0);
