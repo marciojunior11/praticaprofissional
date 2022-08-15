@@ -8,12 +8,40 @@ import { PaisesService } from '../../shared/services/api/paises/PaisesService';
 import { IPaises } from "../../shared/models/ModelPaises";
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
+import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 
 export const ConsultaPaises: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
 
+    const headers: IHeaderProps[] = [
+        {
+            label: "ID",
+            name: "id",  
+        },
+        {
+            label: "País",
+            name: "nmpais",  
+        },        {
+            label: "Sigla",
+            name: "sigla",  
+        },
+        {
+            name: ' ',
+            render: (
+                <>
+                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                        <Icon>delete</Icon>
+                    </IconButton>
+                    <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
+                        <Icon>edit</Icon>
+                    </IconButton>
+                </>
+            )
+        }
+
+    ]
     const [rows, setRows] = useState<IPaises[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -82,60 +110,11 @@ export const ConsultaPaises: React.FC = () => {
                 />
             }
         >
-            <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>País</TableCell>
-                            <TableCell>Sigla</TableCell>
-                            <TableCell>DDI</TableCell>
-                            <TableCell align="right">Ações</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows?.map(row => (
-                            <TableRow key={row.id}>
-                                <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.nmpais}</TableCell>
-                                <TableCell>{row.sigla}</TableCell>
-                                <TableCell>{row.ddi}</TableCell>
-                                <TableCell align="right">
-                                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                        <Icon>delete</Icon>
-                                    </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/paises/cadastro/${row.id}`)}>
-                                        <Icon>edit</Icon>
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                    { qtd === 0 && !isLoading && (
-                        <caption>{Environment.LISTAGEM_VAZIA}</caption>
-                    )}
-                    <TableFooter>
-                        {isLoading && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
-                                    <LinearProgress variant="indeterminate"/> 
-                                </TableCell>
-                            </TableRow>
-                        )}
-                        {(qtd > 0 && qtd > Environment.LIMITE_DE_LINHAS) && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
-                                    <Pagination 
-                                        page={pagina}
-                                        count={Math.ceil(qtd / Environment.LIMITE_DE_LINHAS)}
-                                        onChange={(_, newPage) => setSearchParams({ busca, pagina: newPage.toString() }, { replace : true })}
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableFooter>
-                </Table>
-            </TableContainer>
+            <DataTable
+                headers={headers}
+                rows={rows}
+                rowId={"id"}
+            />
         </LayoutBase>
     );
 };
