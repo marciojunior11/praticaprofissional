@@ -11,20 +11,13 @@ export interface IHeaderProps {
     onClick?: () => void; 
 }
 
-export interface IActionProps {
-    action: () => void;
-    icon: string;
-    color: 'inherit' | 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
-}
-
 interface IDataTableProps {
     headers: IHeaderProps[];
     rows: any[];
     rowId: string;
-    actions?: IActionProps[];
 }
 
-export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, actions } ) => {
+export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     return (
@@ -44,7 +37,14 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, ac
                 <TableBody>
                     { rows.map((row, index) => {
                         return (
-                            <TableRow key={row[rowId]}>
+                            <TableRow 
+                                hover 
+                                key={row[rowId]}
+                                onClick={() => {
+                                    const mSelectedValue = rows[index];
+                                    console.log(mSelectedValue);
+                                }}
+                            >
                                 { headers.map((header) => {
                                     return (
                                         <TableCell>
