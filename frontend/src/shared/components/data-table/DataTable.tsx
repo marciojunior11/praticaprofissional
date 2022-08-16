@@ -15,9 +15,10 @@ interface IDataTableProps {
     headers: IHeaderProps[];
     rows: any[];
     rowId: string;
+    selectable?: boolean;
 }
 
-export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId } ) => {
+export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     return (
@@ -38,11 +39,14 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId } )
                     { rows.map((row, index) => {
                         return (
                             <TableRow 
-                                hover 
+                                hover={selectable} 
                                 key={row[rowId]}
                                 onClick={() => {
-                                    const mSelectedValue = rows[index];
-                                    console.log(mSelectedValue);
+                                    if (selectable) {
+                                        const mSelectedValue = rows[index];
+                                        console.log(mSelectedValue);
+                                    }
+                                    else console.log('NÃO DA PRA SELECIONAR');
                                 }}
                             >
                                 { headers.map((header) => {
