@@ -196,8 +196,8 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
-                    <Grid container direction="column" padding={2} spacing={2}>
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
+                    <Grid item container xs={12} sm={12} md={12} lg={8} xl={8} direction="column" padding={2} spacing={2}>
 
                         {isLoading && (
                             <Grid item>
@@ -210,7 +210,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VTextField
                                     required
                                     fullWidth

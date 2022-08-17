@@ -19,7 +19,7 @@ export const LayoutBase: React.FC<ILayoutBaseProps> = ({children, titulo, barraD
 
     return (
         <Box height='100%' display='flex' flexDirection='column' gap={1}>
-            <Box padding={1} display='flex' alignItems='center' gap={1} height={theme.spacing(smDown ? 6 : mdDown ? 8 : 12)}>
+            <Box padding={1} display='flex' alignItems='center' gap={1} height={titulo && (theme.spacing(smDown ? 6 : mdDown ? 8 : 12))}>
 
                 {smDown && (
                     <IconButton onClick={toggleDrawerOpen}>
@@ -29,14 +29,16 @@ export const LayoutBase: React.FC<ILayoutBaseProps> = ({children, titulo, barraD
                     </IconButton>
                 )}
 
-                <Typography 
-                    variant={ smDown ? 'h5' : mdDown ? 'h4' : 'h3'}
-                    overflow='hiden'
-                    whiteSpace='nowrap'
-                    textOverflow='ellipses'
-                >
-                    {titulo}
-                </Typography>
+                { titulo && (
+                    <Typography 
+                        variant={ smDown ? 'h5' : mdDown ? 'h4' : 'h3'}
+                        overflow='hiden'
+                        whiteSpace='nowrap'
+                        textOverflow='ellipses'
+                    >
+                        {titulo}
+                    </Typography>
+                ) }
             </Box>
 
             {barraDeFerramentas && (

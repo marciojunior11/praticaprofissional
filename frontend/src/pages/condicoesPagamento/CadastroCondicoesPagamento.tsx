@@ -463,7 +463,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                         handleClose={toggleFormaPgtoDialogOpen} 
                         open={isConsultaFormasPgtoDialogOpen} 
                         title="Cadastrar Forma de Pagamento"
-                        fullScreen
+                        fullWidth
                     >
                         <ConsultaFormasPagamento isDialog/>
                     </CustomDialog>

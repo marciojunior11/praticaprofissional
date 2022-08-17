@@ -9,6 +9,7 @@ import { IFormasPagamento } from "../../shared/models/ModelFormasPagamento";
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 import { CadastroFormasPagamento } from "./CadastroFormasPagamento";
+import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 
 interface IConsultaProps {
     isDialog?: boolean;
@@ -18,6 +19,34 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
+
+    const headers: IHeaderProps[] = useMemo(() => [
+        {
+            label: "ID",
+            name: "id",
+        },
+        {
+            label: "Descrição",
+            name: "descricao",
+        },
+        {
+            label: "Ações",
+            name: ' ',
+            align: "right",
+            render: (row) => {
+                return (
+                    <>
+                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                            <Icon>delete</Icon>
+                        </IconButton>
+                        <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
+                            <Icon>edit</Icon>
+                        </IconButton>
+                    </>
+                )
+            }
+        }
+    ], [])
 
     const [rows, setRows] = useState<IFormasPagamento[]>([]);
     const [qtd, setQtd] = useState(0);
@@ -94,57 +123,15 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                 />
             }
         >
-            <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Descrição</TableCell>
-                            <TableCell align="right">Ações</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows?.map(row => (
-                            <TableRow key={row.id}>
-                                <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.descricao}</TableCell>
-                                <TableCell align="right">
-                                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                        <Icon>delete</Icon>
-                                    </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/formasPagamento/cadastro/${row.id}`)}>
-                                        <Icon>edit</Icon>
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                    { qtd === 0 && !isLoading && (
-                        <caption>{Environment.LISTAGEM_VAZIA}</caption>
-                    )}
-                    <TableFooter>
-                        {isLoading && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
-                                    <LinearProgress variant="indeterminate"/> 
-                                </TableCell>
-                            </TableRow>
-                        )}
-                        {(qtd > 0 && qtd > Environment.LIMITE_DE_LINHAS) && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
-                                    <Pagination 
-                                        page={pagina}
-                                        count={Math.ceil(qtd / Environment.LIMITE_DE_LINHAS)}
-                                        onChange={(_, newPage) => setSearchParams({ busca, pagina: newPage.toString() }, { replace : true })}
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableFooter>
-                </Table>
-            </TableContainer>
+            <DataTable
+                headers={headers}
+                rows={rows}
+                rowId="id"
+                selectable          
+            />
             <CustomDialog
+                fullWidth
+                maxWidth="md"
                 onClose={toggleCadastroFormaPgtoDialogOpen}
                 handleClose={toggleCadastroFormaPgtoDialogOpen} 
                 open={isCadastroFormaPgtoDialogOpen} 

@@ -5,6 +5,7 @@ import { render } from "react-dom";
 export interface IHeaderProps {
     label?: string;
     name: string;
+    align?: 'inherit' | 'left' | 'center' | 'right' | 'justify';
     render?: (row: any) => React.ReactNode;
     sortable?: boolean;
     order?: 'asc' | 'desc';
@@ -28,7 +29,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                     <TableRow>
                         { headers.map(header => {
                             return (
-                                <TableCell>
+                                <TableCell align={header.align && header.align}>
                                     {header.label}
                                 </TableCell>
                             )
@@ -51,7 +52,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                             >
                                 { headers.map((header) => {
                                     return (
-                                        <TableCell>
+                                        <TableCell align={header.align && header.align}>
                                             { !header.render ? row[header.name] : header.render(row) }
                                         </TableCell>
                                     )

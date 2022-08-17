@@ -30,7 +30,7 @@ export const AppThemeProvider: React.FC<IThemeProviderProps> = ( { children } ) 
         if (themeName === 'light') return LightTheme;
 
         return DarkTheme;
-    }, [themeName ]);
+    }, [themeName]);
 
     return (
         <ThemeContext.Provider value={{ themeName, toggleTheme }}>
