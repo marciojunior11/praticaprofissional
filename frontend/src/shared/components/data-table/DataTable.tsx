@@ -1,6 +1,8 @@
-import { Icon, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableRowProps } from "@mui/material";
+import { Icon, IconButton, LinearProgress, Pagination, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TableRowProps } from "@mui/material";
 import { useState } from "react";
 import { render } from "react-dom";
+import { URLSearchParamsInit } from "react-router-dom";
+import { Environment } from "../../environment";
 
 export interface IHeaderProps {
     label?: string;
@@ -17,9 +19,14 @@ interface IDataTableProps {
     rows: any[];
     rowId: string;
     selectable?: boolean;
+    onRowClick?: (row: any) => void;
+    rowCount?: number;
+    isLoading?: boolean;
+    page?: number;
+    setSearchParams?: (page: number) => void;
 }
 
-export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false } ) => {
+export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false, onRowClick, rowCount, isLoading, page, setSearchParams } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     return (
@@ -43,11 +50,9 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                                 hover={selectable} 
                                 key={row[rowId]}
                                 onClick={() => {
-                                    if (selectable) {
-                                        const mSelectedValue = rows[index];
-                                        console.log(mSelectedValue);
-                                    }
-                                    else console.log('NÃO DA PRA SELECIONAR');
+                                    selectable && (
+                                        onRowClick?.(row)
+                                    )
                                 }}
                             >
                                 { headers.map((header) => {
@@ -61,6 +66,29 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                         )
                     }) }
                 </TableBody>
+                { rowCount === 0 && !isLoading && (
+                    <caption>{Environment.LISTAGEM_VAZIA}</caption>
+                )}
+                <TableFooter>
+                    {isLoading && (
+                        <TableRow>
+                            <TableCell colSpan={4}>
+                                <LinearProgress variant="indeterminate"/> 
+                            </TableCell>
+                        </TableRow>
+                    )}
+                    {(rowCount && (rowCount > 0 && rowCount > Environment.LIMITE_DE_LINHAS)) && (
+                        <TableRow>
+                            <TableCell colSpan={4}>
+                                <Pagination 
+                                    page={page}
+                                    count={Math.ceil(rowCount / Environment.LIMITE_DE_LINHAS)}
+                                    onChange={(_, newPage) => setSearchParams?.(newPage)}
+                                />
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableFooter>
             </Table>
         </TableContainer>
     )

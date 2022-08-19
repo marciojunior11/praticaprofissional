@@ -13,9 +13,11 @@ import { DataTable, IHeaderProps } from "../../shared/components/data-table/Data
 
 interface IConsultaProps {
     isDialog?: boolean;
+    onSelectItem?: (row: any) => void;
+    toggleOpen?: () => void;
 }
 
-export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = false }) => {
+export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleOpen }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
@@ -127,7 +129,18 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                 headers={headers}
                 rows={rows}
                 rowId="id"
-                selectable          
+                selectable={isDialog}
+                onRowClick={(row) => {
+                    if (isDialog)
+                    {
+                        onSelectItem?.(row);
+                        toggleOpen?.();
+                    }
+                }}   
+                isLoading={isLoading}
+                page={pagina}
+                rowCount={qtd}
+                setSearchParams={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}      
             />
             <CustomDialog
                 fullWidth

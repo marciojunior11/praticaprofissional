@@ -46,7 +46,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const [parcela, setParcela] = useState<IParcelas | null>(null);
 
     const [isConsultaFormasPgtoDialogOpen, setIsConsultaFormasPgtoDialogOpen] = useState(false);
-    const toggleFormaPgtoDialogOpen = () => {
+    const toggleConsultaFormasPgtoDialogOpen = () => {
         setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
     }
 
@@ -352,7 +352,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                             TFLabel="Forma de Pagamento"
                                             getAll={FormasPagamentoService.getAll}
                                             onClickSearch={() => {
-                                                toggleFormaPgtoDialogOpen();
+                                                toggleConsultaFormasPgtoDialogOpen();
                                             }}
                                         />
                                     </Grid>
@@ -459,13 +459,17 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                         </Grid>
                     </Grid>
                     <CustomDialog 
-                        onClose={toggleFormaPgtoDialogOpen}
-                        handleClose={toggleFormaPgtoDialogOpen} 
+                        onClose={toggleConsultaFormasPgtoDialogOpen}
+                        handleClose={toggleConsultaFormasPgtoDialogOpen} 
                         open={isConsultaFormasPgtoDialogOpen} 
                         title="Cadastrar Forma de Pagamento"
                         fullWidth
                     >
-                        <ConsultaFormasPagamento isDialog/>
+                        <ConsultaFormasPagamento 
+                            isDialog
+                            onSelectItem={(row) => formRef.current?.setFieldValue("parcela.formapagamento", row)}
+                            toggleOpen={toggleConsultaFormasPgtoDialogOpen}
+                        />
                     </CustomDialog>
                 </Box>
             </VForm>
