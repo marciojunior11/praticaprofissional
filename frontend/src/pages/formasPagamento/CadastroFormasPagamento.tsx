@@ -19,7 +19,8 @@ interface IFormData {
 
 interface ICadastroProps {
     isDialog?: boolean;
-    handleClose?: () => void;
+    toggleOpen?: () => void;
+    selectedId?: number;
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
@@ -28,8 +29,8 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     ultAlt: yup.string().required(),
 })
 
-export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, handleClose}) => {
-    const { id = 'novo' } = useParams<'id'>();
+export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId}) => {
+    var { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
@@ -41,6 +42,10 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
     const [isValidating, setIsValidating] = useState<any>(null);
 
     const [isValid, setIsValid] = useState(false);
+
+    useEffect(() => {
+        id = String(selectedId)
+    }, [])
 
     useEffect(() => {
         if (id !== 'novo') {
@@ -103,44 +108,102 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
-                        if (id === 'novo') {
-                            FormasPagamentoService.create(dadosValidados)
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message)
-                                    } else {
-                                        toast.success('Cadastrado com sucesso!')
-                                        if (isSaveAndClose()) {
-                                            navigate('/formaspagamento');  
-                                        } else if (isSaveAndNew()) {
-                                            setIsValidating('');
-                                            setIsValid(false);
-                                            navigate('/formaspagamento/cadastro/novo');
-                                            formRef.current?.setData({
-                                                descricao: ''
-                                            });
+                        if (isDialog) {
+                            if (selectedId === undefined) {
+                                FormasPagamentoService.create(dadosValidados)
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
                                         } else {
-                                            setIsValidating(null);
-                                            navigate(`/formaspagamento/cadastro/${result}`);
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                if (isDialog) {
+                                                    toggleOpen?.();
+                                                }
+                                                else {
+                                                    navigate('/formaspagamento')
+                                                } 
+                                            } else if (isSaveAndNew()) {
+                                                setIsValidating('');
+                                                setIsValid(false);
+                                                navigate('/formaspagamento/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    descricao: ''
+                                                });
+                                            } else {
+                                                setIsValidating(null);
+                                                navigate(`/formaspagamento/cadastro/${result}`);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                            } else {
+                                FormasPagamentoService.updateById(Number(selectedId), { id: Number(selectedId), ...dadosValidados })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message);
+                                        } else {
+                                            toast.success('Alterado com sucesso!');
+                                            if (isSaveAndClose()) {
+                                                if (isDialog) {
+                                                    toggleOpen?.();
+                                                }
+                                                else {
+                                                    navigate('/formaspagamento')
+                                                } 
+                                            } else {
+                                                setIsValidating(null);
+                                            }
+                                        }
+                                    });
+                            }
                         } else {
-                            FormasPagamentoService.updateById(Number(id), { id: Number(id), ...dadosValidados })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        if (isSaveAndClose()) {
-                                            navigate('/formaspagamento')
+                            if (id === 'novo') {
+                                FormasPagamentoService.create(dadosValidados)
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
                                         } else {
-                                            setIsValidating(null);
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                if (isDialog) {
+                                                    toggleOpen?.();
+                                                }
+                                                else {
+                                                    navigate('/formaspagamento')
+                                                }
+                                                ;  
+                                            } else if (isSaveAndNew()) {
+                                                setIsValidating('');
+                                                setIsValid(false);
+                                                navigate('/formaspagamento/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    descricao: ''
+                                                });
+                                            } else {
+                                                setIsValidating(null);
+                                                navigate(`/formaspagamento/cadastro/${result}`);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                            } else {
+                                FormasPagamentoService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message);
+                                        } else {
+                                            toast.success('Alterado com sucesso!');
+                                            if (isSaveAndClose()) {
+                                                navigate('/formaspagamento')
+                                            } else {
+                                                setIsValidating(null);
+                                            }
+                                        }
+                                    });
+                            }
                         }
                     } else {
                         toast.error('Verifique os campos');
@@ -236,6 +299,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
+                                        console.log(id);
                                         formRef.current?.setFieldError('pais', '');
                                         debounce(() => {
                                             validate(e.target.value)

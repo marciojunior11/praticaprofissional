@@ -23,10 +23,10 @@ interface IDataTableProps {
     rowCount?: number;
     isLoading?: boolean;
     page?: number;
-    setSearchParams?: (page: number) => void;
+    onPageChange?: (page: number) => void;
 }
 
-export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false, onRowClick, rowCount, isLoading, page, setSearchParams } ) => {
+export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     return (
@@ -49,7 +49,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                             <TableRow 
                                 hover={selectable} 
                                 key={row[rowId]}
-                                onClick={() => {
+                                onDoubleClick={() => {
                                     selectable && (
                                         onRowClick?.(row)
                                     )
@@ -83,7 +83,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                                 <Pagination 
                                     page={page}
                                     count={Math.ceil(rowCount / Environment.LIMITE_DE_LINHAS)}
-                                    onChange={(_, newPage) => setSearchParams?.(newPage)}
+                                    onChange={(_, newPage) => onPageChange?.(newPage)}
                                 />
                             </TableCell>
                         </TableRow>

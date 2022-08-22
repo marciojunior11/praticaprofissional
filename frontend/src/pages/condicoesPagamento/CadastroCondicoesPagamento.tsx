@@ -35,25 +35,26 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 })
 
 export const CadastroCondicoesPagamento: React.FC = () => {
+    //HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
-
-    const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
+    const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
 
+    //STATES
     const [obj, setObj] = useState<ICondicoesPagamento | null>(null);
     const [listaParcelas, setListaParcelas] = useState<IParcelas[]>([]);
     const [parcela, setParcela] = useState<IParcelas | null>(null);
-
     const [isConsultaFormasPgtoDialogOpen, setIsConsultaFormasPgtoDialogOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isValidating, setIsValidating] = useState<any>(null);
+    const [isValid, setIsValid] = useState(false);
+
+    //FUNCTIONS
     const toggleConsultaFormasPgtoDialogOpen = () => {
         setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
     }
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<any>(null);
-
-    const [isValid, setIsValid] = useState(false);
 
     useEffect(() => {
         if (id !== 'novo') {
@@ -468,7 +469,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                         <ConsultaFormasPagamento 
                             isDialog
                             onSelectItem={(row) => formRef.current?.setFieldValue("parcela.formapagamento", row)}
-                            toggleOpen={toggleConsultaFormasPgtoDialogOpen}
+                            toggleDialogOpen={toggleConsultaFormasPgtoDialogOpen}
                         />
                     </CustomDialog>
                 </Box>

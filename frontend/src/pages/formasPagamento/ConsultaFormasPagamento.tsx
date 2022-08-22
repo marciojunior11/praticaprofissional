@@ -13,14 +13,15 @@ import { DataTable, IHeaderProps } from "../../shared/components/data-table/Data
 
 interface IConsultaProps {
     isDialog?: boolean;
+    toggleDialogOpen?: () => void;
     onSelectItem?: (row: any) => void;
-    toggleOpen?: () => void;
 }
 
-export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleOpen }) => {
+export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
+    const [selectedId, setSelectedId] = useState(undefined);
 
     const headers: IHeaderProps[] = useMemo(() => [
         {
@@ -41,7 +42,14 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                         <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>delete</Icon>
                         </IconButton>
-                        <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
+                        <IconButton color="primary" size="small" onClick={() => {
+                            if (isDialog) {
+                                setSelectedId(row.id);
+                                toggleCadastroFormaPgtoDialogOpen();
+                            } else {
+                                navigate(`/estados/cadastro/${row.id}`)
+                            }
+                        }}>
                             <Icon>edit</Icon>
                         </IconButton>
                     </>
@@ -116,11 +124,11 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
                     onClickNew={() => {
-                        isDialog ? (
+                        if (isDialog) {
                             toggleCadastroFormaPgtoDialogOpen()
-                        ) : (
+                        } else {
                             navigate('/formaspagamento/cadastro/novo')
-                        )
+                        }
                     }}
                 />
             }
@@ -134,13 +142,13 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                     if (isDialog)
                     {
                         onSelectItem?.(row);
-                        toggleOpen?.();
+                        toggleDialogOpen?.();
                     }
                 }}   
                 isLoading={isLoading}
                 page={pagina}
                 rowCount={qtd}
-                setSearchParams={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}      
+                onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}      
             />
             <CustomDialog
                 fullWidth
@@ -152,7 +160,8 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
             >
                 <CadastroFormasPagamento 
                     isDialog
-                    handleClose={toggleCadastroFormaPgtoDialogOpen}
+                    toggleOpen={toggleCadastroFormaPgtoDialogOpen}
+                    selectedId={selectedId}
                 />
             </CustomDialog>
         </LayoutBase>
