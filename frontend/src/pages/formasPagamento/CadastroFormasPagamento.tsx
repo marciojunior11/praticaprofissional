@@ -30,7 +30,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 })
 
 export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId}) => {
-    var { id = 'novo' } = useParams<'id'>();
+    const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
@@ -44,10 +44,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
     const [isValid, setIsValid] = useState(false);
 
     useEffect(() => {
-        id = String(selectedId)
-    }, [])
-
-    useEffect(() => {
+        console.log(id)
         if (id !== 'novo') {
             setIsLoading(true);
 
