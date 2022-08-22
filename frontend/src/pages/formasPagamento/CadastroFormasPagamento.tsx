@@ -21,6 +21,7 @@ interface ICadastroProps {
     isDialog?: boolean;
     toggleOpen?: () => void;
     selectedId?: number;
+    reloadDataTableIfDialog?: () => void;
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
@@ -29,7 +30,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     ultAlt: yup.string().required(),
 })
 
-export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId}) => {
+export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -45,25 +46,46 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
 
     useEffect(() => {
         console.log(id)
-        if (id !== 'novo') {
-            setIsLoading(true);
-
-            FormasPagamentoService.getById(Number(id))
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                        navigate('/formaspagamento');
-                    } else {
-                        console.log('RESULT', result);
-                        formRef.current?.setData(result);
-                        setObj(result);
-                    }
+        if (isDialog) {
+            if (id !== undefined) {
+                setIsLoading(true);
+                FormasPagamentoService.getById(Number(selectedId))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/formaspagamento');
+                        } else {
+                            console.log('RESULT', result);
+                            formRef.current?.setData(result);
+                            setObj(result);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    descricao: ''
                 });
+            }
         } else {
-            formRef.current?.setData({
-                descricao: ''
-            });
+            if (id !== 'novo') {
+                setIsLoading(true);
+                FormasPagamentoService.getById(Number(id))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/formaspagamento');
+                        } else {
+                            console.log('RESULT', result);
+                            formRef.current?.setData(result);
+                            setObj(result);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    descricao: ''
+                });
+            }   
         }
     }, [id]);
 
@@ -144,6 +166,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                                             toast.success('Alterado com sucesso!');
                                             if (isSaveAndClose()) {
                                                 if (isDialog) {
+                                                    reloadDataTableIfDialog?.();
                                                     toggleOpen?.();
                                                 }
                                                 else {

@@ -67,6 +67,25 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
         setIsCadastroFormaPgtoDialogOpen(oldValue => !oldValue);
     }
 
+    const reloadDataTable = () => {
+        setIsLoading(true);
+
+        debounce(() => {
+            FormasPagamentoService.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        console.log('RESULT', result);
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
+
     const busca = useMemo(() => {
         return searchParams.get('busca')?.toUpperCase() || ''; 
     }, [searchParams]);
@@ -79,8 +98,6 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
         setIsLoading(true);
 
         debounce(() => {
-            let data = new Date();
-            console.log(data.toLocaleString());
             FormasPagamentoService.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
@@ -161,7 +178,8 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                 <CadastroFormasPagamento 
                     isDialog
                     toggleOpen={toggleCadastroFormaPgtoDialogOpen}
-                    selectedId={selectedId}
+                    selectedId={Number(selectedId)}
+                    reloadDataTableIfDialog={reloadDataTable}
                 />
             </CustomDialog>
         </LayoutBase>
