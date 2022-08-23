@@ -21,7 +21,7 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
-    const [selectedId, setSelectedId] = useState(undefined);
+    const [selectedId, setSelectedId] = useState<number | undefined>();
 
     const headers: IHeaderProps[] = useMemo(() => [
         {
@@ -142,9 +142,10 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
                     onClickNew={() => {
                         if (isDialog) {
-                            toggleCadastroFormaPgtoDialogOpen()
+                            setSelectedId(0);
+                            toggleCadastroFormaPgtoDialogOpen();
                         } else {
-                            navigate('/formaspagamento/cadastro/novo')
+                            navigate('/formaspagamento/cadastro/novo');
                         }
                     }}
                 />

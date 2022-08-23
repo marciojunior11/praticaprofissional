@@ -45,9 +45,10 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
     const [isValid, setIsValid] = useState(false);
 
     useEffect(() => {
-        console.log(id)
+        console.log(id);
+        console.log(selectedId);
         if (isDialog) {
-            if (id !== undefined) {
+            if (selectedId !== 0) {
                 setIsLoading(true);
                 FormasPagamentoService.getById(Number(selectedId))
                     .then((result) => {
@@ -128,7 +129,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                     if(isValid) {
                         setIsLoading(true);
                         if (isDialog) {
-                            if (selectedId === undefined) {
+                            if (selectedId === 0) {
                                 FormasPagamentoService.create(dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
@@ -138,6 +139,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                                             toast.success('Cadastrado com sucesso!')
                                             if (isSaveAndClose()) {
                                                 if (isDialog) {
+                                                    reloadDataTableIfDialog?.();
                                                     toggleOpen?.();
                                                 }
                                                 else {
@@ -274,7 +276,10 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/formaspagamento/cadastro/novo') }
-                    onClickVoltar={() => navigate('/formaspagamento') }
+                    onClickVoltar={() => {
+                        if (isDialog) toggleOpen?.()
+                        else navigate('/formaspagamento');
+                    }}
                 />
             }
         >
