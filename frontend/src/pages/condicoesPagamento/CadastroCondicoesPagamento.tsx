@@ -11,7 +11,7 @@ import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
-import { IParcelas, TListaParcelas } from "../../shared/models/ModelParcelas";
+import { IParcelas, TListaParcelas, utils as parcelasUtils } from "../../shared/models/ModelParcelas";
 import { Environment } from "../../shared/environment";
 import { CadastroPaises } from "../paises/CadastroPaises";
 import { ConsultaFormasPagamento } from "../formasPagamento/ConsultaFormasPagamento";
@@ -83,7 +83,15 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     useEffect(() => {
         if (obj) setIsValid(true)
         else setIsValid(false);
-    }, [obj])
+    }, [obj]);
+
+    const validatePercParcelas = () => {
+        const totalPerc = parcelasUtils.calcularPercentual(listaParcelas);
+        if (totalPerc < 0) {
+            setIsValid(false);
+            toast.error('O percentual total das parcelas deve ser  100%. Por favor, verifique.', { autoClose: false })
+        }
+    }
 
     const validate = (filter: string) => {
         if (filter != obj?.descricao) {
@@ -110,6 +118,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
+        validatePercParcelas();
         let data = new Date();
         dados.datacad = data.toLocaleString();
         dados.ultalt = data.toLocaleString();
@@ -251,7 +260,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating('');
-                                        formRef.current?.setFieldError('pais', '');
+                                        formRef.current?.setFieldError('descricao', '');
                                         debounce(() => {
                                             validate(e.target.value)
                                         })
@@ -398,12 +407,13 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                 </Grid>
                             </>
                         )}
-
                         <Grid item>
                             <Divider orientation="horizontal"/>
                         </Grid>
-                        <Grid item>
-                            <Typography variant="h6">Parcelas</Typography>
+                        <Grid container item direction="row" spacing={2} alignItems="baseline">
+                            <Grid item>
+                                <Typography variant="h6">Parcelas</Typography>
+                            </Grid>
                         </Grid>
                         <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
