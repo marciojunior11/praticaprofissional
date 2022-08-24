@@ -52,6 +52,14 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                         }}>
                             <Icon>edit</Icon>
                         </IconButton>
+                        {isDialog && (
+                            <IconButton color="success" size="small" onClick={() => {
+                                onSelectItem?.(row);
+                                toggleDialogOpen?.();
+                            }}>
+                                <Icon>checkbox</Icon>
+                            </IconButton>
+                        )}
                     </>
                 )
             }
