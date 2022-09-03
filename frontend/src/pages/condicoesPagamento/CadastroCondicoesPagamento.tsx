@@ -49,6 +49,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
     const [isValid, setIsValid] = useState(false);
+    const [isValidParcelas, setIsValidParcelas] = useState(false);
 
     //FUNCTIONS
     const toggleConsultaFormasPgtoDialogOpen = () => {
@@ -85,11 +86,15 @@ export const CadastroCondicoesPagamento: React.FC = () => {
         else setIsValid(false);
     }, [obj]);
 
-    const validatePercParcelas = () => {
-        const totalPerc = parcelasUtils.calcularPercentual(listaParcelas);
-        if (totalPerc < 0) {
-            setIsValid(false);
-            toast.error('O percentual total das parcelas deve ser  100%. Por favor, verifique.', { autoClose: false })
+    const validatePercParcelas = (perc: number) => {
+        var totalPercParcelas: number = 0;
+        listaParcelas.forEach((parcela) => totalPercParcelas += Number(parcela.percentual));
+        totalPercParcelas += Number(perc);
+        if (totalPercParcelas == 100) setIsValidParcelas(true)
+        else {
+            console.log("AQUI", totalPercParcelas);
+            setIsValidParcelas(false);
+            if (totalPercParcelas > 100) toast.error('A soma do percentual total de parcelas deve ser igual a 100%. Por favor, verifique.');
         }
     }
 
@@ -118,14 +123,13 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
-        validatePercParcelas();
         let data = new Date();
         dados.datacad = data.toLocaleString();
         dados.ultalt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
-                    if(isValid) {
+                    if(isValid && isValidParcelas) {
                         setIsLoading(true);
                         if (id === 'novo') {
                             CondicoesPagamentoService.create({ listaparcelas: listaParcelas, ...dadosValidados})
@@ -167,7 +171,8 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                 });
                         }
                     } else {
-                        toast.error('Verifique os campos');
+                        toast.error('Verifique os campos.');
+                        if (!isValidParcelas) toast.error('Verifique a porcentagem total das parcelas.')
                     }
                 })
                 .catch((errors: yup.ValidationError) => {
@@ -372,6 +377,10 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                             color="success" 
                                             size="large"
                                             onClick={(e) => {
+                                                console.log('AAAAA', formRef.current?.getData().parcela.percentual)
+                                                if ((formRef.current?.getData().parcela.percentual != "") && (formRef.current?.getData().parcela.percentual != undefined)) {
+                                                    validatePercParcelas(formRef.current?.getData().parcela.percentual);
+                                                }
                                                 let data = new Date();
                                                 console.log(listaParcelas.length);
                                                 console.log('DIAS', formRef.current?.getData().parcela.dias);
