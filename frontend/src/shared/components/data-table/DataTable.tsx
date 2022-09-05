@@ -8,7 +8,7 @@ export interface IHeaderProps {
     label?: string;
     name: string;
     align?: 'inherit' | 'left' | 'center' | 'right' | 'justify';
-    render?: (row: any) => React.ReactNode;
+    render?: (row: any) => React.ReactNode | null;
     sortable?: boolean;
     order?: 'asc' | 'desc';
     onClick?: () => void; 

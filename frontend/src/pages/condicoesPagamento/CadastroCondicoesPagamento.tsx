@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Button, CircularProgress, Collapse, Divider, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import * as yup from 'yup';
@@ -15,6 +15,8 @@ import { IParcelas, TListaParcelas, utils as parcelasUtils } from "../../shared/
 import { Environment } from "../../shared/environment";
 import { CadastroPaises } from "../paises/CadastroPaises";
 import { ConsultaFormasPagamento } from "../formasPagamento/ConsultaFormasPagamento";
+import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
+import { positiveInteger, positiveDecimal } from "../../shared/utils/validations";
 
 interface IFormData {
     descricao: string;
@@ -47,19 +49,35 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const [parcela, setParcela] = useState<IParcelas | null>(null);
     const [isConsultaFormasPgtoDialogOpen, setIsConsultaFormasPgtoDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [readOnly, setReadOnly] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
     const [isValid, setIsValid] = useState(false);
     const [isValidParcelas, setIsValidParcelas] = useState(false);
+    const [isEditingParcela, setIsEditingParcela] = useState(false);
+    const [parcelaSelected, setParcelaSelected] = useState<IParcelas | null>(null);
 
     //FUNCTIONS
     const toggleConsultaFormasPgtoDialogOpen = () => {
         setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
     }
 
+    useEffect(() => {
+        if (isEditingParcela) {
+            formRef.current?.setFieldValue('parcela.dias', parcelaSelected?.dias);
+            formRef.current?.setFieldValue('parcela.percentual', parcelaSelected?.percentual);
+            formRef.current?.setFieldValue('parcela.formapagamento', parcelaSelected?.formapagamento);
+        } else {
+            formRef.current?.setFieldValue('parcela.dias', '');
+            formRef.current?.setFieldValue('parcela.percentual', '');
+            formRef.current?.setFieldValue('parcela.formapagamento', null);
+        }
+    }, [isEditingParcela])
 
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
+
+            setReadOnly(true);
 
             CondicoesPagamentoService.getById(Number(id))
                 .then((result) => {
@@ -86,16 +104,65 @@ export const CadastroCondicoesPagamento: React.FC = () => {
         else setIsValid(false);
     }, [obj]);
 
-    const validatePercParcelas = (perc: number) => {
+    const insertParcela = () => {
+        console.log('PARCELAS OK', isValidParcelas);
         var totalPercParcelas: number = 0;
         listaParcelas.forEach((parcela) => totalPercParcelas += Number(parcela.percentual));
-        totalPercParcelas += Number(perc);
-        if (totalPercParcelas == 100) setIsValidParcelas(true)
-        else {
-            console.log("AQUI", totalPercParcelas);
-            setIsValidParcelas(false);
-            if (totalPercParcelas > 100) toast.error('A soma do percentual total de parcelas deve ser igual a 100%. Por favor, verifique.');
+        totalPercParcelas += Number(formRef.current?.getData().parcela.percentual);
+        if (isEditingParcela && parcelaSelected) {
+            totalPercParcelas -= parcelaSelected?.percentual;
         }
+        if ((totalPercParcelas > 100) || (formRef.current?.getData().parcela.percentual <= 0) || (formRef.current?.getData().parcela.dias < 0)) {
+            const validationErrors: IVFormErrors = {};
+            if (totalPercParcelas > 100) {
+                toast.error('A soma do percentual total de parcelas não pode ser maior que 100%. Por favor, verifique.', { autoClose:  15000});
+                validationErrors['parcela.percentual'] = 'Percentual inválido';
+            }
+            if (formRef.current?.getData().parcela.percentual <= 0) {
+                toast.error('O percentual deve ser maior que zero. Por favor verifique.', { autoClose:  15000});
+                validationErrors['parcela.percentual'] = 'Percentual inválido';
+            }
+            if (formRef.current?.getData().parcela.dias < 0) {
+                toast.error('O número de dias deve ser inteiro e maior que zero. Por favor verifique.', { autoClose:  15000});
+                validationErrors['parcela.dias'] = 'Número de dias inválido';
+            }
+            formRef.current?.setErrors(validationErrors);
+        }
+        else {
+            if (isEditingParcela) {
+                const newArray = listaParcelas.map((item) => {
+                    if (item.numero == parcelaSelected?.numero) {
+                        return {
+                            ...item,
+                            dias: formRef.current?.getData().parcela.dias,
+                            percentual: formRef.current?.getData().parcela.percentual,
+                            formapagamento: formRef.current?.getData().parcela.formapagamento
+                        }
+                    }
+                    return item;
+                })
+                setIsEditingParcela(false);
+                setListaParcelas(newArray);
+            } else {
+                let data = new Date();
+                setListaParcelas([
+                    ...listaParcelas,
+                    {
+                        numero: listaParcelas.length + 1,
+                        dias: formRef.current?.getData().parcela.dias,
+                        percentual: formRef.current?.getData().parcela.percentual,
+                        formapagamento: formRef.current?.getData().parcela.formapagamento,
+                        datacad: data.toLocaleString(),
+                        ultalt: data.toLocaleString()
+                    }
+                ]);
+            }
+            formRef.current?.setFieldValue('parcela.dias', '');
+            formRef.current?.setFieldValue('parcela.percentual', '');
+            formRef.current?.setFieldValue('parcela.formapagamento', null);
+            if (totalPercParcelas == 100) setIsValidParcelas(true);
+        }
+        console.log(listaParcelas);
     }
 
     const validate = (filter: string) => {
@@ -171,7 +238,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                 });
                         }
                     } else {
-                        toast.error('Verifique os campos.');
+                        if (!isValid) toast.error('Verifique os campos.');
                         if (!isValidParcelas) toast.error('Verifique a porcentagem total das parcelas.')
                     }
                 })
@@ -284,7 +351,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     fullWidth
                                     name="txdesc"
                                     label="Desconto"
-                                    disabled={isLoading}
+                                    disabled={isLoading || readOnly}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>
                                     }}
@@ -299,7 +366,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     fullWidth
                                     name="txmulta"
                                     label="Multa"
-                                    disabled={isLoading}
+                                    disabled={isLoading || readOnly}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>
                                     }}
@@ -314,7 +381,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     fullWidth
                                     name="txjuros"
                                     label="Juros"
-                                    disabled={isLoading}
+                                    disabled={isLoading || readOnly}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>
                                     }}
@@ -358,7 +425,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                             }}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={7}>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
                                         <VAutocompleteSearch
                                             size="small"
                                             required
@@ -374,33 +441,11 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
                                         <Button
                                             variant="contained" 
-                                            color="success" 
+                                            color={ isEditingParcela ? "warning" : "success"} 
                                             size="large"
-                                            onClick={(e) => {
-                                                console.log('AAAAA', formRef.current?.getData().parcela.percentual)
-                                                if ((formRef.current?.getData().parcela.percentual != "") && (formRef.current?.getData().parcela.percentual != undefined)) {
-                                                    validatePercParcelas(formRef.current?.getData().parcela.percentual);
-                                                }
-                                                let data = new Date();
-                                                console.log(listaParcelas.length);
-                                                console.log('DIAS', formRef.current?.getData().parcela.dias);
-                                                console.log('PERC', formRef.current?.getData().parcela.percentual);
-                                                console.log('FORMA',formRef.current?.getData().parcela.formapagamento);
+                                            onClick={e => {
                                                 if (!!formRef.current?.getData().parcela.dias && !!formRef.current?.getData().parcela.percentual && !!formRef.current?.getData().parcela.formapagamento) {
-                                                    setListaParcelas([
-                                                        ...listaParcelas,
-                                                        {
-                                                            numero: listaParcelas.length + 1,
-                                                            dias: formRef.current?.getData().parcela.dias,
-                                                            percentual: formRef.current?.getData().parcela.percentual,
-                                                            formapagamento: formRef.current?.getData().parcela.formapagamento,
-                                                            datacad: data.toLocaleString(),
-                                                            ultalt: data.toLocaleString()
-                                                        }
-                                                    ]);
-                                                    formRef.current?.setFieldValue('parcela.dias', '');
-                                                    formRef.current?.setFieldValue('parcela.percentual', '');
-                                                    formRef.current?.setFieldValue('parcela.formapagamento', null);
+                                                    insertParcela();
                                                 } else {
                                                     const validationErrors: IVFormErrors = {};
                                                     if (!formRef.current?.getData().parcela.dias) validationErrors['parcela.dias'] = 'O campo é obrigatório';
@@ -410,7 +455,26 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                 }
                                             }}
                                         >
-                                            <Icon>add</Icon>
+                                            <Icon>{isEditingParcela ? "check" : "add"}</Icon>
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                        <Button
+                                            variant="contained" 
+                                            color="error"
+                                            size="large"
+                                            onClick={(e) => {
+                                                const validationErrors: IVFormErrors = {};
+                                                validationErrors['parcela.dias'] = '';
+                                                validationErrors['parcela.percentual'] = '';
+                                                formRef.current?.setErrors(validationErrors);
+                                                if (isEditingParcela) setIsEditingParcela(false);
+                                                formRef.current?.setFieldValue('parcela.dias', '');
+                                                formRef.current?.setFieldValue('parcela.percentual', '');
+                                                formRef.current?.setFieldValue('parcela.formapagamento', null);
+                                            }}
+                                        >
+                                            <Icon>close</Icon>
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -448,7 +512,8 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                     <TableCell>{row.formapagamento.descricao}</TableCell>
                                                     { id == 'novo' && (
                                                         <TableCell align="right">
-                                                            <IconButton 
+                                                            <IconButton
+                                                                disabled={isEditingParcela} 
                                                                 color="error" 
                                                                 size="small" 
                                                                 onClick={() => {
@@ -462,7 +527,15 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                             >
                                                                 <Icon>delete</Icon>
                                                             </IconButton>
-                                                            <IconButton color="primary" size="small">
+                                                            <IconButton
+                                                                disabled={isEditingParcela} 
+                                                                color="primary" 
+                                                                size="small"
+                                                                onClick={() => {
+                                                                    setIsEditingParcela(true);
+                                                                    setParcelaSelected(row);
+                                                                }}
+                                                            >
                                                                 <Icon>edit</Icon>
                                                             </IconButton>
                                                         </TableCell>

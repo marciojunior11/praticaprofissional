@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 import { TextField, TextFieldProps } from "@mui/material";
 import { useField } from "@unform/core";
+import { format } from "path";
 
 type TVTextFieldProps = TextFieldProps & {
     name: string;
+    format?: RegExp;
 }
 
-export const VTextField: React.FC<TVTextFieldProps> = ({ name, ...rest }) => {
+export const VTextField: React.FC<TVTextFieldProps> = ({ name, format, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
     const [value, setValue] = useState(defaultValue || '');
+
+    const validateFormat = (value: any): any => {
+        return value = format?.test(String(value)) ? value : "";
+    }
 
     useEffect(() => {
         registerField({
@@ -29,9 +35,15 @@ export const VTextField: React.FC<TVTextFieldProps> = ({ name, ...rest }) => {
 
             
             value={value}
-            onChange={e => { setValue(e.target.value.toUpperCase()); rest.onChange?.(e); }}
+            onChange={e => { 
+                rest.onChange?.(e); 
+                setValue(format ? validateFormat(e.target.value) : e.target.value.toUpperCase());
+            }}
 
-            onKeyDown={(e) => { error && clearError(); rest.onKeyDown?.(e) }}
+            onKeyDown={(e) => {
+                error && clearError();
+                rest.onKeyDown?.(e);
+            }}
         />
     );
 };
