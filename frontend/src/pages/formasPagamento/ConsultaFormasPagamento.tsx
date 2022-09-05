@@ -130,9 +130,10 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        setRows(oldRows => [
-                            ...oldRows.filter(oldRow => oldRow.id !== id)
-                        ]);
+                        // setRows(oldRows => [
+                        //     ...oldRows.filter(oldRow => oldRow.id !== id)
+                        // ]);
+                        reloadDataTable();
                         toast.success('Apagado com sucesso!');
                     }
                 })

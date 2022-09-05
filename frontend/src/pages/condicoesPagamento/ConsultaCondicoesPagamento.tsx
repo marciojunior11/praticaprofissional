@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { Box } from "@mui/system";
 
 export const ConsultaCondicoesPagamento: React.FC = () => {
+    
     const Row = (props: { row: ICondicoesPagamento }) => {
         const { row } = props;
         const [open, setOpen] = useState(false);
@@ -83,6 +84,25 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
+    const reloadDataTable = () => {
+        setIsLoading(true);
+
+        debounce(() => {
+            CondicoesPagamentoService.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        console.log('RESULT', result);
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
+
     const busca = useMemo(() => {
         return searchParams.get('busca')?.toUpperCase() || ''; 
     }, [searchParams]);
@@ -121,9 +141,10 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        setRows(oldRows => [
-                            ...oldRows.filter(oldRow => oldRow.id !== id)
-                        ]);
+                        // setRows(oldRows => [
+                        //     ...oldRows.filter(oldRow => oldRow.id !== id)
+                        // ]);
+                        reloadDataTable();
                         toast.success('Apagado com sucesso!');
                     }
                 })

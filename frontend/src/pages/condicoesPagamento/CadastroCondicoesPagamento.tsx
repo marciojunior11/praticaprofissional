@@ -162,7 +162,6 @@ export const CadastroCondicoesPagamento: React.FC = () => {
             formRef.current?.setFieldValue('parcela.formapagamento', null);
             if (totalPercParcelas == 100) setIsValidParcelas(true);
         }
-        console.log(listaParcelas);
     }
 
     const validate = (filter: string) => {
