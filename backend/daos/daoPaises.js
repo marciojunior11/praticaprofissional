@@ -13,7 +13,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from paises where pais like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from paises where nmpais like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -34,7 +34,7 @@ async function buscarTodosSemPg(url) {
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from paises order by id asc where pais like '%${filter.toUpperCase()}%'`, (err, res) => {
+            pool.query(`select * from paises order by id asc where nmpais like '%${filter.toUpperCase()}%'`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -60,7 +60,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from paises where nmPais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from paises where nmpais like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }

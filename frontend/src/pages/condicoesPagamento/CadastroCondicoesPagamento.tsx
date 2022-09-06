@@ -315,7 +315,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                { (isValidating) && (
+                                                { (isValidating && formRef.current?.getData().descricao) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>
@@ -329,7 +329,6 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                         )
                                     }}
                                     onChange={(e) => {
-                                        console.log(isValidating);
                                         setIsValid(false);
                                         setIsValidating('');
                                         formRef.current?.setFieldError('descricao', '');

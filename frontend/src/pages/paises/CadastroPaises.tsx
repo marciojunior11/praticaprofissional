@@ -84,7 +84,7 @@ export const CadastroPaises: React.FC = () => {
                             setIsValid(result);
                             if (result === false) {
                                 const validationErrors: IVFormErrors = {};
-                                validationErrors['pais'] = 'Este país já está cadastrado.';
+                                validationErrors['nmpais'] = 'Este país já está cadastrado.';
                                 formRef.current?.setErrors(validationErrors);
                             }
                         }
@@ -198,8 +198,8 @@ export const CadastroPaises: React.FC = () => {
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
-                    <Grid container direction="column" padding={2} spacing={2}>
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
+                    <Grid item container xl={4} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -212,27 +212,28 @@ export const CadastroPaises: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
                                 <VTextField 
+                                    size="small"
                                     required
                                     fullWidth
                                     name='nmpais' 
                                     label="País"
-                                    disabled={isLoading}                             
+                                    disabled={isLoading || isValidating}                             
                                     InputProps={{
                                         endAdornment: (
-                                                <InputAdornment position='start'>
-                                                    { (isValidating && formRef.current?.getData().pais) && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    )}
-                                                    { (!isValidating && formRef.current?.getData().pais && isValid) && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            <Icon color="success">done</Icon>
-                                                        </Box>
-                                                    )}
-                                                </InputAdornment>
+                                            <InputAdornment position="end">
+                                                { (isValidating && formRef.current?.getData().nmpais) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <CircularProgress size={24}/>
+                                                    </Box>
+                                                ) }
+                                                { (!isValidating && formRef.current?.getData().descricao && isValid) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <Icon color="success">done</Icon>
+                                                    </Box>
+                                                ) }
+                                            </InputAdornment>
                                         )
                                     }}
                                     onChange={(e) => {
@@ -248,8 +249,9 @@ export const CadastroPaises: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                            <Grid item xs={12} sm={12} md={3} lg={2} xl={6}>
                                 <VTextField
+                                    size="small"
                                     required
                                     fullWidth
                                     name='sigla' 
@@ -258,8 +260,9 @@ export const CadastroPaises: React.FC = () => {
                                     inputProps={{ maxLength: 2 }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                            <Grid item xs={12} sm={12} md={3} lg={2} xl={6}>
                                 <VTextField
+                                    size="small"
                                     required
                                     fullWidth
                                     name='ddi' 
