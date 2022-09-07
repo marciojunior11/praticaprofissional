@@ -1,4 +1,6 @@
 const http = require('http');
+const { CondicoesPagamento } = require('./models/CondicoesPagamento');
+const { Paises } = require('./models/Paises');
 const { router } = require('./routes/router');
 
 const server = http.createServer((req, res) => {
@@ -12,4 +14,6 @@ const server = http.createServer((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => console.log(`SERVIDOR RODANDO NA PORTA ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`SERVIDOR RODANDO NA PORTA ${PORT}`);
+});

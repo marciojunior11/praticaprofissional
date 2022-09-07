@@ -3,6 +3,7 @@ CREATE TABLE Paises (
 	nmPais varchar NOT NULL,
 	sigla varchar(3),
 	ddi varchar(4),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -12,6 +13,7 @@ CREATE TABLE Estados (
 	nmEstado varchar NOT NULL,
 	uf varchar(2),
 	fk_idPais integer NOT NULL REFERENCES Paises(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -21,6 +23,7 @@ CREATE TABLE Cidades (
 	nmCidade varchar NOT NULL,
 	ddd varchar(2),
 	fk_idEstado integer NOT NULL REFERENCES Estados(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -31,6 +34,7 @@ CREATE TABLE Condicoes_Pagamento (
 	txDesc real NOT NULL,
 	txMulta real NOT NULL,
 	txJuros real NOT NULL,
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -51,6 +55,7 @@ CREATE TABLE Clientes (
 	fk_idCidade integer NOT NULL REFERENCES Cidades(id),
 	associado boolean NOT NULL,
 	fk_idCondPgto integer REFERENCES Condicoes_Pagamento(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -70,6 +75,7 @@ CREATE TABLE Fornecedores (
 	bairro varchar,
 	fk_idCidade integer NOT NULL REFERENCES Cidades(id),
 	fk_idCondPgto integer REFERENCES Condicoes_Pagamento(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -77,6 +83,7 @@ CREATE TABLE Fornecedores (
 CREATE TABLE Tributacoes (
 	id integer PRIMARY KEY DEFAULT nextval('tributacoes_seq'),
 	descricao varchar,
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -84,6 +91,7 @@ CREATE TABLE Tributacoes (
 CREATE TABLE Origens (
 	id integer PRIMARY KEY DEFAULT nextval('origens_seq'),
 	descricao varchar,
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -91,6 +99,7 @@ CREATE TABLE Origens (
 CREATE TABLE Grades (
 	id integer PRIMARY KEY DEFAULT nextval('grades_seq'),
 	descricao varchar,
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -99,6 +108,7 @@ CREATE TABLE Caracteristicas (
 	id integer PRIMARY KEY DEFAULT nextval('caracteristicas_seq'),
 	descricao varchar,
 	fk_idGrade integer REFERENCES Grades(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -107,6 +117,7 @@ CREATE TABLE Variacoes (
 	id integer PRIMARY KEY DEFAULT nextval('variacoes_seq'),
 	descricao varchar,
 	fk_idCaracteristica integer REFERENCES Caracteristicas(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -133,6 +144,7 @@ CREATE TABLE Itens (
 	fk_idTributacao integer REFERENCES Tributacoes(id),
 	fk_idOrigem integer REFERENCES Origens(id),
 	fk_idGrade integer REFERENCES Grades(id),
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -140,6 +152,7 @@ CREATE TABLE Itens (
 CREATE TABLE Formas_Pagamento (
 	id integer PRIMARY KEY DEFAULT nextval('formas_pagamento_seq'),
 	descricao varchar NOT NULL,
+	flSituacao varchar(1),
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );
@@ -151,6 +164,7 @@ CREATE TABLE parcelas (
 	percentual real,
 	PRIMARY KEY (fk_idCondPgto, numero),
 	fk_idFormaPgto integer REFERENCES Formas_Pagamento(id),
+	flSituacao varchar,
 	dataCad timestamp(0) NOT NULL,
 	ultAlt timestamp(0) NOT NULL
 );

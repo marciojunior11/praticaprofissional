@@ -66,7 +66,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                         )
                     }) }
                 </TableBody>
-                { rowCount === 0 && !isLoading && (
+                { ((rowCount === 0) || (rows.length === 0)) && !isLoading && (
                     <caption>{Environment.LISTAGEM_VAZIA}</caption>
                 )}
                 <TableFooter>
@@ -77,7 +77,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                             </TableCell>
                         </TableRow>
                     )}
-                    {(rowCount && (rowCount > 0 && rowCount > Environment.LIMITE_DE_LINHAS)) && (
+                    {(rowCount && ((rowCount > 0) && (rowCount > Environment.LIMITE_DE_LINHAS))) && (
                         <TableRow>
                             <TableCell colSpan={4}>
                                 <Pagination 

@@ -10,10 +10,17 @@ import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 
-export const ConsultaPaises: React.FC = () => {
+interface IConsultaProps {
+    isDialog?: boolean;
+    toggleDialogOpen?: () => void;
+    onSelectItem?: (row: any) => void;
+}
+
+export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
+    const [selectedId, setSelectedId] = useState<number | undefined>();
 
     const headers: IHeaderProps[] = [
         {
@@ -57,6 +64,11 @@ export const ConsultaPaises: React.FC = () => {
         return Number(searchParams.get('pagina') || '1');   
     }, [searchParams]);
 
+    const [isCadastroFormaPgtoDialogOpen, setIsCadastroFormaPgtoDialogOpen] = useState(false);
+    const toggleCadastroFormaPgtoDialogOpen = () => {
+        setIsCadastroFormaPgtoDialogOpen(oldValue => !oldValue);
+    }
+
     useEffect(() => {
         setIsLoading(true);
 
@@ -68,19 +80,12 @@ export const ConsultaPaises: React.FC = () => {
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        console.log('RESULT', result);
                         setRows(result.data);
                         setQtd(result.qtd);
                     }
                 });
         })
     }, [busca, pagina]);
-
-    useEffect(() => {
-        rows.map((item) => {
-            console.log(item);
-        })
-    }, [rows]);
 
     const handleDelete = (id: number) => {
 
@@ -101,6 +106,25 @@ export const ConsultaPaises: React.FC = () => {
 
     }
 
+    const reloadDataTable = () => {
+        setIsLoading(true);
+
+        debounce(() => {
+            PaisesService.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        console.log('RESULT', result);
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
+
     return (
         <LayoutBase 
             titulo="Consultar Países"
@@ -116,7 +140,19 @@ export const ConsultaPaises: React.FC = () => {
             <DataTable
                 headers={headers}
                 rows={rows}
-                rowId={"id"}
+                rowId="id"
+                selectable={isDialog}
+                onRowClick={(row) => {
+                    if (isDialog)
+                    {
+                        onSelectItem?.(row);
+                        toggleDialogOpen?.();
+                    }
+                }}   
+                isLoading={isLoading}
+                page={pagina}
+                rowCount={qtd}
+                onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}      
             />
         </LayoutBase>
     );
