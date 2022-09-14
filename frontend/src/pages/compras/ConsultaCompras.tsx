@@ -8,7 +8,7 @@ import { FornecedoresService, IFornecedores } from '../../shared/services/api/fo
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 
-export const ConsultaFornecedores: React.FC = () => {
+export const ConsultaCompras: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
@@ -26,52 +26,52 @@ export const ConsultaFornecedores: React.FC = () => {
     }, [searchParams]);
 
     useEffect(() => {
-        setIsLoading(true);
-        console.log(busca, pagina);
-        debounce(() => {
-            FornecedoresService.getAll(pagina, busca)
-                .then((result) => {
-                    setIsLoading(false);
+        //setIsLoading(true);
+        // console.log(busca, pagina);
+        // debounce(() => {
+        //     FornecedoresService.getAll(pagina, busca)
+        //         .then((result) => {
+        //             setIsLoading(false);
 
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        console.log(result);
-                        setRows(result.data);
-                        setQtd(result.qtd);
-                    }
-                });
-        })
+        //             if (result instanceof Error) {
+        //                 toast.error(result.message);
+        //             } else {
+        //                 console.log(result);
+        //                 setRows(result.data);
+        //                 setQtd(result.qtd);
+        //             }
+        //         });
+        // })
     }, [busca, pagina]);
 
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            FornecedoresService.deleteById(id)
-                .then(result => {
-                    console.log(result);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setRows(oldRows => [
-                            ...oldRows.filter(oldRow => oldRow.id !== id)
-                        ]);
-                        toast.success('Apagado com sucesso!');
-                    }
-                })
+            // FornecedoresService.deleteById(id)
+            //     .then(result => {
+            //         console.log(result);
+            //         if (result instanceof Error) {
+            //             toast.error(result.message);
+            //         } else {
+            //             setRows(oldRows => [
+            //                 ...oldRows.filter(oldRow => oldRow.id !== id)
+            //             ]);
+            //             toast.success('Apagado com sucesso!');
+            //         }
+            //     })
         }
 
     }
 
     return (
         <LayoutBase 
-            titulo="Consultar Fornecedores"
+            titulo="Consultar Compras"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/fornecedores/cadastro/novo')}
+                    onClickNew={() => navigate('/compras/cadastro/novo')}
                 />
             }
         >
@@ -79,12 +79,8 @@ export const ConsultaFornecedores: React.FC = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Razão Social</TableCell>
-                            <TableCell>CNPJ</TableCell>
-                            <TableCell>Telefone</TableCell>
-                            <TableCell>Endereço</TableCell>
-                            <TableCell>Cidade</TableCell>
+                            <TableCell>Num. NF</TableCell>
+                            <TableCell>Vl. Total</TableCell>
                             <TableCell align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>

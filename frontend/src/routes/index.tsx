@@ -22,6 +22,8 @@ import {
     CadastroFormasPagamento,
     CadastroCondicoesPagamento,
     ConsultaFormasPagamento,
+    ConsultaCompras,
+    CadastroCompras,
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -79,6 +81,11 @@ export const AppRoutes = () => {
                 icon: 'request_quote',
                 path: '/condicoespagamento',
             },
+            {
+                label: 'Compras',
+                icon: 'paid',
+                path: '/compras',
+            },
         ]);
     }, []);
 
@@ -112,6 +119,9 @@ export const AppRoutes = () => {
 
             <Route path="/produtos" element={<ConsultaProdutos/>}/>
             <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>
+
+            <Route path="/compras" element={<ConsultaCompras/>}/>
+            <Route path="/compras/cadastro/:id" element={<CadastroCompras/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

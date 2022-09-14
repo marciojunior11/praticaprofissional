@@ -16,4 +16,6 @@ export * from './formasPagamento/ConsultaFormasPagamento';
 export * from './formasPagamento/CadastroFormasPagamento';
 export * from './condicoesPagamento/ConsultaCondicoesPagamento';
 export * from './condicoesPagamento/CadastroCondicoesPagamento';
+export * from './compras/ConsultaCompras';
+export * from './compras/CadastroCompras';
 export * from './dashboard/Dashboard';

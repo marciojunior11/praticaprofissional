@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import * as yup from 'yup';
 
 import { DetailTools } from "../../shared/components";
@@ -28,8 +28,10 @@ export const CadastroCompras: React.FC = () => {
     const { debounce } = useDebounce();
 
     const [obj, setObj] = useState<IFornecedores | null>(null);
+    const [listaItensProduto, setListaItensProduto] = useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
+    const [readOnly, setReadOnly] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
 
     const [isValid, setIsValid] = useState(false);
@@ -183,7 +185,7 @@ export const CadastroCompras: React.FC = () => {
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Cidade' : 'Editar Cidade'}
+            titulo={id === 'novo' ? 'Cadastrar Compra' : 'Editar Compra'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -201,8 +203,8 @@ export const CadastroCompras: React.FC = () => {
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
-                    <Grid container direction="column" padding={2} spacing={2}>
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
+                    <Grid item container xl={8} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -213,154 +215,169 @@ export const CadastroCompras: React.FC = () => {
                         <Grid item>
                             <Typography variant="h6">Dados Gerais</Typography>
                         </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
+          
+                        <Grid container item direction="row" spacing={2} justifyContent="center">
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                                 <VTextField
-                                    fullWidth
-                                    name='razSocial'
-                                    label='Razão Social'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
+                                    name="nrnf"
+                                    label="Número"
                                     required
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
                                 />
                             </Grid>
 
-                            <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
-                                <VTextField 
-                                    fullWidth
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                <VTextField
+                                    name="serienf"
+                                    label="Série"
                                     required
-                                    name='cnpj' 
-                                    label="CNPJ"
-                                    disabled={isLoading}                             
-                                    InputProps={{
-                                        endAdornment: (
-                                                <InputAdornment position='start'>
-                                                    { isValidating === true && (
-                                                        <Box sx={{ display: 'flex',  }}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    )}
-                                                    { isValidating === false && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            { isValid === true ? (
-                                                                <Icon color="success">done</Icon>
-                                                            ) : (
-                                                                <Icon color="error">close</Icon>
-                                                            )}
-                                                        </Box>
-                                                    )}
-                                                </InputAdornment>
-                                        )
-                                    }}
-                                    inputProps={{maxLength: 20}}
-                                    onChange={(e) => {
-                                        setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('cnpj', '');
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                    onBlur={(e) => {
-                                        const formData = formRef.current?.getData();
-                                        const data: IFormData = {
-                                            razSocial: formData?.razSocial,
-                                            nomeFantasia: formData?.nomeFantasia,
-                                            cnpj: formData?.cnpj,
-                                            telefone: formData?.telefone,
-                                            endereco: formData?.endereco,
-                                            numEnd: formData?.numEnd,
-                                            bairro: formData?.bairro,
-                                            cidade: formData?.cidade
-                                        }
-                                        validate(data);
-                                    }}
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                <VTextField
+                                    name="modelonf"
+                                    label="Modelo"
+                                    required
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
                                 />
                             </Grid>
                         </Grid>
 
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
+                        <Grid container item direction="row" spacing={2} justifyContent="center">
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField
-                                    fullWidth
-                                    name='nomeFantasia'
-                                    label='Nome Fantasia'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
-                                <VTextField
-                                    fullWidth
-                                    name='telefone'
-                                    label='Telefone'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={5} sm={5} md={5} lg={5} xl={6}>
-                                <VTextField
-                                    fullWidth
-                                    name='endereco'
-                                    label='Endereço'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
-                                <VTextField
-                                    fullWidth
-                                    name='numEnd'
-                                    label='Numero'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-
-                            <Grid item xs={5} sm={5} md={5} lg={5} xl={5}>
-                                <VTextField
-                                    fullWidth
-                                    name='bairro'
-                                    label='Bairro'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
-                                <VAutocompleteSearch
+                                    name="condicaopagamento"
+                                    label="Condição de pagamento"
                                     required
-                                    name="cidade"
-                                    label='cidade'
-                                    TFLabel="Cidade"
-                                    secLabel={['estado', 'uf']}
-                                    tercLabel={['estado', 'pais', 'sigla']}
-                                    getAll={CidadesService.getAll}
-                                    onInputchange={() => {
-                                        formRef.current?.setFieldError('cidade', '');
-                                    }}
-                                    onChange={(newValue) => {
-                                        if (alterando) setAlterando(false);
-                                    }}
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
                                 />
                             </Grid>
-                        </Grid>            
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
+                                <VTextField
+                                    name="fornecedor"
+                                    label="Fornecedor"
+                                    required
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2} justifyContent="center">
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={5}>
+                                <VTextField
+                                    name="produto"
+                                    label="Produto"
+                                    required
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
+                                <VTextField
+                                    name="qtd"
+                                    label="Quantidade"
+                                    required
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
+                                <VTextField
+                                    name="vlcompra"
+                                    label="Valor compra"
+                                    required
+                                    size="small"
+                                    fullWidth
+                                    disabled={isLoading || readOnly}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={1}>
+                                <Button variant="contained">
+                                    <Icon>add</Icon>
+                                </Button>
+                            </Grid>
+                        </Grid>
+
+                        <Grid item>
+                            <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>ID</TableCell>
+                                            <TableCell>Descrição</TableCell>
+                                            <TableCell>Qtd</TableCell>
+                                            <TableCell>Vl. Compra</TableCell>
+                                            <TableCell>Vl. Total</TableCell>
+                                            { id == 'novo' && (
+                                                <TableCell align="right">Ações</TableCell>
+                                            )}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {/* {listaItensProduto?.map(row => (
+                                            <TableRow key={row.}>
+                                                <TableCell >{row.numernumeroo}</TableCell>
+                                                <TableCell>{row.dias}</TableCell>
+                                                <TableCell>{row.percentual+"%"}</TableCell>
+                                                <TableCell>{row.formapagamento.descricao}</TableCell>
+                                                { id == 'novo' && (
+                                                    <TableCell align="right">
+                                                        <IconButton
+                                                            //disabled={isEditingParcela} 
+                                                            color="error" 
+                                                            size="small" 
+                                                            onClick={() => {
+                                                                if (window.confirm('Deseja excluir esta parcela?')) {
+                                                                    const mArray = listaParcelas.slice();
+                                                                    delete mArray[row.numero-1];
+                                                                    mArray.length = listaParcelas.length-1;
+                                                                    setListaParcelas(mArray);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Icon>delete</Icon>
+                                                        </IconButton>
+                                                        <IconButton
+                                                            disabled={isEditingParcela} 
+                                                            color="primary" 
+                                                            size="small"
+                                                            onClick={() => {
+                                                                setIsEditingParcela(true);
+                                                                setParcelaSelected(row);
+                                                            }}
+                                                        >
+                                                            <Icon>edit</Icon>
+                                                        </IconButton>
+                                                    </TableCell>
+                                                ) }
+                                            </TableRow>
+                                        ))} */}
+                                    </TableBody>
+                                    {/* { listaParcelas.length === 0 && !isLoading && (
+                                        <caption>{Environment.LISTAGEM_VAZIA}</caption>
+                                    )} */}
+                                </Table>
+                            </TableContainer>  
+                        </Grid>
+
                     </Grid>
 
                 </Box>
