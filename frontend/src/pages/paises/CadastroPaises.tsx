@@ -209,8 +209,8 @@ export const CadastroPaises: React.FC = () => {
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
-                    <Grid item container xl={4} direction="column" padding={2} spacing={2} alignItems="left">
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} alignItems="center">
+                    <Grid item container xs={12} sm={10} md={6} lg={5} xl={4} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -223,7 +223,7 @@ export const CadastroPaises: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VTextField 
                                     size="small"
                                     required
@@ -263,7 +263,7 @@ export const CadastroPaises: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={3} lg={2} xl={6}>
+                            <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                 <VTextField
                                     size="small"
                                     required
@@ -274,7 +274,7 @@ export const CadastroPaises: React.FC = () => {
                                     inputProps={{ maxLength: 2 }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={3} lg={2} xl={6}>
+                            <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                 <VTextField
                                     size="small"
                                     required

@@ -246,6 +246,7 @@ export const CadastroEstados: React.FC = () => {
                                 <VTextField 
                                     required
                                     fullWidth
+                                    size="small"
                                     name='estado' 
                                     label="Estado"
                                     disabled={isLoading}                             
@@ -292,6 +293,7 @@ export const CadastroEstados: React.FC = () => {
                                 <VTextField 
                                     required
                                     fullWidth
+                                    size="small"
                                     name='uf' 
                                     label="UF"
                                     disabled={isLoading}
@@ -314,6 +316,7 @@ export const CadastroEstados: React.FC = () => {
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
                                 <VAutocompleteSearch
+                                    size="small"
                                     required
                                     name="pais"
                                     label="pais"
