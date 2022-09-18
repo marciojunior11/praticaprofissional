@@ -36,9 +36,11 @@ async function buscarTodosSemPg(url) {
                     let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
                     mListaEstados.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
+                        nmestado: res.rows[i].nmestado,
                         uf: res.rows[i].uf,
-                        pais: mPais
+                        pais: mPais,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaEstados);
@@ -55,9 +57,11 @@ async function buscarTodosSemPg(url) {
                     let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
                     mListaEstados.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
+                        nmestado: res.rows[i].nmestado,
                         uf: res.rows[i].uf,
-                        pais: mPais
+                        pais: mPais,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaEstados);
@@ -82,9 +86,11 @@ async function buscarTodosComPg (url) {
                     let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
                     mListaEstados.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
+                        nmestado: res.rows[i].nmestado,
                         uf: res.rows[i].uf,
-                        pais: mPais
+                        pais: mPais,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaEstados);
@@ -101,9 +107,11 @@ async function buscarTodosComPg (url) {
                     let mPais = await daoPaises.buscarUm(res.rows[i].fk_idpais);
                     mListaEstados.push({
                         id: res.rows[i].id,
-                        estado: res.rows[i].estado,
+                        nmestado: res.rows[i].nmestado,
                         uf: res.rows[i].uf,
-                        pais: mPais
+                        pais: mPais,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaEstados);
@@ -124,9 +132,11 @@ async function buscarUm (id) {
                 const mPais = await daoPaises.buscarUm(res.rows[0].fk_idpais);
                 const mEstado = {
                     id: res.rows[0].id,
-                    estado: res.rows[0].estado,
+                    nmestado: res.rows[0].estado,
                     uf: res.rows[0].uf,
-                    pais: mPais
+                    pais: mPais,
+                    datacad: res.rows[0].datacad,
+                    ultalt: res.rows[0].ultalt
                 }
                 return resolve(mEstado);
             }

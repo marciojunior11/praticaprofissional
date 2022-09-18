@@ -3,6 +3,7 @@ import { useState } from "react";
 import { render } from "react-dom";
 import { URLSearchParamsInit } from "react-router-dom";
 import { Environment } from "../../environment";
+import { getNestedObjectPropValue } from "../../utils/objects";
 
 export interface IHeaderProps {
     label?: string;
@@ -58,7 +59,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                                 { headers.map((header) => {
                                     return (
                                         <TableCell align={header.align && header.align}>
-                                            { !header.render ? row[header.name] : header.render(row) }
+                                            { !header.render ? getNestedObjectPropValue(row, header.name) : header.render(row) }
                                         </TableCell>
                                     )
                                 }) }

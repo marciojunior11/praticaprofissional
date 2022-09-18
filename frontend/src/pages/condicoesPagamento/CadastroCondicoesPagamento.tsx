@@ -429,7 +429,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                             size="small"
                                             required
                                             name="parcela.formapagamento"
-                                            label="descricao"
+                                            label={["descricao"]}
                                             TFLabel="Forma de Pagamento"
                                             getAll={FormasPagamentoService.getAll}
                                             onClickSearch={() => {

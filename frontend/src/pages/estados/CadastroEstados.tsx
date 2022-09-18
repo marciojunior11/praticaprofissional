@@ -1,22 +1,30 @@
+// #region EXTERNAL IMPORTS
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
+import { toast } from "react-toastify";
+// #endregion
 
+// #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { EstadosService, IEstados } from "../../shared/services/api/estados/EstadosService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
-import { toast } from "react-toastify";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { useDebounce } from "../../shared/hooks";
+import ControllerEstados from "../../shared/controllers/EstadosController";
+import ControllerPaises from "../../shared/controllers/PaisesController";
+// #endregion
 
+// #region INTERFACES
 interface IFormData {
     estado: string;
     uf: string;
     pais: IPaises;
 }
+// #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     estado: yup.string().required(),
@@ -29,22 +37,24 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 })
 
 export const CadastroEstados: React.FC = () => {
+    // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
-
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
+    // #endregion
 
+    // #region STATES
     const [obj, setObj] = useState<IEstados | null>(null);
-
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
-
     const [estado, setEstado] = useState<string>('');
     const [pais, setPais] = useState<IPaises | null>(null);
     const [isValid, setIsValid] = useState(false);
     const [alterando, setAlterando] = useState(false);
+    // #endregion
 
+    // #region ACTIONS
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
@@ -207,6 +217,12 @@ export const CadastroEstados: React.FC = () => {
                 })
         }
     }
+    // #endregion
+
+    // #region CONTROLLERS
+    const controller = new ControllerEstados();
+    const controllerPaises = new ControllerPaises();
+    // #endregion
 
     return (
         <LayoutBase 
@@ -228,8 +244,8 @@ export const CadastroEstados: React.FC = () => {
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
-                    <Grid container direction="column" padding={2} spacing={2}>
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} alignItems="center">
+                    <Grid item container xs={12} sm={10} md={6} lg={5} xl={4} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -242,12 +258,12 @@ export const CadastroEstados: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
                                     required
                                     fullWidth
                                     size="small"
-                                    name='estado' 
+                                    name='nmestado' 
                                     label="Estado"
                                     disabled={isLoading}                             
                                     InputProps={{
@@ -289,7 +305,7 @@ export const CadastroEstados: React.FC = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
                                     required
                                     fullWidth
@@ -314,14 +330,14 @@ export const CadastroEstados: React.FC = () => {
                         </Grid>
 
                         <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
                                     size="small"
                                     required
                                     name="pais"
-                                    label="pais"
+                                    label={["nmpais"]}
                                     TFLabel="País"
-                                    getAll={PaisesService.getAll}
+                                    getAll={controllerPaises.getAll}
                                     onInputchange={() => {
                                         setIsValid(false);
                                         setIsValidating('');

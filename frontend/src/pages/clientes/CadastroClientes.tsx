@@ -379,10 +379,8 @@ export const CadastroClientes: React.FC = () => {
                                 <VAutocompleteSearch
                                     required
                                     name="cidade"
-                                    label='cidade'
+                                    label={["nmcidade", "estado.uf", "estado.pais.sigla"]}
                                     TFLabel="Cidade"
-                                    secLabel={['estado', 'uf']}
-                                    tercLabel={['estado', 'pais', 'sigla']}
                                     getAll={CidadesService.getAll}
                                     onInputchange={() => {
                                         formRef.current?.setFieldError('cidade', '');

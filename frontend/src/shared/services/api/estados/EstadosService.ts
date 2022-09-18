@@ -69,7 +69,6 @@ const create = async (dados: Omit<IDetalhesEstados, 'id'>): Promise<number | und
             return data.id;
         }
     } catch (error) {
-        console.error(error);
         return new Error((error as {message:string}).message || 'Erro ao criar o registros.');
     }     
 }

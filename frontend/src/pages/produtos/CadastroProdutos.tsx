@@ -320,7 +320,7 @@ export const CadastroProdutos: React.FC = () => {
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
                                     name='tipoProduto'
-                                    label='descricao'
+                                    label={["descricao"]}
                                     getAll={TiposProdutoService.getAll}
                                     TFLabel='Tipo de Produto'
                                 />
@@ -330,7 +330,7 @@ export const CadastroProdutos: React.FC = () => {
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
                                     name='fornecedor'
-                                    label='razSocial'
+                                    label={["razsocial"]}
                                     getAll={FornecedoresService.getAll}
                                     TFLabel='Fornecedor'
                                     required

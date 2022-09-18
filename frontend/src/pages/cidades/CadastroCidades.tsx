@@ -285,9 +285,8 @@ export const CadastroCidades: React.FC = () => {
                                 <VAutocompleteSearch
                                     required
                                     name="estado"
-                                    label='estado'
+                                    label={["nmestado", "pais.sigla"]}
                                     TFLabel="Estado"
-                                    secLabel={['pais', 'sigla']}
                                     getAll={EstadosService.getAll}
                                     onInputchange={() => {
                                         setIsValid(false);

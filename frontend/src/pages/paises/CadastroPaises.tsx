@@ -1,8 +1,11 @@
+// #region EXTERNAL IMPORTS
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
+// #endregion
 
+// #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
@@ -10,9 +13,10 @@ import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
-import Paises from "../../shared/models/entities/Paises";
 import ControllerPaises from "../../shared/controllers/PaisesController";
+// #endregion
 
+// #region INTERFACES
 interface IFormData {
     nmpais: string;
     sigla: string;
@@ -20,6 +24,7 @@ interface IFormData {
     datacad: string;
     ultalt: string;
 }
+// #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     nmpais: yup.string().required(),
@@ -30,23 +35,21 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 })
 
 export const CadastroPaises: React.FC = () => {
-
-    const controller = new ControllerPaises();
-
+    // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
-
     const { debounce } = useDebounce();
-
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+    // #endregion
 
+    // #region STATES
     const [obj, setObj] = useState<IPaises | null>(null); 
-
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<boolean>(false);
-
     const [isValid, setIsValid] = useState(false);
+    // #endregion
 
+    // #region ACTIONS
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
@@ -188,6 +191,12 @@ export const CadastroPaises: React.FC = () => {
                 })
         }
     }
+    // #endregion
+
+    // #region CONTROLLERS
+    const controller = new ControllerPaises();
+    // #endregion
+
 
     return (
         <LayoutBase 

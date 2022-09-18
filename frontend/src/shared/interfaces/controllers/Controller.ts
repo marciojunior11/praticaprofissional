@@ -10,5 +10,4 @@ export interface IController {
     create(dados: any): Promise<number | undefined | Error>;
     update(id: number, dados: any): Promise<void | Error>;
     delete(id: number): Promise<void | Error>;
-    validate(filter: string): Promise<boolean | Error>;
 }

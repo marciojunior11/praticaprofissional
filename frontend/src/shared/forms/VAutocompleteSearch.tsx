@@ -5,6 +5,7 @@ import { LoDashStatic } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import { toast } from "react-toastify"
 import { useDebounce } from "../hooks"
+import { getNestedObjectPropValue } from "../utils/objects"
 
 type TGenericList = {
     data: Array<any>,
@@ -18,9 +19,7 @@ type TVAutocompleteProps = {
         page?: number,
         filter?: string
     ) => Promise<TGenericList | Error>
-    label: string,
-    secLabel?: string[],
-    tercLabel?: string[],
+    label: string[],
     TFLabel: string,
     isExternalLoading?: boolean,
     onChange?: (newValue: any) => void,
@@ -83,7 +82,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
 
     return (
         <Grid container direction="row" spacing={0} alignItems="start">
-            <Grid item xl={10}>
+            <Grid item xs={10} sm={10} md={10} lg={10} xl={10}>
                 <Autocomplete
                     //REQUIRED PARAMS
                     size={size}
@@ -100,7 +99,14 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
 
                     //REST PARAMS
                     disablePortal
-                    getOptionLabel={option => (rest.tercLabel && rest.secLabel) ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] + ' - ' + option[rest.tercLabel[0]][rest.tercLabel[1]][rest.tercLabel[2]] : rest.secLabel ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] : option[label]}
+                    getOptionLabel={option => {
+                        var value: string = "";
+                        label.forEach(item => {
+                            value += getNestedObjectPropValue(option, item) + " "
+                        })
+                        return value;
+                    }}
+
                     autoComplete
                     blurOnSelect={true}
 
@@ -132,7 +138,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                     loadingText='Carregando...'
                 />
             </Grid>
-            <Grid item xl={2}>
+            <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
                 <Button variant="outlined" size="large" color={!!error ? 'error' : 'primary'} onClick={onClickSearch}>
                     <Icon>search</Icon>
                 </Button>

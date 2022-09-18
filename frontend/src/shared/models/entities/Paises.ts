@@ -6,7 +6,7 @@ class Paises extends PaiComId {
     private sigla: string;
     private ddi: string;
 
-    //CONSTRUCTORS
+    //CONSTRUCTOR
     constructor(id: number = 0, nmpais: string = "", sigla: string = "", ddi: string = "", datacad: Date | string = new Date(), ultalt: Date | string = new Date()) {
         super();
         this._id = id;
