@@ -6,28 +6,33 @@ import * as yup from 'yup';
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
-import { IPaises } from "../../shared/models/ModelPaises";
+import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
+import Paises from "../../shared/models/entities/Paises";
+import ControllerPaises from "../../shared/controllers/PaisesController";
 
 interface IFormData {
     nmpais: string;
     sigla: string;
     ddi: string;
-    dataCad: string;
-    ultAlt: string;
+    datacad: string;
+    ultalt: string;
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     nmpais: yup.string().required(),
     sigla: yup.string().required().min(2),
     ddi: yup.string().required(),
-    dataCad: yup.string().required(),
-    ultAlt: yup.string().required()
+    datacad: yup.string().required(),
+    ultalt: yup.string().required()
 })
 
 export const CadastroPaises: React.FC = () => {
+
+    const controller = new ControllerPaises();
+
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -38,7 +43,7 @@ export const CadastroPaises: React.FC = () => {
     const [obj, setObj] = useState<IPaises | null>(null); 
 
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<any>(null);
+    const [isValidating, setIsValidating] = useState<boolean>(false);
 
     const [isValid, setIsValid] = useState(false);
 
@@ -46,22 +51,24 @@ export const CadastroPaises: React.FC = () => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            PaisesService.getById(Number(id))
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                        navigate('/paises');
-                    } else {
-                        console.log('RESULT', result);
-                        formRef.current?.setData(result);
-                        setObj(result);
-                    }
-                });
+            controller.getOne(Number(id))
+            .then((result) => {
+                setIsLoading(false);
+                if (result instanceof Error) {
+                    toast.error(result.message);
+                    navigate('/paises');
+                } else {
+                    console.log('RESULT', result);
+                    formRef.current?.setData(result);
+                    setObj(result);
+                }
+            });
         } else {
+            setIsValid(false);
             formRef.current?.setData({
-                pais: '',
-                sigla: ''
+                nmpais: '',
+                sigla: '',
+                ddi: ''
             });
         }
     }, [id]);
@@ -72,24 +79,27 @@ export const CadastroPaises: React.FC = () => {
     }, [obj])
 
     const validate = (filter: string) => {
+        console.log(isValid);
         if (filter != obj?.nmpais) {
             setIsValidating(true);
-            debounce(() => {
-                PaisesService.validate(filter)
-                    .then((result) => {
-                        setIsValidating(false);
-                        if (result instanceof Error) {
-                            toast.error(result.message);
-                        } else {
-                            setIsValid(result);
-                            if (result === false) {
-                                const validationErrors: IVFormErrors = {};
-                                validationErrors['nmpais'] = 'Este país já está cadastrado.';
-                                formRef.current?.setErrors(validationErrors);
+            if (formRef.current?.getData().nmpais != "") {
+                debounce(() => {
+                    controller.validate(filter)
+                        .then((result) => {
+                            setIsValidating(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message);
+                            } else {
+                                setIsValid(result);
+                                if (result === false) {
+                                    const validationErrors: IVFormErrors = {};
+                                    validationErrors['nmpais'] = 'Este país já está cadastrado.';
+                                    formRef.current?.setErrors(validationErrors);
+                                }
                             }
-                        }
-                    })
-            });
+                        })
+                });        
+            }
         } else {
             setIsValid(true);
         }
@@ -97,8 +107,8 @@ export const CadastroPaises: React.FC = () => {
 
     const handleSave = (dados: IFormData) => {
         let data = new Date();
-        dados.dataCad = data.toLocaleString();
-        dados.ultAlt = data.toLocaleString();
+        dados.datacad = data.toLocaleString();
+        dados.ultalt = data.toLocaleString();
         console.log(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
@@ -106,7 +116,7 @@ export const CadastroPaises: React.FC = () => {
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            PaisesService.create(dadosValidados)
+                            controller.create(dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -116,34 +126,35 @@ export const CadastroPaises: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/paises');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating('');
+                                            setIsValidating(false);
                                             navigate('/paises/cadastro/novo');
                                             formRef.current?.setData({
                                                 pais: '',
-                                                sigla: ''
+                                                sigla: '',
+                                                ddi: ''
                                             });
                                             setIsValid(false);
                                         } else {
-                                            setIsValidating(null);
+                                            setIsValidating(false);
                                             navigate(`/paises/cadastro/${result}`);
                                         }
                                     }
                                 });
                         } else {
-                            PaisesService.updateById(Number(id), { id: Number(id), ...dadosValidados })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
+                            controller.update(Number(id), { id: Number(id), ...dadosValidados })
+                            .then((result) => {
+                                setIsLoading(false);
+                                if (result instanceof Error) {
+                                    toast.error(result.message);
+                                } else {
+                                    toast.success('Alterado com sucesso!');
+                                    if (isSaveAndClose()) {
+                                        navigate('/paises')
                                     } else {
-                                        toast.success('Alterado com sucesso!');
-                                        if (isSaveAndClose()) {
-                                            navigate('/paises')
-                                        } else {
-                                            setIsValidating(null);
-                                        }
+                                        setIsValidating(false);
                                     }
-                                });
+                                }
+                            });
                         }
                     } else {
                         toast.error('Verifique os campos');
@@ -187,7 +198,7 @@ export const CadastroPaises: React.FC = () => {
                     mostrarBotaoSalvarNovo={id == 'novo'}
                     mostrarBotaoApagar={id !== 'novo'}
                     mostrarBotaoNovo={id !== 'novo'}
-                    
+
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
@@ -219,7 +230,7 @@ export const CadastroPaises: React.FC = () => {
                                     fullWidth
                                     name='nmpais' 
                                     label="País"
-                                    disabled={isLoading || isValidating}                             
+                                    disabled={isLoading}                             
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
@@ -228,7 +239,7 @@ export const CadastroPaises: React.FC = () => {
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (!isValidating && formRef.current?.getData().descricao && isValid) && (
+                                                { (isValid) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -236,9 +247,12 @@ export const CadastroPaises: React.FC = () => {
                                             </InputAdornment>
                                         )
                                     }}
+                                    onBlur={e => {
+                                        setIsValidating(false);
+                                    }}
                                     onChange={(e) => {
                                         setIsValid(false);
-                                        setIsValidating('');
+                                        setIsValidating(false);
                                         formRef.current?.setFieldError('pais', '');
                                         debounce(() => {
                                             validate(e.target.value);

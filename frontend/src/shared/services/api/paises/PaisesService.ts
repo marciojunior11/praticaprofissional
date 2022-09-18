@@ -1,6 +1,6 @@
 import { Environment } from "../../../environment";
 import { Api } from "../axios-config";
-import { IPaises, IDetalhesPaises, TListaPaises } from "../../../models/ModelPaises";
+import { IPaises, IDetalhesPaises, TListaPaises } from "../../../interfaces/entities/Paises";
 
 const getAll = async (page?: number, filter = ''): Promise<TListaPaises | Error> => {
     try {

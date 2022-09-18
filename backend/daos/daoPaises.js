@@ -109,7 +109,7 @@ async function salvar (pais) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into paises (nmpais, sigla, ddi, datacad, ultalt) values($1, $2, $3, $4, $5)', [pais.nmpais.toUpperCase(), pais.sigla.toUpperCase(), pais.ddi, pais.dataCad, pais.ultAlt], async (err, res) => {
+                client.query('insert into paises (nmpais, sigla, ddi, datacad, ultalt) values($1, $2, $3, $4, $5)', [pais.nmpais.toUpperCase(), pais.sigla.toUpperCase(), pais.ddi, pais.datacad, pais.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -148,7 +148,7 @@ async function alterar (id, pais) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update paises set id = $1, nmPais = $2, sigla = $3, ddi = $4, ultalt = $5 where id = $6 ', [pais.id, pais.nmpais.toUpperCase(), pais.sigla.toUpperCase(), pais.ddi.toUpperCase(), pais.ultAlt, id], (err, res) => {
+                client.query('update paises set id = $1, nmPais = $2, sigla = $3, ddi = $4, ultalt = $5 where id = $6 ', [pais.id, pais.nmpais.toUpperCase(), pais.sigla.toUpperCase(), pais.ddi.toUpperCase(), pais.ultalt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {

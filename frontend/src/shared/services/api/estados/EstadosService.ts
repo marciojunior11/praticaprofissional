@@ -1,4 +1,4 @@
-import { IPaises } from "../../../models/ModelPaises";
+import { IPaises } from "../../../interfaces/entities/Paises";
 import { Environment } from "../../../environment";
 import { Api } from "../axios-config";
 

@@ -5,10 +5,11 @@ import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { PaisesService } from '../../shared/services/api/paises/PaisesService';
-import { IPaises } from "../../shared/models/ModelPaises";
+import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { Environment } from "../../shared/environment";
 import { toast } from "react-toastify";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
+import ControllerPaises from "../../shared/controllers/PaisesController"
 
 interface IConsultaProps {
     isDialog?: boolean;
@@ -52,6 +53,8 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
             }
         }
     ]
+    
+    const controller = new ControllerPaises();
     const [rows, setRows] = useState<IPaises[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -64,16 +67,12 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
         return Number(searchParams.get('pagina') || '1');   
     }, [searchParams]);
 
-    const [isCadastroFormaPgtoDialogOpen, setIsCadastroFormaPgtoDialogOpen] = useState(false);
-    const toggleCadastroFormaPgtoDialogOpen = () => {
-        setIsCadastroFormaPgtoDialogOpen(oldValue => !oldValue);
-    }
-
     useEffect(() => {
         setIsLoading(true);
 
         debounce(() => {
-            PaisesService.getAll(pagina, busca)
+
+            controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -90,7 +89,7 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            PaisesService.deleteById(id)
+            controller.delete(id)
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {

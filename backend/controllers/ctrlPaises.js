@@ -60,13 +60,14 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { nmpais, sigla, ddi, dataCad, ultAlt } = JSON.parse(body);
+            const { nmpais, sigla, ddi, datacad, ultalt } = JSON.parse(body);
+            console.log(body)
             const mPais = {
                 nmpais,
                 sigla,
                 ddi,
-                dataCad,
-                ultAlt
+                datacad,
+                ultalt
             };
             const novoPais = await daoPaises.salvar(mPais);
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -91,14 +92,14 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { id, nmpais, sigla, ddi, dataCad, ultAlt } = JSON.parse(body);
+            const { id, nmpais, sigla, ddi, datacad, ultalt } = JSON.parse(body);
             const mPais = {
                 id,
                 nmpais,
                 sigla,
                 ddi,
-                dataCad,
-                ultAlt
+                datacad,
+                ultalt
             };
             const novoPais = await daoPaises.alterar(id, mPais)
             res.writeHead(201, { 'Content-Type': 'application/json'});

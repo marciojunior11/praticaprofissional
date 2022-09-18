@@ -9,7 +9,7 @@ import { EstadosService, IEstados } from "../../shared/services/api/estados/Esta
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import { toast } from "react-toastify";
 import { PaisesService } from "../../shared/services/api/paises/PaisesService";
-import { IPaises } from "../../shared/models/ModelPaises";
+import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { useDebounce } from "../../shared/hooks";
 
 interface IFormData {

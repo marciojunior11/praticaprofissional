@@ -12,8 +12,8 @@ export interface IDetalhesPaises {
     nmpais: string;
     sigla: string;
     ddi: string;
-    dataCad: string;
-    ultAlt: string
+    datacad: string;
+    ultalt: string
 }
 
 export type TListaPaises = {
