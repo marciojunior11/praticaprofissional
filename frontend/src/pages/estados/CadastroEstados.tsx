@@ -23,8 +23,6 @@ interface IFormData {
     nmestado: string;
     uf: string;
     pais: IPaises;
-    datacad: string;
-    ultalt: string;
 }
 // #endregion
 
@@ -37,9 +35,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
         sigla: yup.string().required().min(2),
         datacad: yup.string().required(),
         ultalt: yup.string().required()
-    }).required(),
-    datacad: yup.string().required(),
-    ultalt: yup.string().required()
+    }).required()
 })
 
 export const CadastroEstados: React.FC = () => {
@@ -51,13 +47,11 @@ export const CadastroEstados: React.FC = () => {
     // #endregion
 
     // #region STATES
-    const [obj, setObj] = useState<IEstados | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
-    const [estado, setEstado] = useState<string>('');
     const [pais, setPais] = useState<IPaises | null>(null);
+    const [nmestado, setNmEstado] = useState("");
     const [isValid, setIsValid] = useState(false);
-    const [alterando, setAlterando] = useState(false);
     // #endregion
 
     // #region ACTIONS
@@ -74,19 +68,9 @@ export const CadastroEstados: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
-                        setEstado(result.nmestado);
+                        setIsValid(true);
                         setPais(result.pais);
-                        // setEstado(formRef.current?.getData().estado);
-                        // setPais(formRef.current?.getData().pais);
-                        // setObj(result);
-                        // setAlterando(true);
-                        // validate({
-                        //     nmestado: result.nmestado,
-                        //     uf: result.uf,
-                        //     pais: result.pais,
-                        //     datacad: result.datacad.toLocaleString(),
-                        //     ultalt: result.ultalt.toLocaleString()
-                        // });
+                        setNmEstado(result.nmestado);
                     }
                 });
         } else {
@@ -98,56 +82,48 @@ export const CadastroEstados: React.FC = () => {
         }
     }, [id]);
 
-    // useEffect(() => {
-    //     if (obj) setIsValid(true)
-    //     else setIsValid(false);
-    // }, [obj])
-
     useEffect(() => {
-        console.log('AQUI 2');
-        if (formRef.current?.getData().nmestado && formRef.current?.getData().pais) {
+        if (nmestado != "" && pais) {
             const formData = formRef.current?.getData();
             const data: IFormData = {
                 nmestado: formData?.nmestado,
                 uf: formData?.uf,
-                pais: formData?.pais,
-                datacad: new Date().toLocaleString(),
-                ultalt: new Date().toLocaleString(),
+                pais: formData?.pais
             }
             debounce(() => {
                 validate(data);
             })
         }
-    }, [formRef.current?.getData().nmestado, formRef.current?.getData().pais])
+    }, [nmestado, pais]);
 
     const validate = (dados: IFormData) => {
-        if (!isValid && dados.nmestado && dados.pais) {
-            debounce(() => {
-                setIsValidating(true);
-                controller.validate(dados)
-                .then((result) => {
-                    setIsValidating(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setIsValid(result);
-                        if (result === false) {
-                            const validationErrors: IVFormErrors = {};
-                            validationErrors['estado'] = 'Já existe um estado vinculado a este país.';
-                            formRef.current?.setErrors(validationErrors);
+        debounce(() => {
+            if (!isValid && dados.nmestado && dados.pais) {
+                debounce(() => {
+                    setIsValidating(true);
+                    controller.validate(dados)
+                    .then((result) => {
+                        setIsValidating(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            setIsValid(result);
+                            console.log(result);
+                            if (result === false) {
+                                const validationErrors: IVFormErrors = {};
+                                validationErrors['nmestado'] = 'Já existe um estado vinculado a este país.';
+                                formRef.current?.setErrors(validationErrors);
+                            }
                         }
-                    }
+                    })
                 })
-            })
-        } else {
-            setIsValid(true);
-        }
+            } else {
+                setIsValid(true);
+            }
+        })
     }
 
     const handleSave = (dados: IFormData) => {
-        let data = new Date();
-        dados.datacad = data.toLocaleString();
-        dados.ultalt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -281,12 +257,12 @@ export const CadastroEstados: React.FC = () => {
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                { isValidating && (
+                                                { isValidating && (nmestado != "") && pais && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (isValid) && (
+                                                { (isValid && nmestado != "" && pais) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -297,8 +273,8 @@ export const CadastroEstados: React.FC = () => {
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
+                                        setNmEstado(e.target.value);
                                         formRef.current?.setFieldError('estado', '');
-                                        setEstado(e.target.value.toUpperCase());
                                     }}
                                 />
                             </Grid>
@@ -327,7 +303,10 @@ export const CadastroEstados: React.FC = () => {
                                     onInputchange={() => {
                                         setIsValid(false);
                                         setIsValidating(false);
-                                        formRef.current?.setFieldError('estado', '');
+                                        formRef.current?.setFieldError('nmestado', '');
+                                    }}
+                                    onChange={newValue => {
+                                        setPais(newValue);
                                     }}
                                 />
                             </Grid>

@@ -149,7 +149,6 @@ async function buscarUm (id) {
 // @route POST /api/estados
 async function salvar (estado) {
     return new Promise((resolve, reject) => {
-
         pool.connect((err, client, done) => {
             const shouldAbort = err => {
                 if (err) {
@@ -166,7 +165,7 @@ async function salvar (estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into estados (nmestado, uf, fk_idPais) values($1, $2, $3)', [estado.nmestado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id], async (err, res) => {
+            client.query('insert into estados (nmestado, uf, fk_idPais, datacad, ultalt) values($1, $2, $3, $4, $5)', [estado.nmestado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, estado.datacad, estado.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -205,7 +204,7 @@ async function alterar (id, estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update estados set id = $1, nmestado = $2, uf = $3, fk_idPais = $4 where id = $5 ', [estado.id, estado.nmestado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, id], (err, res) => {
+                client.query('update estados set nmestado = $1, uf = $2, fk_idpais = $3, ultalt = $4 where id = $5 ', [estado.nmestado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, estado.datacad, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -242,7 +241,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from estados where id = ${id}`, (err, res) => {
+                client.query('delete from estados where id = $1', [id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -259,10 +258,8 @@ async function deletar (id) {
 };
 
 async function validate(estado) {
-    const mPais = estado.pais;
-    console.log(estado);
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from estados where nmestado like '${estado.nmestado.toUpperCase()}' and fk_idpais = ${mPais.id}`, (err, res) => {
+        pool.query('select * from estados where nmestado like $1 and fk_idpais = $2', [estado.nmestado, estado.pais.id], (err, res) => {
             if (err) {
                 return reject(err);
             }

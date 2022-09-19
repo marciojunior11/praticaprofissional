@@ -255,7 +255,7 @@ export const CadastroPaises: React.FC = () => {
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
-                                        formRef.current?.setFieldError('pais', '');
+                                        formRef.current?.setFieldError('nmpais', '');
                                         debounce(() => {
                                             validate(e.target.value);
                                         });

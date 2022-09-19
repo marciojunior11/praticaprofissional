@@ -6,6 +6,8 @@ export interface IEstados {
     nmestado: string;
     uf: string;
     pais: IPaises;
+    datacad: string | Date;
+    ultalt: string | Date;
 }
 
 export interface IDetalhesEstados {
