@@ -9,10 +9,10 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { EstadosService, IEstados } from "../../shared/services/api/estados/EstadosService";
+import { EstadosService } from "../../shared/services/api/estados/EstadosService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
-import { PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { IPaises } from "../../shared/interfaces/entities/Paises";
+import { IDetalhesEstados, IEstados } from "../../shared/interfaces/entities/Estados";
 import { useDebounce } from "../../shared/hooks";
 import ControllerEstados from "../../shared/controllers/EstadosController";
 import ControllerPaises from "../../shared/controllers/PaisesController";
@@ -20,20 +20,26 @@ import ControllerPaises from "../../shared/controllers/PaisesController";
 
 // #region INTERFACES
 interface IFormData {
-    estado: string;
+    nmestado: string;
     uf: string;
     pais: IPaises;
+    datacad: string;
+    ultalt: string;
 }
 // #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    estado: yup.string().required(),
+    nmestado: yup.string().required(),
     uf: yup.string().required().min(2),
     pais: yup.object().shape({
         id: yup.number().positive().integer().required(),
-        pais: yup.string().required(),
-        sigla: yup.string().required().min(2)
-    }).required()
+        nmpais: yup.string().required(),
+        sigla: yup.string().required().min(2),
+        datacad: yup.string().required(),
+        ultalt: yup.string().required()
+    }).required(),
+    datacad: yup.string().required(),
+    ultalt: yup.string().required()
 })
 
 export const CadastroEstados: React.FC = () => {
@@ -59,7 +65,7 @@ export const CadastroEstados: React.FC = () => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            EstadosService.getById(Number(id))
+            controller.getOne(Number(id))
                 .then((result) => {
                     setIsLoading(false);
                     if (result instanceof Error) {
@@ -68,15 +74,23 @@ export const CadastroEstados: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
-                        setEstado(formRef.current?.getData().estado);
-                        setPais(formRef.current?.getData().pais);
-                        setObj(result);
-                        setAlterando(true);
+                        setIsValid(true);
+                        // setEstado(formRef.current?.getData().estado);
+                        // setPais(formRef.current?.getData().pais);
+                        // setObj(result);
+                        // setAlterando(true);
+                        // validate({
+                        //     nmestado: result.nmestado,
+                        //     uf: result.uf,
+                        //     pais: result.pais,
+                        //     datacad: result.datacad.toLocaleString(),
+                        //     ultalt: result.ultalt.toLocaleString()
+                        // });
                     }
                 });
         } else {
             formRef.current?.setData({
-                estado: '',
+                nmestado: '',
                 uf: '',
                 pais: null
             });
@@ -89,12 +103,15 @@ export const CadastroEstados: React.FC = () => {
     }, [obj])
 
     useEffect(() => {
+        console.log('aqui');
         if (estado && pais) {
             const formData = formRef.current?.getData();
             const data: IFormData = {
-                estado: formData?.estado,
+                nmestado: formData?.nmestado,
                 uf: formData?.uf,
-                pais: formData?.pais
+                pais: formData?.pais,
+                datacad: new Date().toLocaleString(),
+                ultalt: new Date().toLocaleString(),
             }
             validate(data);
         }
@@ -103,18 +120,18 @@ export const CadastroEstados: React.FC = () => {
     const validate = (dados: IFormData) => {
         const obj1 = {
             id: obj?.id,
-            estado: obj?.estado,
+            estado: obj?.nmestado,
             pais: obj?.pais
         }
         const obj2 = {
             id: Number(id),
-            estado: dados.estado,
+            estado: dados.nmestado,
             pais: dados.pais
         }
-        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
-            setIsValidating(true);
+        if (JSON.stringify(obj1) !== JSON.stringify(obj2) && ((dados.nmestado) && (dados.pais))) {
             debounce(() => {
-                EstadosService.validate(dados)
+                setIsValidating(true);
+                controller.validate(dados)
                 .then((result) => {
                     setIsValidating(false);
                     if (result instanceof Error) {
@@ -135,14 +152,16 @@ export const CadastroEstados: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
-        validate(dados);
+        let data = new Date();
+        dados.datacad = data.toLocaleString();
+        dados.ultalt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            EstadosService.create(dadosValidados)
+                            controller.create(dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -166,7 +185,7 @@ export const CadastroEstados: React.FC = () => {
                                     }
                                 });
                         } else {
-                            EstadosService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            controller.update(Number(id), { id: Number(id), ...dadosValidados })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -296,9 +315,11 @@ export const CadastroEstados: React.FC = () => {
                                         if (pais) {
                                             const formData = formRef.current?.getData();
                                             const data = {
-                                                estado: formData?.estado,
+                                                nmestado: formData?.estado,
                                                 uf: formData?.uf,
-                                                pais: formData?.pais
+                                                pais: formData?.pais,
+                                                datacad: new Date().toLocaleString(),
+                                                ultalt: new Date().toLocaleString()
                                             }
                                             validate(data);
                                         }
@@ -314,17 +335,19 @@ export const CadastroEstados: React.FC = () => {
                                     label="UF"
                                     disabled={isLoading}
                                     inputProps={{ maxLength: 2 }}
-                                    onBlur={() => {
-                                        if (alterando) {
-                                            const formData = formRef.current?.getData();
-                                            const data = {
-                                                estado: formData?.estado,
-                                                uf: formData?.uf,
-                                                pais: formData?.pais
-                                            }
-                                            validate(data);
-                                        }
-                                    }}
+                                    // onBlur={() => {
+                                    //     if (alterando) {
+                                    //         const formData = formRef.current?.getData();
+                                    //         const data = {
+                                    //             nmestado: formData?.estado,
+                                    //             uf: formData?.uf,
+                                    //             pais: formData?.pais,
+                                    //             datacad: new Date().toLocaleString(),
+                                    //             ultalt: new Date().toLocaleString()
+                                    //         }
+                                    //         validate(data);
+                                    //     }
+                                    // }}
                                 />
                             </Grid>
                         </Grid>
@@ -345,6 +368,10 @@ export const CadastroEstados: React.FC = () => {
                                     }}
                                     onChange={(newValue) => {
                                         setPais(newValue);
+                                        if (newValue && formRef.current?.getData().nmestado != "") {
+                                            debounce(() => {
+                                            })
+                                        }
                                     }}
                                 />
                             </Grid>

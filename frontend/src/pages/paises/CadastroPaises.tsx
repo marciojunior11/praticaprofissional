@@ -82,10 +82,9 @@ export const CadastroPaises: React.FC = () => {
     }, [obj])
 
     const validate = (filter: string) => {
-        console.log(isValid);
         if (filter != obj?.nmpais) {
-            setIsValidating(true);
-            if (formRef.current?.getData().nmpais != "") {
+            if (filter != "") {
+                setIsValidating(true);
                 debounce(() => {
                     controller.validate(filter)
                         .then((result) => {
@@ -112,7 +111,6 @@ export const CadastroPaises: React.FC = () => {
         let data = new Date();
         dados.datacad = data.toLocaleString();
         dados.ultalt = data.toLocaleString();
-        console.log(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -207,6 +205,8 @@ export const CadastroPaises: React.FC = () => {
                     mostrarBotaoSalvarNovo={id == 'novo'}
                     mostrarBotaoApagar={id !== 'novo'}
                     mostrarBotaoNovo={id !== 'novo'}
+
+                    disableButtons={isValidating}
 
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}

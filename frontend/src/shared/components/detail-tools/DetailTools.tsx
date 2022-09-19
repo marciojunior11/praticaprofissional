@@ -9,6 +9,8 @@ interface IDetailToolsProps {
     mostrarBotaoSalvarNovo?: boolean,
     mostrarBotaoSalvarFechar?: boolean,
 
+    disableButtons?: boolean,
+
     botaoNovoIsLoading?: boolean,
     botaoVoltarIsLoading?: boolean,
     botaoApagarIsLoading?: boolean,
@@ -33,6 +35,8 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
     mostrarBotaoSalvar = true,
     mostrarBotaoSalvarNovo = false,
     mostrarBotaoSalvarFechar = false,
+
+    disableButtons = false,
 
     botaoNovoIsLoading = false,
     botaoVoltarIsLoading = false,
@@ -71,6 +75,7 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='contained'
                     disableElevation
                     onClick={handleClickSalvar}
+                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         Salvar
@@ -89,6 +94,7 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='contained'
                     disableElevation
                     onClick={handleClickSalvarNovo}
+                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         Salvar e novo
@@ -107,6 +113,7 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='outlined'
                     disableElevation
                     onClick={handleClickSalvarFechar}
+                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         Salvar e fechar
@@ -125,6 +132,7 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='outlined'
                     disableElevation
                     onClick={handleClickApagar}
+                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         Apagar
@@ -143,6 +151,7 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='outlined'
                     disableElevation
                     onClick={handleClickNovo}
+                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         {textoBotaoNovo}
@@ -165,6 +174,7 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='outlined'
                     disableElevation
                     onClick={handleClickVoltar}
+                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         Voltar

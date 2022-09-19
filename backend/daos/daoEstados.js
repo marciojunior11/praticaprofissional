@@ -14,7 +14,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from estados where nmestado like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -48,7 +48,7 @@ async function buscarTodosSemPg(url) {
         } else {
             const filter = url.split('=')[2]
             console.log(filter);
-            pool.query(`select * from estados where estado like '${filter.toUpperCase()}'`, async (err, res) => {
+            pool.query(`select * from estados where nmestado like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -98,7 +98,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from estados where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from estados where nmestado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -132,7 +132,7 @@ async function buscarUm (id) {
                 const mPais = await daoPaises.buscarUm(res.rows[0].fk_idpais);
                 const mEstado = {
                     id: res.rows[0].id,
-                    nmestado: res.rows[0].estado,
+                    nmestado: res.rows[0].nmestado,
                     uf: res.rows[0].uf,
                     pais: mPais,
                     datacad: res.rows[0].datacad,
@@ -166,7 +166,7 @@ async function salvar (estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into estados (estado, uf, fk_idPais) values($1, $2, $3)', [estado.estado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id], async (err, res) => {
+            client.query('insert into estados (nmestado, uf, fk_idPais) values($1, $2, $3)', [estado.nmestado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -205,7 +205,7 @@ async function alterar (id, estado) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update estados set id = $1, estado = $2, uf = $3, fk_idPais = $4 where id = $5 ', [estado.id, estado.estado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, id], (err, res) => {
+                client.query('update estados set id = $1, nmestado = $2, uf = $3, fk_idPais = $4 where id = $5 ', [estado.id, estado.nmestado.toUpperCase(), estado.uf.toUpperCase(), estado.pais.id, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -260,8 +260,9 @@ async function deletar (id) {
 
 async function validate(estado) {
     const mPais = estado.pais;
+    console.log(estado);
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from estados where estado like '${estado.estado.toUpperCase()}' and fk_idpais = ${mPais.id}`, (err, res) => {
+        pool.query(`select * from estados where nmestado like '${estado.nmestado.toUpperCase()}' and fk_idpais = ${mPais.id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }

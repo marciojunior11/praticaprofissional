@@ -112,7 +112,7 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                         <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>delete</Icon>
                         </IconButton>
-                        <IconButton color="primary" size="small" onClick={() => navigate(`/paises/cadastro/${row.id}`)}>
+                        <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
                             <Icon>edit</Icon>
                         </IconButton>
                     </>

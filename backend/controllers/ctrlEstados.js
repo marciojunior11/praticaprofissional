@@ -132,7 +132,7 @@ async function validate(req, res) {
         req.on('end', async () => {
             const response = JSON.parse(body);
             const mEstado = {
-                estado: response.estado,
+                nmestado: response.nmestado,
                 uf: response.uf,
                 pais: response.pais
             };

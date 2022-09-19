@@ -2,6 +2,7 @@ import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
 import { IEstados, IDetalhesEstados, TListaEstados } from '../interfaces/entities/Estados';
 import Estados from '../models/entities/Estados';
+import Paises from '../models/entities/Paises';
 import { IController } from './../interfaces/controllers/Controller';
 
 class ControllerEstados implements IController {
@@ -52,9 +53,11 @@ class ControllerEstados implements IController {
     }
 
     create = async (dados: Omit<IDetalhesEstados, 'id'>): Promise<number | undefined | Error> => {
-        let estado = new Estados(0, dados.nmestado, dados.uf, dados.pais, dados.datacad, dados.ultalt);
+        let pais = new Paises(dados.pais.id, dados.pais.nmpais, dados.pais.sigla, dados.pais.ddi, dados.pais.datacad, dados.pais.ultalt);
+        let estado = new Estados(0, dados.nmestado, dados.uf, pais, dados.datacad, dados.ultalt);
+        estado._pais = pais;
         try {
-            const { data } = await Api.post<IEstados>('/api/estados', dados);
+            const { data } = await Api.post<IEstados>('/api/estados', estado);
             if (data) {
                 return data.id;
             }
@@ -64,7 +67,9 @@ class ControllerEstados implements IController {
     }
 
     update = async (id: number, dados: IDetalhesEstados): Promise<void | Error> => {
-        let estado = new Estados(id, dados.nmestado, dados.uf, dados.pais, dados.datacad, dados.ultalt)
+        let pais = new Paises(dados.pais.id, dados.pais.nmpais, dados.pais.sigla, dados.pais.ddi, dados.pais.datacad, dados.pais.ultalt);
+        let estado = new Estados(0, dados.nmestado, dados.uf, pais, dados.datacad, dados.ultalt);
+        estado._pais = pais;
         try {
             await Api.put(`/api/estados/${id}`, estado);
         } catch (error) {

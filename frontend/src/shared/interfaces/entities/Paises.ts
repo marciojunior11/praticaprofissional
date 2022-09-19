@@ -3,8 +3,8 @@ export interface IPaises {
     nmpais: string;
     sigla: string;
     ddi: string;
-    dataCad: string;
-    ultAlt: string
+    datacad: string;
+    ultalt: string
 }
 
 export interface IDetalhesPaises {

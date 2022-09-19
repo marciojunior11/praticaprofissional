@@ -14,7 +14,7 @@ export interface IDetalhesEstados {
     id: number;
     nmestado: string;
     uf: string;
-    pais: Paises;
+    pais: IPaises;
     datacad: Date | string;
     ultalt: Date | string;
 }

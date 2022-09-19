@@ -5,7 +5,6 @@ const daoPaises = require('../daos/daoPaises');
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoPaises.buscarTodosSemPg(req.url);
-        console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
