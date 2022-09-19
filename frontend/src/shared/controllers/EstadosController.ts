@@ -53,8 +53,8 @@ class ControllerEstados implements IController {
     }
 
     create = async (dados: Omit<IDetalhesEstados, 'id'>): Promise<number | undefined | Error> => {
-        let pais = new Paises(dados.pais.id, dados.pais.nmpais, dados.pais.sigla, dados.pais.ddi, dados.pais.datacad, dados.pais.ultalt);
-        let estado = new Estados(0, dados.nmestado, dados.uf, pais, dados.datacad, dados.ultalt);
+        let pais = new Paises(dados.pais.id, dados.pais.nmpais, dados.pais.sigla, dados.pais.ddi, new Date(), new Date());
+        let estado = new Estados(0, dados.nmestado, dados.uf, pais, new Date(), new Date());
         estado._pais = pais;
         try {
             const { data } = await Api.post<IEstados>('/api/estados', estado);
@@ -67,8 +67,8 @@ class ControllerEstados implements IController {
     }
 
     update = async (id: number, dados: IDetalhesEstados): Promise<void | Error> => {
-        let pais = new Paises(dados.pais.id, dados.pais.nmpais, dados.pais.sigla, dados.pais.ddi, dados.pais.datacad, dados.pais.ultalt);
-        let estado = new Estados(0, dados.nmestado, dados.uf, pais, dados.datacad, dados.ultalt);
+        let pais = new Paises(dados.pais.id, dados.pais.nmpais, dados.pais.sigla, dados.pais.ddi, new Date(), new Date());
+        let estado = new Estados(0, dados.nmestado, dados.uf, pais, new Date(), new Date());
         estado._pais = pais;
         try {
             await Api.put(`/api/estados/${id}`, estado);

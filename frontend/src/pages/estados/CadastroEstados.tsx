@@ -74,7 +74,8 @@ export const CadastroEstados: React.FC = () => {
                     } else {
                         console.log('RESULT', result);
                         formRef.current?.setData(result);
-                        setIsValid(true);
+                        setEstado(result.nmestado);
+                        setPais(result.pais);
                         // setEstado(formRef.current?.getData().estado);
                         // setPais(formRef.current?.getData().pais);
                         // setObj(result);
@@ -97,14 +98,14 @@ export const CadastroEstados: React.FC = () => {
         }
     }, [id]);
 
-    useEffect(() => {
-        if (obj) setIsValid(true)
-        else setIsValid(false);
-    }, [obj])
+    // useEffect(() => {
+    //     if (obj) setIsValid(true)
+    //     else setIsValid(false);
+    // }, [obj])
 
     useEffect(() => {
-        console.log('aqui');
-        if (estado && pais) {
+        console.log('AQUI 2');
+        if (formRef.current?.getData().nmestado && formRef.current?.getData().pais) {
             const formData = formRef.current?.getData();
             const data: IFormData = {
                 nmestado: formData?.nmestado,
@@ -113,22 +114,14 @@ export const CadastroEstados: React.FC = () => {
                 datacad: new Date().toLocaleString(),
                 ultalt: new Date().toLocaleString(),
             }
-            validate(data);
+            debounce(() => {
+                validate(data);
+            })
         }
-    }, [estado, pais])
+    }, [formRef.current?.getData().nmestado, formRef.current?.getData().pais])
 
     const validate = (dados: IFormData) => {
-        const obj1 = {
-            id: obj?.id,
-            estado: obj?.nmestado,
-            pais: obj?.pais
-        }
-        const obj2 = {
-            id: Number(id),
-            estado: dados.nmestado,
-            pais: dados.pais
-        }
-        if (JSON.stringify(obj1) !== JSON.stringify(obj2) && ((dados.nmestado) && (dados.pais))) {
+        if (!isValid && dados.nmestado && dados.pais) {
             debounce(() => {
                 setIsValidating(true);
                 controller.validate(dados)
@@ -185,7 +178,7 @@ export const CadastroEstados: React.FC = () => {
                                     }
                                 });
                         } else {
-                            controller.update(Number(id), { id: Number(id), ...dadosValidados })
+                            controller.update(Number(id), dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -287,42 +280,25 @@ export const CadastroEstados: React.FC = () => {
                                     disabled={isLoading}                             
                                     InputProps={{
                                         endAdornment: (
-                                                <InputAdornment position='start'>
-                                                    { isValidating === true && (
-                                                        <Box sx={{ display: 'flex',  }}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    )}
-                                                    { isValidating === false && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            { isValid === true ? (
-                                                                <Icon color="success">done</Icon>
-                                                            ) : (
-                                                                <Icon color="error">close</Icon>
-                                                            )}
-                                                        </Box>
-                                                    )}
-                                                </InputAdornment>
+                                            <InputAdornment position="end">
+                                                { isValidating && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <CircularProgress size={24}/>
+                                                    </Box>
+                                                ) }
+                                                { (isValid) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <Icon color="success">done</Icon>
+                                                    </Box>
+                                                ) }
+                                            </InputAdornment>
                                         )
                                     }}
                                     onChange={(e) => {
                                         setIsValid(false);
-                                        setIsValidating('');
+                                        setIsValidating(false);
                                         formRef.current?.setFieldError('estado', '');
                                         setEstado(e.target.value.toUpperCase());
-                                    }}
-                                    onBlur={() => {
-                                        if (pais) {
-                                            const formData = formRef.current?.getData();
-                                            const data = {
-                                                nmestado: formData?.estado,
-                                                uf: formData?.uf,
-                                                pais: formData?.pais,
-                                                datacad: new Date().toLocaleString(),
-                                                ultalt: new Date().toLocaleString()
-                                            }
-                                            validate(data);
-                                        }
                                     }}
                                 />
                             </Grid>
@@ -335,19 +311,6 @@ export const CadastroEstados: React.FC = () => {
                                     label="UF"
                                     disabled={isLoading}
                                     inputProps={{ maxLength: 2 }}
-                                    // onBlur={() => {
-                                    //     if (alterando) {
-                                    //         const formData = formRef.current?.getData();
-                                    //         const data = {
-                                    //             nmestado: formData?.estado,
-                                    //             uf: formData?.uf,
-                                    //             pais: formData?.pais,
-                                    //             datacad: new Date().toLocaleString(),
-                                    //             ultalt: new Date().toLocaleString()
-                                    //         }
-                                    //         validate(data);
-                                    //     }
-                                    // }}
                                 />
                             </Grid>
                         </Grid>
@@ -363,15 +326,8 @@ export const CadastroEstados: React.FC = () => {
                                     getAll={controllerPaises.getAll}
                                     onInputchange={() => {
                                         setIsValid(false);
-                                        setIsValidating('');
+                                        setIsValidating(false);
                                         formRef.current?.setFieldError('estado', '');
-                                    }}
-                                    onChange={(newValue) => {
-                                        setPais(newValue);
-                                        if (newValue && formRef.current?.getData().nmestado != "") {
-                                            debounce(() => {
-                                            })
-                                        }
                                     }}
                                 />
                             </Grid>

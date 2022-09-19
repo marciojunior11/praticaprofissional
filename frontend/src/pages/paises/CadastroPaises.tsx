@@ -21,8 +21,6 @@ interface IFormData {
     nmpais: string;
     sigla: string;
     ddi: string;
-    datacad: string;
-    ultalt: string;
 }
 // #endregion
 
@@ -30,8 +28,6 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     nmpais: yup.string().required(),
     sigla: yup.string().required().min(2),
     ddi: yup.string().required(),
-    datacad: yup.string().required(),
-    ultalt: yup.string().required()
 })
 
 export const CadastroPaises: React.FC = () => {
@@ -108,9 +104,6 @@ export const CadastroPaises: React.FC = () => {
     }
 
     const handleSave = (dados: IFormData) => {
-        let data = new Date();
-        dados.datacad = data.toLocaleString();
-        dados.ultalt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -142,7 +135,7 @@ export const CadastroPaises: React.FC = () => {
                                     }
                                 });
                         } else {
-                            controller.update(Number(id), { id: Number(id), ...dadosValidados })
+                            controller.update(Number(id), dados)
                             .then((result) => {
                                 setIsLoading(false);
                                 if (result instanceof Error) {

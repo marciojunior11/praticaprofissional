@@ -52,7 +52,7 @@ class ControllerPaises implements IController {
     }
 
     create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<number | undefined | Error> => {
-        let pais = new Paises(0, dados.nmpais, dados.sigla, dados.ddi, dados.datacad, dados.ultalt);
+        let pais = new Paises(0, dados.nmpais, dados.sigla, dados.ddi, new Date(), new Date());
         try {
             const { data } = await Api.post<IPaises>('/api/paises', pais);
             if (data) {
@@ -64,7 +64,7 @@ class ControllerPaises implements IController {
     }
 
     update = async (id: number, dados: IDetalhesPaises): Promise<void | Error> => {
-        let pais = new Paises(id, dados.nmpais, dados.sigla, dados.ddi, dados.datacad, dados.ultalt)
+        let pais = new Paises(id, dados.nmpais, dados.sigla, dados.ddi, new Date(), new Date())
         try {
             await Api.put(`/api/paises/${id}`, pais);
         } catch (error) {
