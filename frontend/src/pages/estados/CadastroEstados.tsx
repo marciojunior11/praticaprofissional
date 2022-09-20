@@ -142,11 +142,15 @@ export const CadastroEstados: React.FC = () => {
                                         } else if (isSaveAndNew()) {
                                             setIsValidating(false);
                                             navigate('/estados/cadastro/novo');
+                                            setIsValidating(false);
                                             formRef.current?.setData({
                                                 nmestado: '',
                                                 uf: '',
                                                 pais: null
                                             });
+                                            setIsValid(false);
+                                            setNmEstado("");
+                                            setPais(null);
                                         } else {
                                             setIsValidating(false);
                                             navigate(`/estados/cadastro/${result}`);
@@ -222,6 +226,8 @@ export const CadastroEstados: React.FC = () => {
                     mostrarBotaoApagar={id !== 'novo'}
                     mostrarBotaoNovo={id !== 'novo'}
                     
+                    disableButtons={isValidating}
+
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}

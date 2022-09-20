@@ -174,7 +174,6 @@ export const DetailTools: React.FC<IDetailToolsProps> = ({
                     variant='outlined'
                     disableElevation
                     onClick={handleClickVoltar}
-                    disabled={disableButtons}
                 >
                     <Typography variant='button' whiteSpace='nowrap' textOverflow='ellipsis' overflow='hidden'>
                         Voltar
