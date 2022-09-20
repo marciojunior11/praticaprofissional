@@ -48,7 +48,7 @@ export const CadastroEstados: React.FC = () => {
 
     // #region STATES
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<any>(null);
+    const [isValidating, setIsValidating] = useState<boolean>(false);
     const [pais, setPais] = useState<IPaises | null>(null);
     const [nmestado, setNmEstado] = useState("");
     const [isValid, setIsValid] = useState(false);
@@ -99,8 +99,8 @@ export const CadastroEstados: React.FC = () => {
     const validate = (dados: IFormData) => {
         debounce(() => {
             if (!isValid && dados.nmestado && dados.pais) {
+                setIsValidating(true);
                 debounce(() => {
-                    setIsValidating(true);
                     controller.validate(dados)
                     .then((result) => {
                         setIsValidating(false);
@@ -140,15 +140,15 @@ export const CadastroEstados: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/estados');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating(null);
+                                            setIsValidating(false);
                                             navigate('/estados/cadastro/novo');
                                             formRef.current?.setData({
-                                                estado: '',
+                                                nmestado: '',
                                                 uf: '',
                                                 pais: null
                                             });
                                         } else {
-                                            setIsValidating(null);
+                                            setIsValidating(false);
                                             navigate(`/estados/cadastro/${result}`);
                                         }
                                     }
@@ -164,7 +164,7 @@ export const CadastroEstados: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/estados')
                                         } else {
-                                            setIsValidating(null);
+                                            setIsValidating(false);
                                         }
                                     }
                                 });
@@ -257,7 +257,7 @@ export const CadastroEstados: React.FC = () => {
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                { isValidating && (nmestado != "") && pais && (
+                                                { isValidating && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>

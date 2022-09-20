@@ -123,7 +123,7 @@ export const CadastroPaises: React.FC = () => {
                                             setIsValidating(false);
                                             navigate('/paises/cadastro/novo');
                                             formRef.current?.setData({
-                                                pais: '',
+                                                nmpais: '',
                                                 sigla: '',
                                                 ddi: ''
                                             });
