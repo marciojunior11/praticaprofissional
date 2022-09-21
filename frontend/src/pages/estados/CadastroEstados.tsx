@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 // #endregion
 
 // #region INTERNAL IMPORTS
-import { DetailTools } from "../../shared/components";
+import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { EstadosService } from "../../shared/services/api/estados/EstadosService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
@@ -16,6 +16,7 @@ import { IDetalhesEstados, IEstados } from "../../shared/interfaces/entities/Est
 import { useDebounce } from "../../shared/hooks";
 import ControllerEstados from "../../shared/controllers/EstadosController";
 import ControllerPaises from "../../shared/controllers/PaisesController";
+import { ConsultaPaises } from "../paises/ConsultaPaises";
 // #endregion
 
 // #region INTERFACES
@@ -52,9 +53,13 @@ export const CadastroEstados: React.FC = () => {
     const [pais, setPais] = useState<IPaises | null>(null);
     const [nmestado, setNmEstado] = useState("");
     const [isValid, setIsValid] = useState(false);
+    const [isConsultaPaisesDialogOpen, setIsConsultaPaisesDialogOpen] = useState(false);
     // #endregion
 
     // #region ACTIONS
+    const toggleConsultaPaisesDialogOpen = () => {
+        setIsConsultaPaisesDialogOpen(oldValue => !oldValue);
+    }
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
@@ -66,7 +71,6 @@ export const CadastroEstados: React.FC = () => {
                         toast.error(result.message);
                         navigate('/estados');
                     } else {
-                        console.log('RESULT', result);
                         formRef.current?.setData(result);
                         setIsValid(true);
                         setPais(result.pais);
@@ -314,12 +318,27 @@ export const CadastroEstados: React.FC = () => {
                                     onChange={newValue => {
                                         setPais(newValue);
                                     }}
+                                    onClickSearch={() => {
+                                        toggleConsultaPaisesDialogOpen();
+                                    }}
                                 />
                             </Grid>
                         </Grid>
 
                     </Grid>
-
+                    <CustomDialog
+                        onClose={toggleConsultaPaisesDialogOpen}
+                        handleClose={toggleConsultaPaisesDialogOpen}
+                        open={isConsultaPaisesDialogOpen}
+                        title="Cadastrar País"
+                        fullWidth
+                    >
+                        <ConsultaPaises
+                            isDialog
+                            onSelectItem={(row) => formRef.current?.setFieldValue("pais", row)}
+                            toggleDialogOpen={toggleConsultaPaisesDialogOpen}
+                        />
+                    </CustomDialog>
                 </Box>
             </VForm>
         </LayoutBase>

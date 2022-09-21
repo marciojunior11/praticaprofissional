@@ -6,10 +6,11 @@ import { toast } from "react-toastify";
 // #endregion
 
 // #region INTERNAL IMPORTS
-import { ListTools } from "../../shared/components";
+import { CustomDialog, ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { IPaises } from "../../shared/interfaces/entities/Paises";
+import { CadastroPaises } from "./CadastroPaises";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import ControllerPaises from "../../shared/controllers/PaisesController"
 // #endregion
@@ -40,18 +41,36 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
     const [rows, setRows] = useState<IPaises[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCadastroPaisesDialogOpen, setIsCadastroPaisesDialogOpen] = useState(false);
     // #endregion
 
     // #region ACTIONS
-    useEffect(() => {
+    const toggleCadastroPaisesDialogOpen = () => {
+        setIsCadastroPaisesDialogOpen(oldValue => !oldValue);
+    }
+
+    const reloadDataTable = () => {
         setIsLoading(true);
-
         debounce(() => {
-
             controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
 
+    useEffect(() => {
+        setIsLoading(true);
+        debounce(() => {
+            controller.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
@@ -61,6 +80,7 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                 });
         })
     }, [busca, pagina]);
+
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
@@ -70,33 +90,14 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        setRows(oldRows => [
-                            ...oldRows.filter(oldRow => oldRow.id !== id)
-                        ]);
+                        reloadDataTable();
                         toast.success('Apagado com sucesso!');
                     }
                 })
         }
 
     }
-    const reloadDataTable = () => {
-        setIsLoading(true);
 
-        debounce(() => {
-            controller.getAll(pagina, busca)
-                .then((result) => {
-                    setIsLoading(false);
-
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        console.log('RESULT', result);
-                        setRows(result.data);
-                        setQtd(result.qtd);
-                    }
-                });
-        })        
-    }
     // #endregion
 
     // #region CONTROLLERS
@@ -126,9 +127,24 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                         <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>delete</Icon>
                         </IconButton>
-                        <IconButton color="primary" size="small" onClick={() => navigate(`/paises/cadastro/${row.id}`)}>
+                        <IconButton color="primary" size="small" onClick={() => {
+                            if (isDialog) {
+                                setSelectedId(row.id);
+                                toggleCadastroPaisesDialogOpen();
+                            } else {
+                                navigate(`/estados/cadastro/${row.id}`)
+                            }
+                        }}>
                             <Icon>edit</Icon>
                         </IconButton>
+                        {isDialog && (
+                            <IconButton color="success" size="small" onClick={() => {
+                                onSelectItem?.(row);
+                                toggleDialogOpen?.();
+                            }}>
+                                <Icon>checkbox</Icon>
+                            </IconButton>
+                        )}
                     </>
                 )
             }
@@ -137,13 +153,20 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
 
     return (
         <LayoutBase 
-            titulo="Consultar Países"
+            titulo={!isDialog ? "Consultar Países" : ""}
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/paises/cadastro/novo')}
+                    onClickNew={() => {
+                        if (isDialog) {
+                            setSelectedId(0);
+                            toggleCadastroPaisesDialogOpen();
+                        } else {
+                            navigate('/paises/cadastro/novo')
+                        }
+                    }}
                 />
             }
         >
@@ -157,6 +180,7 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                     {
                         onSelectItem?.(row);
                         toggleDialogOpen?.();
+                        console.log('row', row);
                     }
                 }}   
                 isLoading={isLoading}
@@ -164,6 +188,21 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                 rowCount={qtd}
                 onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}      
             />
+            <CustomDialog
+                fullWidth
+                maxWidth="md"
+                onClose={toggleCadastroPaisesDialogOpen}
+                handleClose={toggleCadastroPaisesDialogOpen}
+                open={isCadastroPaisesDialogOpen}
+                title="Cadastrar País"
+            >
+                <CadastroPaises
+                    isDialog
+                    toggleOpen={toggleCadastroPaisesDialogOpen}
+                    selectedId={Number(selectedId)}
+                    reloadDataTableIfDialog={reloadDataTable}
+                />
+            </CustomDialog>
         </LayoutBase>
     );
 };

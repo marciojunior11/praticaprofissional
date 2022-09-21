@@ -1,27 +1,105 @@
+//#region EXTERNAL IMPORTS
 import { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon } from "@mui/material";
+import { IconButton, Icon } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
+// #endregion
+
+// #region INTERNAL IMPORTS
 import { CustomDialog, ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { FormasPagamentoService } from '../../shared/services/api/formasPagamento/FormasPagamentoService';
 import { IFormasPagamento } from "../../shared/models/ModelFormasPagamento";
-import { Environment } from "../../shared/environment";
-import { toast } from "react-toastify";
 import { CadastroFormasPagamento } from "./CadastroFormasPagamento";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
+// #endregion
 
+// #region INTERFACES
 interface IConsultaProps {
     isDialog?: boolean;
     toggleDialogOpen?: () => void;
     onSelectItem?: (row: any) => void;
 }
+// #endregion
 
 export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
+    // #region HOOKS
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
+    const busca = useMemo(() => {
+        return searchParams.get('busca')?.toUpperCase() || ''; 
+    }, [searchParams]);
+    const pagina = useMemo(() => {
+        return Number(searchParams.get('pagina') || '1');   
+    }, [searchParams]);
+    // #endregion
+
+    // #region STATES
     const [selectedId, setSelectedId] = useState<number | undefined>();
+    const [rows, setRows] = useState<IFormasPagamento[]>([]);
+    const [qtd, setQtd] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isCadastroFormaPgtoDialogOpen, setIsCadastroFormaPgtoDialogOpen] = useState(false);
+    // #endregion
+
+    // #region ACTIONS
+    const toggleCadastroFormaPgtoDialogOpen = () => {
+        setIsCadastroFormaPgtoDialogOpen(oldValue => !oldValue);
+    }
+
+    const reloadDataTable = () => {
+        setIsLoading(true);
+        debounce(() => {
+            FormasPagamentoService.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
+
+    useEffect(() => {
+        setIsLoading(true);
+        debounce(() => {
+            FormasPagamentoService.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })
+    }, [busca, pagina]);
+
+    const handleDelete = (id: number) => {
+        if (window.confirm('Deseja apagar o registro?')) {
+            FormasPagamentoService.deleteById(id)
+                .then(result => {
+                    console.log(result);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        reloadDataTable();
+                        toast.success('Apagado com sucesso!');
+                    }
+                })
+        }
+    }
+    // #endregion
+
+    // #region CONTROLLERS
+    // #endregion
 
     const headers: IHeaderProps[] = useMemo(() => [
         {
@@ -47,7 +125,7 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
                                 setSelectedId(row.id);
                                 toggleCadastroFormaPgtoDialogOpen();
                             } else {
-                                navigate(`/estados/cadastro/${row.id}`)
+                                navigate(`/formaspagamento/cadastro/${row.id}`)
                             }
                         }}>
                             <Icon>edit</Icon>
@@ -65,81 +143,6 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
             }
         }
     ], [])
-
-    const [rows, setRows] = useState<IFormasPagamento[]>([]);
-    const [qtd, setQtd] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-
-    const [isCadastroFormaPgtoDialogOpen, setIsCadastroFormaPgtoDialogOpen] = useState(false);
-    const toggleCadastroFormaPgtoDialogOpen = () => {
-        setIsCadastroFormaPgtoDialogOpen(oldValue => !oldValue);
-    }
-
-    const reloadDataTable = () => {
-        setIsLoading(true);
-
-        debounce(() => {
-            FormasPagamentoService.getAll(pagina, busca)
-                .then((result) => {
-                    setIsLoading(false);
-
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        console.log('RESULT', result);
-                        setRows(result.data);
-                        setQtd(result.qtd);
-                    }
-                });
-        })        
-    }
-
-    const busca = useMemo(() => {
-        return searchParams.get('busca')?.toUpperCase() || ''; 
-    }, [searchParams]);
-
-    const pagina = useMemo(() => {
-        return Number(searchParams.get('pagina') || '1');   
-    }, [searchParams]);
-
-    useEffect(() => {
-        setIsLoading(true);
-
-        debounce(() => {
-            FormasPagamentoService.getAll(pagina, busca)
-                .then((result) => {
-                    setIsLoading(false);
-
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        console.log('RESULT', result);
-                        setRows(result.data);
-                        setQtd(result.qtd);
-                    }
-                });
-        })
-    }, [busca, pagina]);
-
-    const handleDelete = (id: number) => {
-
-        if (window.confirm('Deseja apagar o registro?')) {
-            FormasPagamentoService.deleteById(id)
-                .then(result => {
-                    console.log(result);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        // setRows(oldRows => [
-                        //     ...oldRows.filter(oldRow => oldRow.id !== id)
-                        // ]);
-                        reloadDataTable();
-                        toast.success('Apagado com sucesso!');
-                    }
-                })
-        }
-
-    }
 
     return (
         <LayoutBase 

@@ -1,16 +1,21 @@
+// #region EXTERNAL IMPORTS
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
+import { toast } from "react-toastify";
+// #endregion
 
+// #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { FormasPagamentoService } from "../../shared/services/api/formasPagamento/FormasPagamentoService";
 import { IFormasPagamento } from "../../shared/models/ModelFormasPagamento";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
-import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
+// #endregion
 
+// #region INTERFACES
 interface IFormData {
     descricao: string,
     dataCad: string,
@@ -24,6 +29,8 @@ interface ICadastroProps {
     reloadDataTableIfDialog?: () => void;
 }
 
+// #endregion
+
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     descricao: yup.string().required(),
     dataCad: yup.string().required(),
@@ -31,22 +38,22 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 })
 
 export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+    // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
-
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
+    // #endregion
 
+    // #region STATES
     const [obj, setObj] = useState<IFormasPagamento | null>(null);
-
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
-
     const [isValid, setIsValid] = useState(false);
+    // #endregion
 
+    // #region ACTIONS
     useEffect(() => {
-        console.log(id);
-        console.log(selectedId);
         if (isDialog) {
             if (selectedId !== 0) {
                 setIsLoading(true);
@@ -57,7 +64,6 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                             toast.error(result.message);
                             navigate('/formaspagamento');
                         } else {
-                            console.log('RESULT', result);
                             formRef.current?.setData(result);
                             setObj(result);
                         }
@@ -259,6 +265,10 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                 })
         }
     }
+    // #endregion
+
+    // #region CONTROLLERS
+    // #endregion
 
     return (
         <LayoutBase 

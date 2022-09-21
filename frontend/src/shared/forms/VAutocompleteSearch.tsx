@@ -53,9 +53,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
     }, [registerField, fieldName, selectedOption])
 
     useEffect(() =>{
-
         setIsLoading(true);
-
         debounce(() => {
             getAll(0, busca)
                 .then(result => {

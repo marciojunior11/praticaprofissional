@@ -3,15 +3,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
+import { toast } from "react-toastify";
 // #endregion
 
 // #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { PaisesService } from "../../shared/services/api/paises/PaisesService";
 import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
-import { toast } from "react-toastify";
 import { useDebounce } from "../../shared/hooks";
 import ControllerPaises from "../../shared/controllers/PaisesController";
 // #endregion
@@ -22,6 +21,13 @@ interface IFormData {
     sigla: string;
     ddi: string;
 }
+
+interface ICadastroProps {
+    isDialog?: boolean;
+    toggleOpen?: () => void;
+    selectedId?: number;
+    reloadDataTableIfDialog?: () => void;
+}
 // #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
@@ -30,56 +36,81 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     ddi: yup.string().required(),
 })
 
-export const CadastroPaises: React.FC = () => {
+export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+    // #region CONTROLLERS
+    const controller = new ControllerPaises();
+    // #endregion
+   
     // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
-    const { debounce } = useDebounce();
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+    const { debounce } = useDebounce();
     // #endregion
 
     // #region STATES
-    const [obj, setObj] = useState<IPaises | null>(null); 
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<boolean>(false);
     const [isValid, setIsValid] = useState(false);
+    const [nmpais, setNmPais] = useState("");
     // #endregion
 
     // #region ACTIONS
     useEffect(() => {
-        if (id !== 'novo') {
-            setIsLoading(true);
-
-            controller.getOne(Number(id))
-            .then((result) => {
-                setIsLoading(false);
-                if (result instanceof Error) {
-                    toast.error(result.message);
-                    navigate('/paises');
-                } else {
-                    console.log('RESULT', result);
-                    formRef.current?.setData(result);
-                    setObj(result);
-                }
-            });
+        if (isDialog) {
+            if (selectedId !== 0) {
+                setIsLoading(true);
+                controller.getOne(Number(selectedId))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/paises')
+                        } else {
+                            formRef.current?.setData(result);
+                            setNmPais(result.nmpais);
+                        }
+                    })
+            } else {
+                formRef.current?.setData({
+                    nmpais: '',
+                    sigla: '',
+                    ddi: ''
+                });
+            }
         } else {
-            setIsValid(false);
-            formRef.current?.setData({
-                nmpais: '',
-                sigla: '',
-                ddi: ''
-            });
+            if (id !== 'novo') {
+                setIsLoading(true);
+                controller.getOne(Number(id))
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                        navigate('/paises');
+                    } else {
+                        formRef.current?.setData(result);
+                        setIsValid(true);
+                        setNmPais(result.nmpais);
+                    }
+                });
+            } else {
+                setIsValid(false);
+                formRef.current?.setData({
+                    nmpais: '',
+                    sigla: '',
+                    ddi: ''
+                });
+            }
         }
     }, [id]);
 
     useEffect(() => {
-        if (obj) setIsValid(true)
-        else setIsValid(false);
-    }, [obj])
+        if (nmpais != "") validate(nmpais);
+    }, [nmpais]);
 
     const validate = (filter: string) => {
-        if (filter != obj?.nmpais) {
-            if (filter != "") {
+        debounce(() => {
+            if (!isValid && filter != "") {
                 setIsValidating(true);
                 debounce(() => {
                     controller.validate(filter)
@@ -97,10 +128,10 @@ export const CadastroPaises: React.FC = () => {
                             }
                         })
                 });        
+            } else {
+                setIsValid(true);
             }
-        } else {
-            setIsValid(true);
-        }
+        })
     }
 
     const handleSave = (dados: IFormData) => {
@@ -109,46 +140,76 @@ export const CadastroPaises: React.FC = () => {
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
-                        if (id === 'novo') {
-                            controller.create(dadosValidados)
+                        if (isDialog) {
+                            if (selectedId === 0) {
+                                controller.create(dadosValidados)
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
+                                        } else {
+                                            toast.success('Cadastrado com sucesso!')
+                                            reloadDataTableIfDialog?.()
+                                            toggleOpen?.();
+                                        }
+                                    });
+                            } else {
+                                controller.update(Number(id), dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
-                                        toast.error(result.message)
+                                        toast.error(result.message);
                                     } else {
-                                        toast.success('Cadastrado com sucesso!')
+                                        toast.success('Alterado com sucesso!');
+                                        reloadDataTableIfDialog?.();
+                                        toggleOpen?.();
+                                    }
+                                });
+                            }
+                        } else {
+                            if (id === 'novo') {
+                                controller.create(dadosValidados)
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
+                                        } else {
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                navigate('/paises');
+                                            } else if (isSaveAndNew()) {
+                                                setIsValidating(false);
+                                                navigate('/paises/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    nmpais: '',
+                                                    sigla: '',
+                                                    ddi: ''
+                                                });
+                                                setIsValid(false);
+                                            } else {
+                                                setIsValidating(false);
+                                                setIsValid(true);
+                                                setNmPais(dadosValidados.nmpais);
+                                                navigate(`/paises/cadastro/${result}`);
+                                            }
+                                        }
+                                    });
+                            } else {
+                                controller.update(Number(id), dados)
+                                .then((result) => {
+                                    setIsLoading(false);
+                                    if (result instanceof Error) {
+                                        toast.error(result.message);
+                                    } else {
+                                        toast.success('Alterado com sucesso!');
                                         if (isSaveAndClose()) {
-                                            navigate('/paises');
-                                        } else if (isSaveAndNew()) {
-                                            setIsValidating(false);
-                                            navigate('/paises/cadastro/novo');
-                                            formRef.current?.setData({
-                                                nmpais: '',
-                                                sigla: '',
-                                                ddi: ''
-                                            });
-                                            setIsValid(false);
+                                            navigate('/paises')
                                         } else {
                                             setIsValidating(false);
-                                            navigate(`/paises/cadastro/${result}`);
                                         }
                                     }
                                 });
-                        } else {
-                            controller.update(Number(id), dados)
-                            .then((result) => {
-                                setIsLoading(false);
-                                if (result instanceof Error) {
-                                    toast.error(result.message);
-                                } else {
-                                    toast.success('Alterado com sucesso!');
-                                    if (isSaveAndClose()) {
-                                        navigate('/paises')
-                                    } else {
-                                        setIsValidating(false);
-                                    }
-                                }
-                            });
+                            }
                         }
                     } else {
                         toast.error('Verifique os campos');
@@ -163,7 +224,6 @@ export const CadastroPaises: React.FC = () => {
                         console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
-                    console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
     };
@@ -171,11 +231,11 @@ export const CadastroPaises: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            PaisesService.deleteById(id)
+            controller.delete(id)
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);
-                    } else {         
+                    } else {      
                         toast.success('Apagado com sucesso!')
                         navigate('/paises');
                     }
@@ -184,20 +244,16 @@ export const CadastroPaises: React.FC = () => {
     }
     // #endregion
 
-    // #region CONTROLLERS
-    const controller = new ControllerPaises();
-    // #endregion
-
-
     return (
         <LayoutBase 
             titulo={id === 'novo' ? 'Cadastrar País' : 'Editar País'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo={id == 'novo'}
-                    mostrarBotaoApagar={id !== 'novo'}
-                    mostrarBotaoNovo={id !== 'novo'}
+                    mostrarBotaoSalvar={!isDialog}
+                    mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
+                    mostrarBotaoApagar={id !== 'novo' && !isDialog}
+                    mostrarBotaoNovo={id !== 'novo' && !isDialog}
 
                     disableButtons={isValidating}
 
@@ -256,9 +312,7 @@ export const CadastroPaises: React.FC = () => {
                                         setIsValid(false);
                                         setIsValidating(false);
                                         formRef.current?.setFieldError('nmpais', '');
-                                        debounce(() => {
-                                            validate(e.target.value);
-                                        });
+                                        validate(e.target.value);
                                     }}
                                 />
                             </Grid>
