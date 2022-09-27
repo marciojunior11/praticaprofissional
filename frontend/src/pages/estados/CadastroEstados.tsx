@@ -17,6 +17,7 @@ import { useDebounce } from "../../shared/hooks";
 import ControllerEstados from "../../shared/controllers/EstadosController";
 import ControllerPaises from "../../shared/controllers/PaisesController";
 import { ConsultaPaises } from "../paises/ConsultaPaises";
+import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 // #endregion
 
 // #region INTERFACES
@@ -30,7 +31,7 @@ interface IFormData {
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     nmestado: yup.string().required(),
     uf: yup.string().required().min(2),
-    pais: yup.object().shape({
+    pais: yup.object().typeError("Selecione um país").shape({
         id: yup.number().positive().integer().required(),
         nmpais: yup.string().required(),
         sigla: yup.string().required().min(2),
@@ -39,7 +40,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     }).required()
 })
 
-export const CadastroEstados: React.FC = () => {
+export const CadastroEstados: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
     // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
@@ -49,9 +50,10 @@ export const CadastroEstados: React.FC = () => {
 
     // #region STATES
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<boolean>(false);
+    const [isValidating, setIsValidating] = useState(false);
     const [pais, setPais] = useState<IPaises | null>(null);
     const [nmestado, setNmEstado] = useState("");
+    const [estadoOriginal, setEstadoOriginal] = useState<IDetalhesEstados | null>(null);
     const [isValid, setIsValid] = useState(false);
     const [isConsultaPaisesDialogOpen, setIsConsultaPaisesDialogOpen] = useState(false);
     // #endregion
@@ -63,7 +65,6 @@ export const CadastroEstados: React.FC = () => {
     useEffect(() => {
         if (id !== 'novo') {
             setIsLoading(true);
-
             controller.getOne(Number(id))
                 .then((result) => {
                     setIsLoading(false);
@@ -75,6 +76,7 @@ export const CadastroEstados: React.FC = () => {
                         setIsValid(true);
                         setPais(result.pais);
                         setNmEstado(result.nmestado);
+                        setEstadoOriginal(result);
                     }
                 });
         } else {
@@ -87,16 +89,30 @@ export const CadastroEstados: React.FC = () => {
     }, [id]);
 
     useEffect(() => {
+        const formData = formRef.current?.getData();
+        const dados: IFormData = {
+            nmestado: formData?.nmestado,
+            uf: formData?.uf,
+            pais: formData?.pais
+        }
         if (nmestado != "" && pais) {
-            const formData = formRef.current?.getData();
-            const data: IFormData = {
-                nmestado: formData?.nmestado,
-                uf: formData?.uf,
-                pais: formData?.pais
+            if (id !== 'novo') {
+                const objAlterado = {
+                    nmestado: nmestado,
+                    pais: pais
+                };
+                const objOriginal = {
+                    nmestado: estadoOriginal?.nmestado,
+                    pais: estadoOriginal?.pais,
+                };
+                if (JSON.stringify(objAlterado) === JSON.stringify(objOriginal)) {
+                    setIsValid(true);
+                } else {
+                    validate(dados);
+                }
+            } else {
+                validate(dados);
             }
-            debounce(() => {
-                validate(data);
-            })
         }
     }, [nmestado, pais]);
 
@@ -112,7 +128,7 @@ export const CadastroEstados: React.FC = () => {
                             toast.error(result.message);
                         } else {
                             setIsValid(result);
-                            console.log(result);
+                            console.log("RESULT", result);
                             if (result === false) {
                                 const validationErrors: IVFormErrors = {};
                                 validationErrors['nmestado'] = 'Já existe um estado vinculado a este país.';
@@ -133,36 +149,63 @@ export const CadastroEstados: React.FC = () => {
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
-                        if (id === 'novo') {
-                            controller.create(dadosValidados)
+                        if (isDialog) {
+                            if (selectedId === 0) {
+                                controller.create(dadosValidados)
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
+                                        } else {
+                                            toast.success('Cadastrado com sucesso!')
+                                            reloadDataTableIfDialog?.()
+                                            toggleOpen?.();
+                                        }
+                                    });
+                            } else {
+                                controller.update(Number(id), dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
-                                        toast.error(result.message)
+                                        toast.error(result.message);
                                     } else {
-                                        toast.success('Cadastrado com sucesso!')
-                                        if (isSaveAndClose()) {
-                                            navigate('/estados');
-                                        } else if (isSaveAndNew()) {
-                                            setIsValidating(false);
-                                            navigate('/estados/cadastro/novo');
-                                            setIsValidating(false);
-                                            formRef.current?.setData({
-                                                nmestado: '',
-                                                uf: '',
-                                                pais: null
-                                            });
-                                            setIsValid(false);
-                                            setNmEstado("");
-                                            setPais(null);
-                                        } else {
-                                            setIsValidating(false);
-                                            navigate(`/estados/cadastro/${result}`);
-                                        }
+                                        toast.success('Alterado com sucesso!');
+                                        reloadDataTableIfDialog?.();
+                                        toggleOpen?.();
                                     }
                                 });
+                            }
                         } else {
-                            controller.update(Number(id), dadosValidados)
+                            if (id === 'novo') {
+                                controller.create(dadosValidados)
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
+                                        } else {
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                navigate('/estados');
+                                            } else if (isSaveAndNew()) {
+                                                setIsValidating(false);
+                                                navigate('/estados/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    nmestado: '',
+                                                    uf: '',
+                                                    pais: null
+                                                });
+                                                setIsValid(false);
+                                            } else {
+                                                setIsValidating(false);
+                                                setIsValid(true);
+                                                setNmEstado(dadosValidados.nmestado);
+                                                setPais(dadosValidados.pais)
+                                                navigate(`/estados/cadastro/${result}`);
+                                            }
+                                        }
+                                    });
+                            } else {
+                                controller.update(Number(id), dados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -176,6 +219,7 @@ export const CadastroEstados: React.FC = () => {
                                         }
                                     }
                                 });
+                            }
                         }
                     } else {
                         toast.error('Verifique os campos');
@@ -190,11 +234,6 @@ export const CadastroEstados: React.FC = () => {
                         console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
-                    if (!pais) {
-                        validationErrors['pais'] = 'O campo é obrigatório';
-                    }
-                    
-                    console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
     };
@@ -283,8 +322,8 @@ export const CadastroEstados: React.FC = () => {
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
-                                        setNmEstado(e.target.value);
-                                        formRef.current?.setFieldError('estado', '');
+                                        setNmEstado(e.target.value.toUpperCase());
+                                        formRef.current?.setFieldError('nmestado', '');
                                     }}
                                 />
                             </Grid>
@@ -321,6 +360,7 @@ export const CadastroEstados: React.FC = () => {
                                     onClickSearch={() => {
                                         toggleConsultaPaisesDialogOpen();
                                     }}
+                                    isDialogOpen={isConsultaPaisesDialogOpen}
                                 />
                             </Grid>
                         </Grid>
@@ -335,7 +375,11 @@ export const CadastroEstados: React.FC = () => {
                     >
                         <ConsultaPaises
                             isDialog
-                            onSelectItem={(row) => formRef.current?.setFieldValue("pais", row)}
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldValue("pais", row);
+                                formRef.current?.setFieldError('pais', '');
+                                setPais(row);
+                            }}
                             toggleDialogOpen={toggleConsultaPaisesDialogOpen}
                         />
                     </CustomDialog>

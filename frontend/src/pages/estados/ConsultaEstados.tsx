@@ -7,19 +7,13 @@ import { toast } from "react-toastify";
 
 // #region INTERNAL IMPORTS
 import { useDebounce } from "../../shared/hooks";
-import { ListTools } from "../../shared/components";
+import { CustomDialog, ListTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IEstados } from "../../shared/interfaces/entities/Estados";
 import ControllerEstados from "../../shared/controllers/EstadosController";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
-// #endregion
-
-// #region INTERFACES
-interface IConsultaProps {
-    isDialog?: boolean;
-    toggleDialogOpen?: () => void;
-    onSelectItem?: (row: any) => void;
-}
+import { IConsultaProps } from "../../shared/interfaces/views/Consulta";
+import { CadastroEstados } from "./CadastroEstados";
 // #endregion
 
 export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
@@ -40,6 +34,8 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
     const [rows, setRows] = useState<IEstados[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedId, setSelectedId] = useState<number | undefined>();
+    const [isCadastroEstadosDialogOpen, setIsCadastroEstadosDialogOpen] = useState(false);
     // #endregion
     
     // #region ACTIONS
@@ -78,6 +74,26 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                 })
         }
     }
+
+    const toggleCadastroEstadosDialogOpen = () => {
+        setIsCadastroEstadosDialogOpen(oldValue => !oldValue);
+    }
+
+    const reloadDataTable = () => {
+        setIsLoading(true);
+        debounce(() => {
+            controller.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
     // #endregion
 
     // #region CONTROLLERS
@@ -114,6 +130,14 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                         <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
                             <Icon>edit</Icon>
                         </IconButton>
+                        {isDialog && (
+                            <IconButton color="success" size="small" onClick={() => {
+                                onSelectItem?.(row);
+                                toggleDialogOpen?.();
+                            }}>
+                                <Icon>checkbox</Icon>
+                            </IconButton>
+                        )}
                     </>
                 )
             }
@@ -149,6 +173,21 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                 rowCount={qtd}
                 onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}      
             />
+            <CustomDialog
+                fullWidth
+                maxWidth="md"
+                onClose={toggleCadastroEstadosDialogOpen}
+                handleClose={toggleCadastroEstadosDialogOpen}
+                open={isCadastroEstadosDialogOpen}
+                title="Cadastrar Estado"
+            >
+                <CadastroEstados
+                    isDialog
+                    toggleOpen={toggleCadastroEstadosDialogOpen}
+                    selectedId={Number(selectedId)}
+                    reloadDataTableIfDialog={reloadDataTable}
+                />
+            </CustomDialog>
         </LayoutBase>
     );
 };

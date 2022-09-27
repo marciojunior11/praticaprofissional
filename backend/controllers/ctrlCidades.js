@@ -59,10 +59,13 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const { nmcidade, ddd, estado, datacad, ultalt } = JSON.parse(body);
             const mCidade = {
-                cidade: response.cidade,
-                estado: response.estado
+                nmcidade: nmcidade,
+                ddd: ddd,
+                estado: estado,
+                datacad: datacad,
+                ultalt: ultalt,
             };
             const novaCidade = await daoCidades.salvar(mCidade);
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -87,11 +90,15 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const { id, nmcidade, ddd, estado, datacad, ultalt } = JSON.parse(body);
+            console.log("ESTADO", estado);
             const mCidade = {
-                id: response.id,
-                cidade: response.cidade,
-                estado: response.estado
+                id: id,
+                nmcidade: nmcidade,
+                ddd: ddd,
+                estado: estado,
+                datacad: datacad,
+                ultalt: ultalt
             };
             const novaCidade = await daoCidades.alterar(id, mCidade)
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -130,7 +137,7 @@ async function validate(req, res) {
         req.on('end', async () => {
             const response = JSON.parse(body);
             const mCidade = {
-                cidade: response.cidade,
+                nmcidade: response.nmcidade,
                 estado: response.estado
             };
             const resp = await daoCidades.validate(mCidade);

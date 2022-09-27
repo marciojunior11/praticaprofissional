@@ -1,4 +1,3 @@
-import Paises from "../../models/entities/Paises";
 import { IPaises } from "./Paises";
 
 export interface IEstados {

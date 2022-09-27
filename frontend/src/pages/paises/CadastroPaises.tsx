@@ -9,10 +9,11 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { IPaises } from "../../shared/interfaces/entities/Paises";
+import { IDetalhesPaises, IPaises } from "../../shared/interfaces/entities/Paises";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerPaises from "../../shared/controllers/PaisesController";
+import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 // #endregion
 
 // #region INTERFACES
@@ -20,13 +21,6 @@ interface IFormData {
     nmpais: string;
     sigla: string;
     ddi: string;
-}
-
-interface ICadastroProps {
-    isDialog?: boolean;
-    toggleOpen?: () => void;
-    selectedId?: number;
-    reloadDataTableIfDialog?: () => void;
 }
 // #endregion
 
@@ -53,6 +47,7 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
     const [isValidating, setIsValidating] = useState<boolean>(false);
     const [isValid, setIsValid] = useState(false);
     const [nmpais, setNmPais] = useState("");
+    const [paisOriginal, setPaisOriginal] = useState<IDetalhesPaises | null>(null);
     // #endregion
 
     // #region ACTIONS
@@ -69,6 +64,7 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                         } else {
                             formRef.current?.setData(result);
                             setNmPais(result.nmpais);
+                            setPaisOriginal(result);
                         }
                     })
             } else {
@@ -91,6 +87,7 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                         formRef.current?.setData(result);
                         setIsValid(true);
                         setNmPais(result.nmpais);
+                        setPaisOriginal(result);
                     }
                 });
             } else {
@@ -109,8 +106,9 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
     }, [nmpais]);
 
     const validate = (filter: string) => {
+        console.log(filter.toUpperCase() == paisOriginal?.nmpais);
         debounce(() => {
-            if (!isValid && filter != "") {
+            if (!isValid && filter != "" && (filter.toUpperCase() != paisOriginal?.nmpais)) {
                 setIsValidating(true);
                 debounce(() => {
                     controller.validate(filter)

@@ -14,7 +14,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from cidades where cidade like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from cidades where nmcidade like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -36,8 +36,11 @@ async function buscarTodosSemPg(url) {
                     let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
                     mListaCidades.push({
                         id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
+                        nmcidade: res.rows[i].nmcidade,
+                        ddd: res.rows[i].ddd,
+                        estado: mEstado,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaCidades);
@@ -45,7 +48,7 @@ async function buscarTodosSemPg(url) {
         } else {
             const filter = url.split('=')[2]
             console.log(filter);
-            pool.query(`select * from cidades where cidade like '${filter.toUpperCase()}'`, async (err, res) => {
+            pool.query(`select * from cidades where nmcidade like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -54,8 +57,11 @@ async function buscarTodosSemPg(url) {
                     let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
                     mListaCidades.push({
                         id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
+                        nmcidade: res.rows[i].nmcidade,
+                        ddd: res.rows[i].ddd,
+                        estado: mEstado,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaCidades);
@@ -80,16 +86,18 @@ async function buscarTodosComPg (url) {
                     let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
                     mListaCidades.push({
                         id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
+                        nmcidade: res.rows[i].nmcidade,
+                        ddd: res.rows[i].ddd,
+                        estado: mEstado,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaCidades);
             })
         } else {
             var filter = url.split('=')[3];
-            console.log(filter);
-            pool.query('select * from cidades where estado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from cidades where nmcidade like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -98,8 +106,11 @@ async function buscarTodosComPg (url) {
                     let mEstado = await daoEstados.buscarUm(res.rows[i].fk_idestado);
                     mListaCidades.push({
                         id: res.rows[i].id,
-                        cidade: res.rows[i].cidade,
-                        estado: mEstado
+                        nmcidade: res.rows[i].nmcidade,
+                        ddd: res.rows[i].ddd,
+                        estado: mEstado,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
                     })
                 }
                 return resolve(mListaCidades);
@@ -120,8 +131,11 @@ async function buscarUm (id) {
                 const mEstado = await daoEstados.buscarUm(res.rows[0].fk_idestado);
                 const mCidade = {
                     id: res.rows[0].id,
-                    cidade: res.rows[0].cidade,
-                    estado: mEstado
+                    nmcidade: res.rows[0].nmcidade,
+                    ddd: res.rows[0].ddd,
+                    estado: mEstado,
+                    datacad: res.rows[0].datacad,
+                    ultalt: res.rows[0].ultalt                   
                 }
                 return resolve(mCidade);
             }
@@ -151,7 +165,7 @@ async function salvar (cidade) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into cidades (cidade, fk_idEstado) values($1, $2)', [cidade.cidade.toUpperCase(), cidade.estado.id], async (err, res) => {
+            client.query('insert into cidades (nmcidade, ddd, fk_idEstado, datacad, ultalt) values($1, $2, $3, $4, $5)', [cidade.nmcidade.toUpperCase(), cidade.ddd, cidade.estado.id, cidade.datacad, cidade.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -190,7 +204,7 @@ async function alterar (id, cidade) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update cidades set id = $1, cidade = $2, fk_idestado = $3 where id = $4 ', [cidade.id, cidade.cidade.toUpperCase(), cidade.estado.id, id], (err, res) => {
+                client.query('update cidades set nmcidade = $1, ddd = $2, fk_idestado = $3, ultalt = $4 where id = $5', [cidade.nmcidade.toUpperCase(), cidade.ddd, cidade.estado.id, cidade.ultalt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -246,7 +260,7 @@ async function deletar (id) {
 async function validate(cidade) {
     const mEstado = cidade.estado;
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from cidades where cidade like '${cidade.cidade.toUpperCase()}' and fk_idestado = ${mEstado.id}`, (err, res) => {
+        pool.query('select * from cidades where nmcidade like $1 and fk_idestado = $2', [cidade.nmcidade, mEstado.id], (err, res) => {
             if (err) {
                 return reject(err);
             }

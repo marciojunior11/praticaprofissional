@@ -1,5 +1,4 @@
 const http = require('http');
-const { CondicoesPagamento } = require('./models/CondicoesPagamento');
 const { router } = require('./routes/router');
 
 const server = http.createServer((req, res) => {

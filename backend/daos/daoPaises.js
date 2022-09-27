@@ -212,7 +212,7 @@ async function deletar (id) {
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query('select * from paises where nmpais like $1', [filter], (err, res) => {
+        pool.query('select * from paises where nmpais like $1', [filter.toUpperCase()], (err, res) => {
             if (err) {
                 return reject(err);
             }

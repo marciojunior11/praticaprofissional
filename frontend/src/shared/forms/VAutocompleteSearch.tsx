@@ -26,9 +26,10 @@ type TVAutocompleteProps = {
     onInputchange?: () => void,
     required?: boolean,
     onClickSearch?: () => void,
+    isDialogOpen: boolean,
 }
 
-export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, ...rest}) => {
+export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -37,11 +38,10 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
     //STATES
     const [busca, setBusca] = useState('');
     const [options, setOptions] = useState<any[]>([]);
-    const [selectedOption, setSelectedOption] = useState<any | undefined>(defaultValue);
+    const [selectedOption, setSelectedOption] = useState<any | null>(defaultValue);
     const [isLoading, setIsLoading] = useState(false);
 
-    //EFFECTS
-
+    //ACTIONS
     useEffect(() => {
         
         registerField({
@@ -52,7 +52,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
 
     }, [registerField, fieldName, selectedOption])
 
-    useEffect(() =>{
+    const reloadData = () => {
         setIsLoading(true);
         debounce(() => {
             getAll(0, busca)
@@ -65,10 +65,28 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                     }
                 })
         })
+    }
+
+    useEffect(() =>{
+        reloadData();
     }, [])
 
-    //MEMOS
+    useEffect(() =>{
+        if (!isDialogOpen) {
+            reloadData();
+        }
+    }, [isDialogOpen])
+
+    // useEffect(() => {
+    //     const option = options.find(item => JSON.stringify(item) === JSON.stringify(selectedOption))
+    //     console.log(option);
+    //     if (!option) {
+    //         reloadData();
+    //     }
+    // }, [selectedOption])
+
     const autoCompleteSelectedOption = useMemo(() => {
+
         if (!selectedOption) return null;
 
         const mSelectedOption = options.find(option => option.id === selectedOption.id);
@@ -92,6 +110,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                             error={!!error}
                             helperText={error}
                             required={rest.required}
+                            disabled={isLoading}
                         />
                     )}
 
@@ -108,8 +127,6 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                     autoComplete
                     blurOnSelect={true}
 
-                        
-
                     //LOADING PARAMS
                     loading={isLoading}
                     disabled={isExternalLoading}
@@ -119,12 +136,13 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({size, name, 
                     //ONCHANGE PARAMS
                     onInputChange={(_, newValue) => {setBusca(newValue); rest.onInputchange?.()}}
                     onChange={(_: any, newValue: any) => {
-                        console.log(selectedOption)
                         setSelectedOption(newValue); 
                         setBusca(''); 
                         clearError(); 
                         rest.onChange?.(newValue);
                     }}
+
+
 
                     //POPUP ICON
                     popupIcon={(isExternalLoading || isLoading) ? <CircularProgress size={28}/> : undefined}

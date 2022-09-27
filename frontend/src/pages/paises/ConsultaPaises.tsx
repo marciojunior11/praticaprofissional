@@ -13,14 +13,7 @@ import { IPaises } from "../../shared/interfaces/entities/Paises";
 import { CadastroPaises } from "./CadastroPaises";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import ControllerPaises from "../../shared/controllers/PaisesController"
-// #endregion
-
-// #region INTERFACES
-interface IConsultaProps {
-    isDialog?: boolean;
-    toggleDialogOpen?: () => void;
-    onSelectItem?: (row: any) => void;
-}
+import { IConsultaProps } from "../../shared/interfaces/views/Consulta"
 // #endregion
 
 export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
@@ -132,7 +125,7 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                                 setSelectedId(row.id);
                                 toggleCadastroPaisesDialogOpen();
                             } else {
-                                navigate(`/estados/cadastro/${row.id}`)
+                                navigate(`/paises/cadastro/${row.id}`)
                             }
                         }}>
                             <Icon>edit</Icon>
@@ -180,7 +173,6 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
                     {
                         onSelectItem?.(row);
                         toggleDialogOpen?.();
-                        console.log('row', row);
                     }
                 }}   
                 isLoading={isLoading}
