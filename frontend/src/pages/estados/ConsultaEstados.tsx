@@ -152,7 +152,14 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/estados/cadastro/novo')}
+                    onClickNew={() => {
+                        if (isDialog) {
+                            setSelectedId(0);
+                            toggleCadastroEstadosDialogOpen();
+                        } else {
+                            navigate('/paises/cadastro/novo')
+                        }
+                    }}
                 />
             }
         >

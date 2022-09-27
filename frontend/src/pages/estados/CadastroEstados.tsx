@@ -265,9 +265,10 @@ export const CadastroEstados: React.FC<ICadastroProps> = ({isDialog = false, tog
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo={id == 'novo'}
-                    mostrarBotaoApagar={id !== 'novo'}
-                    mostrarBotaoNovo={id !== 'novo'}
+                    mostrarBotaoSalvar={!isDialog}
+                    mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
+                    mostrarBotaoApagar={id !== 'novo' && !isDialog}
+                    mostrarBotaoNovo={id !== 'novo' && !isDialog}
                     
                     disableButtons={isValidating}
 

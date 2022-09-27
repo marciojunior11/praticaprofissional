@@ -56,7 +56,7 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
 
     // #region STATES
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<any>(null);
+    const [isValidating, setIsValidating] = useState(false);
     const [nmcidade, setNmCidade] = useState("");
     const [estado, setEstado] = useState<IEstados | null>(null);
     const [cidadeOriginal, setCidadeOriginal] = useState<IDetalhesCidades | null>(null);
@@ -358,12 +358,13 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
                                     getAll={EstadosService.getAll}
                                     onInputchange={() => {
                                         setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('estado', '');
+                                        setIsValidating(false);
+                                        formRef.current?.setFieldError('nmcidade', '');
                                     }}
                                     onChange={(newValue) => {
                                         setEstado(newValue);
                                     }}
+                                    onClickSearch={toggleConsultaEstadosDialogOpen}
                                     isDialogOpen={isConsultaEstadosOpen}
                                 />
                             </Grid>
