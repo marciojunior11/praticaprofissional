@@ -146,7 +146,7 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
 
     return (
         <LayoutBase 
-            titulo="Consultar Estados"
+            titulo={!isDialog ? "Consultar Estados" : ""}
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
@@ -157,7 +157,7 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                             setSelectedId(0);
                             toggleCadastroEstadosDialogOpen();
                         } else {
-                            navigate('/paises/cadastro/novo')
+                            navigate('/estados/cadastro/novo')
                         }
                     }}
                 />
