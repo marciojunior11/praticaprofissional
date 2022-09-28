@@ -18,9 +18,8 @@ async function buscarTodosSemPg(req, res) {
 
 async function buscarTodosComPg(req, res) {
     try {
-        const url = req.url;
-        const response = await daoFornecedores.buscarTodosComPg(url);
-        const qtd = await daoFornecedores.getQtd(url);
+        const response = await daoFornecedores.buscarTodosComPg(req.url);
+        const qtd = await daoFornecedores.getQtd(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -59,16 +58,41 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const { 
+                razsocial, 
+                nmfantasia,
+                telefone, 
+                celular,
+                email, 
+                cnpj, 
+                inscestadual,
+                cep,
+                endereco,
+                numend,
+                bairro,
+                cidade,
+                condicaopagamento,
+                flsituacao,
+                datacad,
+                ultalt
+            } = JSON.parse(body);
             const mFornecedor = {
-                razSocial: response.razSocial,
-                nomeFantasia: response.nomeFantasia,
-                cnpj: response.cnpj,
-                telefone: response.telefone,
-                endereco: response.endereco,
-                numEnd: response.numEnd,
-                bairro: response.bairro,
-                cidade: response.cidade
+                razsocial,
+                nmfantasia,
+                telefone,
+                celular,
+                email,
+                cnpj,
+                inscestadual,
+                cep,
+                endereco,
+                numend,
+                bairro,
+                cidade,
+                condicaopagamento,
+                flsituacao,
+                datacad,
+                ultalt
             };
             const novoFornecedor = await daoFornecedores.salvar(mFornecedor);
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -93,17 +117,43 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const { 
+                id,
+                razsocial, 
+                nmfantasia,
+                telefone, 
+                celular,
+                email, 
+                cnpj, 
+                inscestadual,
+                cep,
+                endereco,
+                numend,
+                bairro,
+                cidade,
+                condicaopagamento,
+                flsituacao,
+                datacad,
+                ultalt
+            } = JSON.parse(body);
             const mFornecedor = {
-                id: response.id,
-                razSocial: response.razSocial,
-                nomeFantasia: response.nomeFantasia,
-                cnpj: response.cnpj,
-                telefone: response.telefone,
-                endereco: response.endereco,
-                numEnd: response.numEnd,
-                bairro: response.bairro,
-                cidade: response.cidade
+                id,
+                razsocial, 
+                nmfantasia,
+                telefone, 
+                celular,
+                email, 
+                cnpj, 
+                inscestadual,
+                cep,
+                endereco,
+                numend,
+                bairro,
+                cidade,
+                condicaopagamento,
+                flsituacao,
+                datacad,
+                ultalt
             };
             const novoFornecedor = await daoFornecedores.alterar(id, mFornecedor)
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -140,16 +190,43 @@ async function validate(req, res) {
         })
 
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const { 
+                id,
+                razsocial, 
+                nmfantasia,
+                telefone, 
+                celular,
+                email, 
+                cnpj, 
+                inscestadual,
+                cep,
+                endereco,
+                numend,
+                bairro,
+                cidade,
+                condicaopagamento,
+                flsituacao,
+                datacad,
+                ultalt
+            } = JSON.parse(body);
             const mFornecedor = {
-                razSocial: response.razSocial,
-                nomeFantasia: response.nomeFantasia,
-                cnpj: response.cnpj,
-                telefone: response.telefone,
-                endereco: response.endereco,
-                numEnd: response.numEnd,
-                bairro: response.bairro,
-                cidade: response.cidade
+                id,
+                razsocial, 
+                nmfantasia,
+                telefone, 
+                celular,
+                email, 
+                cnpj, 
+                inscestadual,
+                cep,
+                endereco,
+                numend,
+                bairro,
+                cidade,
+                condicaopagamento,
+                flsituacao,
+                datacad,
+                ultalt
             };
             const resp = await daoFornecedores.validate(mFornecedor);
             res.writeHead(201, { 'Content-Type': 'application/json'});

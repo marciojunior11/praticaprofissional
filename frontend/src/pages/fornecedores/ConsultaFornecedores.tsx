@@ -1,30 +1,41 @@
+// #region EXTERNAL IMPORTS
 import { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Chip } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
+// #endregion
+
+// #region INTERNAL IMPORTS
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { FornecedoresService, IFornecedores } from '../../shared/services/api/fornecedores/FornecedoresService';
 import { Environment } from "../../shared/environment";
-import { toast } from "react-toastify";
+import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
+import { IConsultaProps } from "../../shared/interfaces/views/Consulta";
+import { mask } from "../../shared/utils/functions";
+// #endregion
 
-export const ConsultaFornecedores: React.FC = () => {
+export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
+    // #region HOOKS
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
     const navigate = useNavigate();
-
-    const [rows, setRows] = useState<IFornecedores[]>([]);
-    const [qtd, setQtd] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-
     const busca = useMemo(() => {
         return searchParams.get('busca')?.toUpperCase() || ''; 
     }, [searchParams]);
-
     const pagina = useMemo(() => {
         return Number(searchParams.get('pagina') || '1');   
     }, [searchParams]);
+    // #endregion
 
+    // #region STATES
+    const [rows, setRows] = useState<IFornecedores[]>([]);
+    const [qtd, setQtd] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    // #endregion
+
+    // #region ACTIONS
     useEffect(() => {
         setIsLoading(true);
         console.log(busca, pagina);
@@ -62,6 +73,87 @@ export const ConsultaFornecedores: React.FC = () => {
         }
 
     }
+    // #endregion
+
+    // #region CONTROLLERS
+    // #endregion
+
+    const headers: IHeaderProps[] = [
+        {
+            label: "ID",
+            name: "id",  
+        },
+        {
+            label: "Raz. Social",
+            name: "razsocial",  
+        },        
+        {
+            label: "Nm. Fantasia",
+            name: "nmfantasia",  
+        },
+        {
+            label: "CNPJ",
+            name: ' ',
+            render: (row) => {
+                return mask(row.cnpj, '##.###.###/0001-##');
+            }
+        },
+        {
+            label: "CEP",
+            name: '',
+            render: (row) => {
+                return mask(row.cnpj, '#####-###');
+            }
+        },
+        {
+            label: "Endereço",
+            name: ' ',
+            render: (row) => {
+                return `${row.endereco}, ${row.numend}, Bairro ${row.bairro}`
+            }
+        },
+        {
+            label: "Cidade",
+            name: ' ',
+            render: (row) => {
+                return `${row.cidade.nmcidade}, ${row.cidade.estado.nmestado}, ${row.cidade.estado.pais.nmpais}`
+            }
+        },
+        {
+            label: "Situação",
+            name: ' ',
+            align: "center",
+            render: (row) => {
+                return (
+                    <>
+                        {row.flsituacao == "A" && (
+                            <Chip label="ATIVO" color="success"/>
+                        )}
+                        {row.flsituacao == "I" && (
+                            <Chip label="INATIVO" color="error"/>
+                        )}
+                    </>
+                )
+            }
+        },
+        {
+            label: "Ações",
+            name: ' ',
+            align: "right",
+            render: (row) => {
+                return (
+                    <>
+                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                            <Icon>delete</Icon>
+                        </IconButton>
+                        <IconButton color="primary" size="small" onClick={() => navigate(`/fornecedores/cadastro/${row.id}`)}>
+                            <Icon>edit</Icon>
+                        </IconButton>
+                    </>
+                )
+            }
+        }
+    ]
 
     return (
         <LayoutBase 
@@ -75,64 +167,23 @@ export const ConsultaFornecedores: React.FC = () => {
                 />
             }
         >
-            <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Razão Social</TableCell>
-                            <TableCell>CNPJ</TableCell>
-                            <TableCell>Telefone</TableCell>
-                            <TableCell>Endereço</TableCell>
-                            <TableCell>Cidade</TableCell>
-                            <TableCell align="right">Ações</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows?.map(row => (
-                            <TableRow key={row.id}>
-                                <TableCell>{row.id}</TableCell>
-                                <TableCell>{row.razSocial}</TableCell>
-                                <TableCell>{row.cnpj}</TableCell>
-                                <TableCell>{row.telefone}</TableCell>
-                                <TableCell>{`${row.endereco}, ${row.numEnd}, ${row.bairro}`}</TableCell>
-                                <TableCell>{`${row.cidade.cidade} - ${row.cidade.estado.uf} - ${row.cidade.estado.pais.sigla}`}</TableCell>
-                                <TableCell align="right">
-                                    <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                        <Icon>delete</Icon>
-                                    </IconButton>
-                                    <IconButton color="primary" size="small" onClick={() => navigate(`/fornecedores/cadastro/${row.id}`)}>
-                                        <Icon>edit</Icon>
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                    { qtd === 0 && !isLoading && (
-                        <caption>{Environment.LISTAGEM_VAZIA}</caption>
-                    )}
-                    <TableFooter>
-                        {isLoading && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
-                                    <LinearProgress variant="indeterminate"/> 
-                                </TableCell>
-                            </TableRow>
-                        )}
-                        {(qtd > 0 && qtd > Environment.LIMITE_DE_LINHAS) && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
-                                    <Pagination 
-                                        page={pagina}
-                                        count={Math.ceil(qtd / Environment.LIMITE_DE_LINHAS)}
-                                        onChange={(_, newPage) => setSearchParams({ busca, pagina: newPage.toString() }, { replace : true })}
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableFooter>
-                </Table>
-            </TableContainer>
+            <DataTable
+                headers={headers}
+                rows={rows}
+                rowId="id"
+                selectable={isDialog}
+                onRowClick={(row) => {
+                    if (isDialog)
+                    {
+                        onSelectItem?.(row);
+                        toggleDialogOpen?.();
+                    }
+                }}   
+                isLoading={isLoading}
+                page={pagina}
+                rowCount={qtd}
+                onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}     
+            />
         </LayoutBase>
     );
 };

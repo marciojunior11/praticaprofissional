@@ -1,17 +1,22 @@
+// #region EXTERNAL IMPORTS
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Tab, Tabs, Typography } from "@mui/material";
 import * as yup from 'yup';
+import { toast } from "react-toastify";
+// #endregion
 
+// #region INTERNAL IMPORTS
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { FornecedoresService, IFornecedores } from "../../shared/services/api/fornecedores/FornecedoresService";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
-import { toast } from "react-toastify";
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms";
 import { ICidades, CidadesService } from "../../shared/services/api/cidades/CidadesService";
 import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
+// #endregion
 
+// #region INTERFACES
 interface IFormData {
     razSocial: string;
     nomeFantasia: string | undefined;
@@ -21,6 +26,32 @@ interface IFormData {
     numEnd: string | undefined;
     bairro: string | undefined;
     cidade: ICidades
+}
+
+interface ITabPanelProps {
+    children?: React.ReactNode;
+    index: number;
+    value: number;
+}
+// #endregion
+
+function TabPanel(props: ITabPanelProps) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    { children }
+                </Box>
+            )}
+        </div>
+    )
 }
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
@@ -47,20 +78,29 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     }).required()
 })
 
+
+
 export const CadastroFornecedores: React.FC = () => {
+    // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
-
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
+    // #endregion
 
+    // #region STATES
     const [obj, setObj] = useState<IFornecedores | null>(null);
-
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
-
     const [isValid, setIsValid] = useState(false);
     const [alterando, setAlterando] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(0);
+    // #endregion
+
+    // #region ACTIONS
+    const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
+        setSelectedTab(newValue);
+    }
 
     useEffect(() => {
         if (id !== 'novo') {
@@ -230,10 +270,14 @@ export const CadastroFornecedores: React.FC = () => {
                 })
         }
     }
+    // #endregion
+
+    // #region CONTROLLERS
+    // #endregion
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Cidade' : 'Editar Cidade'}
+            titulo={id === 'novo' ? 'Cadastrar Fornecedor' : 'Editar Fornecedor'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -251,166 +295,154 @@ export const CadastroFornecedores: React.FC = () => {
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined">
-                    <Grid container direction="column" padding={2} spacing={2}>
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} alignItems="center">
+                    <Tabs
+                        value={selectedTab}
+                        onChange={handleChangeTab}
+                        textColor="primary"
+                        indicatorColor="primary"
+                    >
+                        <Tab value={0} label="Dados Gerais"/>
+                        <Tab value={1} label="Endereço"/>
+                        <Tab value={2} label="Informações de Contato"/>
+                    </Tabs>
+                    <Grid item container xs={12} sm={10} md={6} lg={5} xl={4} direction="column" padding={2} spacing={2} alignItems="left">
+                        <TabPanel value={selectedTab} index={0}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='razsocial' 
+                                        label="Razão Social"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='nmfantasia' 
+                                        label="Nome Fantasia"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='cnpj' 
+                                        label="CNPJ"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='inscestadual' 
+                                        label="Inscrição Estadual"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                            </Grid>
+                        </TabPanel>
+                        
+                        <TabPanel value={selectedTab} index={1}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='cep' 
+                                        label="CEP"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='endereco' 
+                                        label="Endereço"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='numend' 
+                                        label="Número"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='bairro' 
+                                        label="Bairro"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    TO DO: SUBSTITUIR TEXTFIELD POR AUTOCOMPLETE COM SEARCH CIDADES
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='cidade' 
+                                        label="Cidade"
+                                        disabled={isLoading}  
+                                    />
+                                </Grid>
+                            </Grid>
+                        </TabPanel>   
 
-                        {isLoading && (
-                            <Grid item>
-                                <LinearProgress variant="indeterminate"/>
-                            </Grid>
-                        )}
-
-                        <Grid item>
-                            <Typography variant="h6">Dados Gerais</Typography>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
-                                <VTextField
-                                    fullWidth
-                                    name='razSocial'
-                                    label='Razão Social'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                    required
-                                />
-                            </Grid>
-
-                            <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
-                                <VTextField 
-                                    fullWidth
-                                    required
-                                    name='cnpj' 
-                                    label="CNPJ"
-                                    disabled={isLoading}                             
-                                    InputProps={{
-                                        endAdornment: (
-                                                <InputAdornment position='start'>
-                                                    { isValidating === true && (
-                                                        <Box sx={{ display: 'flex',  }}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    )}
-                                                    { isValidating === false && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            { isValid === true ? (
-                                                                <Icon color="success">done</Icon>
-                                                            ) : (
-                                                                <Icon color="error">close</Icon>
-                                                            )}
-                                                        </Box>
-                                                    )}
-                                                </InputAdornment>
-                                        )
-                                    }}
-                                    inputProps={{maxLength: 20}}
-                                    onChange={(e) => {
-                                        setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('cnpj', '');
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                    onBlur={(e) => {
-                                        const formData = formRef.current?.getData();
-                                        const data: IFormData = {
-                                            razSocial: formData?.razSocial,
-                                            nomeFantasia: formData?.nomeFantasia,
-                                            cnpj: formData?.cnpj,
-                                            telefone: formData?.telefone,
-                                            endereco: formData?.endereco,
-                                            numEnd: formData?.numEnd,
-                                            bairro: formData?.bairro,
-                                            cidade: formData?.cidade
-                                        }
-                                        validate(data);
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={7} sm={7} md={8} lg={9} xl={10}>
-                                <VTextField
-                                    fullWidth
-                                    name='nomeFantasia'
-                                    label='Nome Fantasia'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={5} sm={5} md={4} lg={3} xl={2}>
-                                <VTextField
-                                    fullWidth
-                                    name='telefone'
-                                    label='Telefone'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={5} sm={5} md={5} lg={5} xl={6}>
-                                <VTextField
-                                    fullWidth
-                                    name='endereco'
-                                    label='Endereço'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
-                                <VTextField
-                                    fullWidth
-                                    name='numEnd'
-                                    label='Numero'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-
-                            <Grid item xs={5} sm={5} md={5} lg={5} xl={5}>
-                                <VTextField
-                                    fullWidth
-                                    name='bairro'
-                                    label='Bairro'
-                                    disabled={isLoading}
-                                    onChange={e => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
-                                <VAutocompleteSearch
-                                    required
-                                    name="cidade"
-                                    label={["nmcidade", "estado.uf", "estado.pais.sigla"]}
-                                    TFLabel="Cidade"
-                                    getAll={CidadesService.getAll}
-                                    onInputchange={() => {
-                                        formRef.current?.setFieldError('cidade', '');
-                                    }}
-                                    onChange={(newValue) => {
-                                        if (alterando) setAlterando(false);
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>            
+                        <TabPanel value={selectedTab} index={2}>
+                            <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                        <VTextField
+                                            size="small"
+                                            required
+                                            fullWidth
+                                            name='telefone' 
+                                            label="Telefone"
+                                            disabled={isLoading}  
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                        <VTextField
+                                            size="small"
+                                            required
+                                            fullWidth
+                                            name='celular' 
+                                            label="Celular"
+                                            disabled={isLoading}  
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                        <VTextField
+                                            size="small"
+                                            required
+                                            fullWidth
+                                            name='email' 
+                                            label="E-mail"
+                                            disabled={isLoading}  
+                                        />
+                                    </Grid>
+                                </Grid>
+                        </TabPanel>    
                     </Grid>
-
                 </Box>
             </VForm>
         </LayoutBase>

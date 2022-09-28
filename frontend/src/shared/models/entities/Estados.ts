@@ -2,12 +2,13 @@ import PaiComId from "./PaiComId";
 import Paises from "./Paises";
 
 class Estados extends PaiComId {
-    //ATRIBUTOS
+    // #region ATRIBUTOS
     private nmestado: string;
     private uf: string;
     private pais: Paises;
+    // #endregion
 
-    //CONSTRUCTOR
+    // #region CONSTRUCTOR
     constructor(id: number = 0, nmestado: string = "", uf: string = "", pais: Paises = new Paises(), datacad: Date | string = new Date(), ultalt: Date | string = new Date()) {
         super();
         this.id = id;
@@ -17,8 +18,9 @@ class Estados extends PaiComId {
         this.datacad = datacad;
         this.ultalt = ultalt;
     }
+    // #endregion
 
-    //GETTERS
+    // #region GETTERS
     public get _nmestado() {
         return this.nmestado;
     }
@@ -30,8 +32,9 @@ class Estados extends PaiComId {
     public get _pais() {
         return this.pais;
     }
+    // #endregion
 
-    //SETTERS
+    // #region SETTERS
     public set _nmestado(value: string) {
         this.nmestado = value;
     }
@@ -43,6 +46,7 @@ class Estados extends PaiComId {
     public set _pais(value: Paises) {
         this.pais = value;
     }
+    // #endregion
 }
 
 export default Estados;

@@ -1,5 +1,6 @@
 const { pool } = require('../datamodule/index');
 const daoCidades = require('./daoCidades');
+const daoCondicoesPagamento = require('./daoCondicoesPagamento');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/fornecedores
@@ -14,7 +15,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from fornecedores where fornecedor like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from fornecedores where razsocial like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -34,16 +35,25 @@ async function buscarTodosSemPg(url) {
                 const mListaFornecedores = [];
                 for (let i = 0; i < res.rowCount ; i++) {
                     let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    let mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
                     mListaFornecedores.push({
                         id: res.rows[i].id,
-                        razSocial: res.rows[i].razsocial,
-                        nomeFantasia: res.rows[i].nomefantasia,
-                        cnpj: res.rows[i].cnpj,
+                        razsocial: res.rows[i].razsocial,
+                        nmfantasia: res.rows[i].nmfantasia,
                         telefone: res.rows[i].telefone,
+                        celuar: res.rows[i].celular,
+                        email: res.rows[i].email,
+                        cnpj: res.rows[i].cnpj,
+                        inscestadual: res.rows[i].inscestadual,
+                        cep: res.rows[i].cep,
                         endereco: res.rows[i].endereco,
-                        numEnd: res.rows[i].numend,
+                        numend: res.rows[i].numend,
                         bairro: res.rows[i].bairro,
-                        cidade: mCidade
+                        cidade: mCidade,
+                        condicaopagamento: mCondicaoPagamento,
+                        flsituacao: res.rows[i].flsituacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
                     })
                 }
                 return resolve(mListaFornecedores);
@@ -51,23 +61,32 @@ async function buscarTodosSemPg(url) {
         } else {
             const filter = url.split('=')[2]
             console.log(filter);
-            pool.query(`select * from fornecedores where fornecedor like '${filter.toUpperCase()}'`, async (err, res) => {
+            pool.query(`select * from fornecedores where razsocial like '${filter.toUpperCase()}'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
                 const mListaFornecedores = [];
                 for (let i = 0; i < res.rowCount ; i++) {
                     let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    let mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
                     mListaFornecedores.push({
                         id: res.rows[i].id,
-                        razSocial: res.rows[i].razsocial,
-                        nomeFantasia: res.rows[i].nomefantasia,
-                        cnpj: res.rows[i].cnpj,
+                        razsocial: res.rows[i].razsocial,
+                        nmfantasia: res.rows[i].nmfantasia,
                         telefone: res.rows[i].telefone,
+                        celuar: res.rows[i].celular,
+                        email: res.rows[i].email,
+                        cnpj: res.rows[i].cnpj,
+                        inscestadual: res.rows[i].inscestadual,
+                        cep: res.rows[i].cep,
                         endereco: res.rows[i].endereco,
-                        numEnd: res.rows[i].numend,
+                        numend: res.rows[i].numend,
                         bairro: res.rows[i].bairro,
-                        cidade: mCidade
+                        cidade: mCidade,
+                        condicaopagamento: mCondicaoPagamento,
+                        flsituacao: res.rows[i].flsituacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
                     })
                 }
                 return resolve(mListaFornecedores);
@@ -90,16 +109,25 @@ async function buscarTodosComPg (url) {
                 const mListaFornecedores = [];
                 for (let i = 0; i < res.rowCount ; i++) {
                     let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    let mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
                     mListaFornecedores.push({
                         id: res.rows[i].id,
-                        razSocial: res.rows[i].razsocial,
-                        nomeFantasia: res.rows[i].nomefantasia,
-                        cnpj: res.rows[i].cnpj,
+                        razsocial: res.rows[i].razsocial,
+                        nmfantasia: res.rows[i].nmfantasia,
                         telefone: res.rows[i].telefone,
+                        celuar: res.rows[i].celular,
+                        email: res.rows[i].email,
+                        cnpj: res.rows[i].cnpj,
+                        inscestadual: res.rows[i].inscestadual,
+                        cep: res.rows[i].cep,
                         endereco: res.rows[i].endereco,
-                        numEnd: res.rows[i].numend,
+                        numend: res.rows[i].numend,
                         bairro: res.rows[i].bairro,
-                        cidade: mCidade
+                        cidade: mCidade,
+                        condicaopagamento: mCondicaoPagamento,
+                        flsituacao: res.rows[i].flsituacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
                     })
                 }
                 return resolve(mListaFornecedores);
@@ -107,23 +135,32 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from fornecedores where fornecedor like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from fornecedores where razsocial like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
                 const mListaFornecedores = [];
                 for (let i = 0; i < res.rowCount ; i++) {
                     let mCidade = await daoCidades.buscarUm(res.rows[i].fk_idcidade);
+                    let mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
                     mListaFornecedores.push({
                         id: res.rows[i].id,
-                        razSocial: res.rows[i].razsocial,
-                        nomeFantasia: res.rows[i].nomefantasia,
-                        cnpj: res.rows[i].cnpj,
+                        razsocial: res.rows[i].razsocial,
+                        nmfantasia: res.rows[i].nmfantasia,
                         telefone: res.rows[i].telefone,
+                        celuar: res.rows[i].celular,
+                        email: res.rows[i].email,
+                        cnpj: res.rows[i].cnpj,
+                        inscestadual: res.rows[i].inscestadual,
+                        cep: res.rows[i].cep,
                         endereco: res.rows[i].endereco,
-                        numEnd: res.rows[i].numend,
+                        numend: res.rows[i].numend,
                         bairro: res.rows[i].bairro,
-                        cidade: mCidade
+                        cidade: mCidade,
+                        condicaopagamento: mCondicaoPagamento,
+                        flsituacao: res.rows[i].flsituacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt,
                     })
                 }
                 return resolve(mListaFornecedores);
@@ -142,16 +179,25 @@ async function buscarUm (id) {
             }
             if (res.rowCount != 0) {
                 const mCidade = await daoCidades.buscarUm(res.rows[0].fk_idcidade);
+                let mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[0].fk_idcondpgto);
                 const mFornecedor = {
                     id: res.rows[0].id,
-                    razSocial: res.rows[0].razsocial,
-                    nomeFantasia: res.rows[0].nomefantasia,
-                    cnpj: res.rows[0].cnpj,
+                    razsocial: res.rows[0].razsocial,
+                    nmfantasia: res.rows[0].nmfantasia,
                     telefone: res.rows[0].telefone,
+                    celuar: res.rows[0].celular,
+                    email: res.rows[0].email,
+                    cnpj: res.rows[0].cnpj,
+                    inscestadual: res.rows[0].inscestadual,
+                    cep: res.rows[0].cep,
                     endereco: res.rows[0].endereco,
-                    numEnd: res.rows[0].numend,
+                    numend: res.rows[0].numend,
                     bairro: res.rows[0].bairro,
-                    cidade: mCidade
+                    cidade: mCidade,
+                    condicaopagamento: mCondicaoPagamento,
+                    flsituacao: res.rows[0].flsituacao,
+                    datacad: res.rows[0].datacad,
+                    ultalt: res.rows[0].ultalt,
                 }
                 return resolve(mFornecedor);
             }
@@ -181,7 +227,24 @@ async function salvar (fornecedor) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-            client.query('insert into fornecedores (razsocial, nomefantasia, cnpj, telefone, endereco, numend, bairro, fk_idcidade) values($1, $2, $3, $4, $5, $6, $7, $8)', [fornecedor.razSocial.toUpperCase(), fornecedor.nomeFantasia.toUpperCase(), fornecedor.cnpj, fornecedor.telefone, fornecedor.endereco.toUpperCase(), fornecedor.numEnd, fornecedor.bairro.toUpperCase(), fornecedor.cidade.id], async (err, res) => {
+            client.query('insert into fornecedores (razsocial, nmfantasia, telefone, celular, email, cnpj, inscestadual, cep, endereco, numend, bairro, fk_idcidade, fk_idcondpgto, flsituacao, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)', [
+                fornecedor.razsocial.toUpperCase(), 
+                fornecedor.nmfantasia.toUpperCase(), 
+                fornecedor.telefone, 
+                fornecedor.celular, 
+                fornecedor.email, 
+                fornecedor.cnpj, 
+                fornecedor.inscestadual, 
+                fornecedor.cep, 
+                fornecedor.endereco, 
+                fornecedor.numend, 
+                fornecedor.bairro, 
+                fornecedor.cidade.id, 
+                fornecedor.condicaopagamento.id, 
+                fornecedor.flsituacao, 
+                fornecedor.datacad, 
+                fornecedor.ultalt
+            ], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -220,7 +283,25 @@ async function alterar (id, fornecedor) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update fornecedores set id = $1, razsocial = $2, nomefantasia = $3, cnpj = $4, telefone = $5, endereco = $6, numend = $7, bairro = $8, fk_idcidade = $9 where id = $10 ', [fornecedor.id, fornecedor.razSocial.toUpperCase(), fornecedor.nomeFantasia.toUpperCase(), fornecedor.cnpj, fornecedor.telefone, fornecedor.endereco.toUpperCase(), fornecedor.numEnd, fornecedor.bairro.toUpperCase(), fornecedor.cidade.id, id], (err, res) => {
+                client.query('update fornecedores set razsocial = $1, nmfantasia = $2, telefone = $3, celular = $4, email = $5, cnpj = $6, inscestadual = $7, cep = $8, endereco = $9, numend = $10, bairro = $11, fk_idcidade = $12, fk_idcondpgto = $13, flsituacao = $14, datacad = $15, ultalt = $16 where id = $17', [
+                    fornecedor.razsocial,
+                    fornecedor.nmfantasia,
+                    fornecedor.telefone,
+                    fornecedor.celular,
+                    fornecedor.email,
+                    fornecedor.cnpj,
+                    fornecedor.inscestadual,
+                    fornecedor.cep,
+                    fornecedor.endereco,
+                    fornecedor.numend,
+                    fornecedor.bairro,
+                    fornecedor.cidade.id,
+                    fornecedor.condicaopagamento.id,
+                    fornecedor.flsituacao,
+                    fornecedor.datacad,
+                    fornecedor.ultalt,
+                    id
+                ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -257,7 +338,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from fornecedores where id = ${id}`, (err, res) => {
+                client.query('delete from fornecedores where id = $1', [id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -274,13 +355,11 @@ async function deletar (id) {
 };
 
 async function validate(fornecedor) {
-    console.log(fornecedor.cnpj)
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from fornecedores where cnpj like '${fornecedor.cnpj}'`, (err, res) => {
+        pool.query('select * from fornecedores where cnpj like $1', [fornecedor.cnpj], (err, res) => {
             if (err) {
                 return reject(err);
             }
-            console.log(res.rowCount);
             return resolve(res);
         })
     })
