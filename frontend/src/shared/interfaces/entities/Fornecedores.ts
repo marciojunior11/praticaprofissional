@@ -5,9 +5,9 @@ export interface IFornecedores {
     id: number;
     razsocial: string;
     nmfantasia: string;
+    email: string;
     telefone: string;
     celular: string;
-    email: string;
     cnpj: string;
     inscestadual: string;
     cep: string;

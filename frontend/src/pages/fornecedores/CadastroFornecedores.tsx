@@ -23,6 +23,7 @@ interface IFormData {
     cnpj: string;
     telefone: string | undefined;
     endereco: string | undefined;
+    email: string | undefined;
     numEnd: string | undefined;
     bairro: string | undefined;
     cidade: ICidades
@@ -60,6 +61,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     cnpj: yup.string().required().max(20).matches(number, 'Apenas números são aceitos neste campo.'),
     telefone: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
     endereco: yup.string(),
+    email: yup.string(),
     numEnd: yup.string().matches(number, 'Apenas números são aceitos neste campo.'),
     bairro: yup.string(),
     cidade: yup.object().shape({

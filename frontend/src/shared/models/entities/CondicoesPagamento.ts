@@ -88,3 +88,5 @@ class CondicoesPagamento extends PaiComId {
     }
     // #endregion
 }
+
+export default CondicoesPagamento;
