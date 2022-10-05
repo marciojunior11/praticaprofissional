@@ -6,12 +6,14 @@ import { toast } from "react-toastify";
 // #endregion
 
 // #region INTERNAL IMPORTS
-import { ListTools } from "../../shared/components";
+import { CustomDialog, ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
-import { CidadesService, ICidades } from '../../shared/services/api/cidades/CidadesService';
+import { ICidades } from "../../shared/interfaces/entities/Cidades";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import { IConsultaProps } from "../../shared/interfaces/views/Consulta";
+import { CadastroCidades } from "./CadastroCidades";
+import ControllerCidades from "../../shared/controllers/CidadesController";
 // #endregion
 
 export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
@@ -31,21 +33,21 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
     const [rows, setRows] = useState<ICidades[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedId, setSelectedId] = useState<number | undefined>();
+    const [isCadastroCidadesDialogOpen, setIsCadastroCidadesDialogOpen] = useState(false);
     // #endregion
 
     // #region ACTIONS
     useEffect(() => {
         setIsLoading(true);
-        console.log(busca, pagina);
         debounce(() => {
-            CidadesService.getAll(pagina, busca)
+            controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        console.log(result);
                         setRows(result.data);
                         setQtd(result.qtd);
                     }
@@ -56,7 +58,7 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            CidadesService.deleteById(id)
+            controller.delete(id)
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
@@ -71,9 +73,30 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
         }
 
     }
+
+    const toggleCadastroCidadesDialogOpen = () => {
+        setIsCadastroCidadesDialogOpen(oldValue => !oldValue);
+    }
+
+    const reloadDataTable = () => {
+        setIsLoading(true);
+        debounce(() => {
+            controller.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
     // #endregion
 
     // #region CONTROLLERS
+    const controller = new ControllerCidades();
     // #endregion
 
     const headers: IHeaderProps[] = [
@@ -106,6 +129,14 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
                         <IconButton color="primary" size="small" onClick={() => navigate(`/cidades/cadastro/${row.id}`)}>
                             <Icon>edit</Icon>
                         </IconButton>
+                        {isDialog && (
+                            <IconButton color="success" size="small" onClick={() => {
+                                onSelectItem?.(row);
+                                toggleDialogOpen?.();
+                            }}>
+                                <Icon>checkbox</Icon>
+                            </IconButton>
+                        )}
                     </>
                 )
             }
@@ -120,7 +151,14 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/cidades/cadastro/novo')}
+                    onClickNew={() => {
+                        if (isDialog) {
+                            setSelectedId(0);
+                            toggleCadastroCidadesDialogOpen();
+                        } else {
+                            navigate('/cidades/cadastro/novo')
+                        }
+                    }}
                 />
             }
         >
@@ -141,6 +179,21 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
                 rowCount={qtd}
                 onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })} 
             />
+            <CustomDialog
+                fullWidth
+                maxWidth="md"
+                onClose={toggleCadastroCidadesDialogOpen}
+                handleClose={toggleCadastroCidadesDialogOpen}
+                open={isCadastroCidadesDialogOpen}
+                title="Cadastrar Estado"
+            >
+                <CadastroCidades
+                    isDialog
+                    toggleOpen={toggleCadastroCidadesDialogOpen}
+                    selectedId={Number(selectedId)}
+                    reloadDataTableIfDialog={reloadDataTable}
+                />
+            </CustomDialog>
         </LayoutBase>
     );
 };

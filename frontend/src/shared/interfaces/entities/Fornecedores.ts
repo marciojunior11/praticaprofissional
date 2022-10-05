@@ -23,21 +23,21 @@ export interface IFornecedores {
 
 export interface IDetalhesFornecedores {
     razsocial: string;
-    nmfantasia: string;
-    telefone: string;
-    celular: string;
-    email: string;
+    nmfantasia: string | undefined;
     cnpj: string;
     inscestadual: string;
+    telefone: string | undefined;
+    celular: string | undefined;
+    email: string | undefined;
     cep: string;
     endereco: string;
     numend: string;
     bairro: string;
     cidade: ICidades;
-    condicaopagamento: ICondicoesPagamento;
-    flsituacao: string;
-    datacad: string | Date;
-    ultalt: string | Date;
+    //condicaopagamento: ICondicoesPagamento | undefined;
+    flsituacao: string | undefined;
+    datacad: string | Date | undefined;
+    ultalt: string | Date | undefined;
 }
 
 export type TListaFornecedores = {

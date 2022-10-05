@@ -345,9 +345,6 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
                                     inputProps={{ maxLength: 2 }}
                                 />
                             </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
                                     size="small"
@@ -367,8 +364,8 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
                                     onClickSearch={toggleConsultaEstadosDialogOpen}
                                     isDialogOpen={isConsultaEstadosOpen}
                                 />
-                            </Grid>
-                        </Grid>            
+                            </Grid>  
+                        </Grid>         
                     </Grid>
                     <CustomDialog
                         onClose={toggleConsultaEstadosDialogOpen}
