@@ -4,8 +4,8 @@ import { ICondicoesPagamento } from "./CondicoesPagamento";
 export interface IFornecedores {
     id: number;
     razsocial: string;
-    nmfantasia: string;
-    email: string;
+    nmfantasia: string | undefined;
+    email: string | undefined;
     telefone: string;
     celular: string;
     cnpj: string;
@@ -34,10 +34,7 @@ export interface IDetalhesFornecedores {
     numend: string;
     bairro: string;
     cidade: ICidades;
-    //condicaopagamento: ICondicoesPagamento | undefined;
     flsituacao: string | undefined;
-    datacad: string | Date | undefined;
-    ultalt: string | Date | undefined;
 }
 
 export type TListaFornecedores = {

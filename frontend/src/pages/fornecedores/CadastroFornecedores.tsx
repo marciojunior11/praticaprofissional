@@ -9,9 +9,8 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { FornecedoresService, IFornecedores } from "../../shared/services/api/fornecedores/FornecedoresService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms";
-import { ICidades, CidadesService } from "../../shared/services/api/cidades/CidadesService";
+import { ICidades } from "../../shared/interfaces/entities/Cidades";
 import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
 import ControllerFornecedores from "../../shared/controllers/FornecedoresController";
@@ -33,10 +32,7 @@ interface IFormData {
     numend: string;
     bairro: string;
     cidade: ICidades;
-    //condicaopagamento: ICondicoesPagamento | undefined;
     flsituacao: string | undefined;
-    datacad: string | Date | undefined;
-    ultalt: string | Date | undefined;
 }
 // #endregion
 
@@ -82,12 +78,8 @@ export const CadastroFornecedores: React.FC = () => {
     // #endregion
 
     // #region STATES
-    const [obj, setObj] = useState<IFornecedores | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<any>(null);
-    const [isValid, setIsValid] = useState(false);
-    const [alterando, setAlterando] = useState(false);
-    const [selectedTab, setSelectedTab] = useState(0);
+    const [isValid, setIsValid] = useState(true);
     const [isConsultaCidadesDialogOpen, setIsConsultaCidadesDialogOpen] = useState(false);
     // #endregion
 
@@ -96,17 +88,14 @@ export const CadastroFornecedores: React.FC = () => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            FornecedoresService.getById(Number(id))
+            controller.getOne(Number(id))
                 .then((result) => {
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
                         navigate('/fornecedores');
                     } else {
-                        console.log('RESULT', result);
                         formRef.current?.setData(result);
-                        setObj(result);
-                        setAlterando(true);
                     }
                 });
         } else {
@@ -123,59 +112,7 @@ export const CadastroFornecedores: React.FC = () => {
         }
     }, [id]);
 
-    useEffect(() => {
-        if (obj) setIsValid(true)
-        else setIsValid(false);
-    }, [obj])
-
-    const validate = (dados: IFormData) => {
-        const obj1 = {
-            id: obj?.id,
-            razSocial: obj?.razSocial,
-            nomeFantasia: obj?.nomeFantasia,
-            cnpj: obj?.cnpj,
-            telefone: obj?.telefone,
-            endereco: obj?.endereco,
-            numEnd: obj?.numEnd,
-            bairro: obj?.bairro,
-            cidade: obj?.cidade
-        }
-        const obj2 = {
-            id: Number(id),
-            razSocial: dados.razSocial,
-            nomeFantasia: dados.nomeFantasia,
-            cnpj: dados.cnpj,
-            telefone: dados.telefone,
-            endereco: dados.endereco,
-            numEnd: dados.numEnd,
-            bairro: dados.bairro,
-            cidade: dados.cidade
-        }
-        if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
-            setIsValidating(true);
-            debounce(() => {
-                FornecedoresService.validate(dados)
-                .then((result) => {
-                    setIsValidating(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setIsValid(result);
-                        if (result === false) {
-                            const validationErrors: IVFormErrors = {};
-                            validationErrors['cnpj'] = 'Este CNPJ já está cadastrado.';
-                            formRef.current?.setErrors(validationErrors);
-                        }
-                    }
-                })
-            })
-        } else {
-            setIsValid(true);
-        }
-    }
-
     const handleSave = (dados: IFormData) => {
-        console.log(dados);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -192,7 +129,6 @@ export const CadastroFornecedores: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/fornecedores');
                                         } else if (isSaveAndNew()) {
-                                            setIsValidating('');
                                             setIsValid(false);
                                             navigate('/fornecedores/cadastro/novo');
                                             formRef.current?.setData({
@@ -206,13 +142,12 @@ export const CadastroFornecedores: React.FC = () => {
                                                 cidade: null
                                             });
                                         } else {
-                                            setIsValidating(null);
                                             navigate(`/fornecedores/cadastro/${result}`);
                                         }
                                     }
                                 });
                         } else {
-                            FornecedoresService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                            controller.update(Number(id), dadosValidados)
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -222,7 +157,6 @@ export const CadastroFornecedores: React.FC = () => {
                                         if (isSaveAndClose()) {
                                             navigate('/fornecedores')
                                         } else {
-                                            setIsValidating(null);
                                         }
                                     }
                                 });
@@ -249,7 +183,7 @@ export const CadastroFornecedores: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            FornecedoresService.deleteById(id)
+            controller.delete(id)
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);

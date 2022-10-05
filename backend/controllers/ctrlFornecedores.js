@@ -94,6 +94,7 @@ async function salvar(req, res) {
                 datacad,
                 ultalt
             };
+            console.log(mFornecedor);
             const novoFornecedor = await daoFornecedores.salvar(mFornecedor);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(novoFornecedor));

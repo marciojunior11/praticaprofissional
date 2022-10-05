@@ -13,7 +13,6 @@ import { useDebounce } from "../../shared/hooks";
 import { ConsultaEstados } from "../estados/ConsultaEstados";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { CidadesService, ICidades } from "../../shared/services/api/cidades/CidadesService";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
 import ControllerCidades from "../../shared/controllers/CidadesController";
 import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
