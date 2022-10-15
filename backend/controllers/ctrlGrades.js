@@ -1,10 +1,10 @@
-const daoTiposProduto = require('../daos/daoTiposProduto');
+const daoGrades = require('../daos/daoGrades');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/tiposproduto
+// @route GET /api/paises
 async function buscarTodosSemPg(req, res) {
     try {
-        const response = await daoTiposProduto.buscarTodosSemPg(req.url);
+        const response = await daoGrades.buscarTodosSemPg(req.url);
         console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
@@ -18,13 +18,11 @@ async function buscarTodosSemPg(req, res) {
 
 async function buscarTodosComPg(req, res) {
     try {
-        const url = req.url;
-        const tipos_produto = await daoTiposProduto.buscarTodosComPg(url);
-        const qtd = await daoTiposProduto.getQtd(url);
-        //tipos_produto.rowCount = qtd;
+        const response = await daoGrades.buscarTodosComPg(req.url);
+        const qtd = await daoGrades.getQtd(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-            data: tipos_produto,
+            data: response,
             totalCount: qtd
         }));
     } catch (error) {
@@ -33,16 +31,16 @@ async function buscarTodosComPg(req, res) {
 };
 
 // @descricao BUSCA UM REGISTROS
-// @route GET /api/tiposproduto/:id
+// @route GET /api/paises/:id
 async function buscarUm(req, res, id) {
     try {
-        const tipos_produto = await daoTiposProduto.buscarUm(id);
-        if (!tipos_produto) {
+        const response = await daoGrades.buscarUm(id);
+        if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'País não encontrado.' }));
+            res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(tipos_produto));
+            res.end(JSON.stringify(response));
         };
     } catch (error) {
         console.log(error);
@@ -50,7 +48,7 @@ async function buscarUm(req, res, id) {
 };
 
 // @descricao SALVA UM REGISTROS
-// @route POST /api/tiposproduto
+// @route POST /api/paises
 async function salvar(req, res) {
     try {
         let body = '';
@@ -60,13 +58,16 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { descricao } = JSON.parse(body);
-            const mTipoProduto = {
-                descricao
+            const { descricao, flsituacao, datacad, ultalt } = JSON.parse(body);
+            const mGrade = {
+                descricao,
+                flsituacao,
+                datacad,
+                ultalt
             };
-            const novoTipoProduto = await daoTiposProduto.salvar(mTipoProduto);
+            const novaFormaPagamento = await daoGrades.salvar(mGrade);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novoTipoProduto));
+            res.end(JSON.stringify(novaFormaPagamento));
         })
     } catch (error) {
         console.log(error);
@@ -74,27 +75,30 @@ async function salvar(req, res) {
 };
 
 // @descricao ALTERA UM REGISTROS
-// @route PUT /api/tiposproduto/:id
+// @route PUT /api/paises/:id
 async function alterar(req, res, id) {
     try {
-        const mTipoProduto = await daoTiposProduto.buscarUm(id);
-        if (!mTipoProduto) {
+        const response = await daoGrades.buscarUm(id);
+        if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'País não encontrado.' })); 
+            res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' })); 
         };
         let body = '';
         req.on('data', (chunk) => {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { descricao } = JSON.parse(body);
-            const mTipoProduto = {
+            const { id, descricao, flsituacao, datacad, ultalt } = JSON.parse(body);
+            const mGrade = {
                 id,
-                descricao
+                descricao,
+                flsituacao,
+                datacad,
+                ultalt
             };
-            const novoTipoProduto = await daoTiposProduto.alterar(id, mTipoProduto)
+            const novaFormaPagamento = await daoGrades.alterar(id, mGrade)
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novoTipoProduto));
+            res.end(JSON.stringify(novaFormaPagamento));
         })
     } catch (error) {
         console.log(error);
@@ -102,17 +106,17 @@ async function alterar(req, res, id) {
 };
 
 // @descricao DELETA UM REGISTROS
-// @route GET /api/tiposproduto/:id
+// @route GET /api/paises/:id
 async function deletar(req, res, id) {
     try {
-        const mTipoProduto = await daoTiposProduto.buscarUm(id);
-        if (!mTipoProduto) {
+        const response = await daoGrades.buscarUm(id);
+        if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'País não encontrado.' }));
+            res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' }));
         }
-        const response = await daoTiposProduto.deletar(id);
+        const responseDelete = await daoGrades.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(response));
+        res.end(JSON.stringify(responseDelete));
     } catch (error) {
         console.log(error);
     }
@@ -121,9 +125,9 @@ async function deletar(req, res, id) {
 async function validate(req, res) {
     try {
             const filter = req.url.split('=')[1];
-            const resp = await daoTiposProduto.validate(filter);
+            const response = await daoGrades.validate(filter);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(resp.rowCount));
+            res.end(JSON.stringify(response.rowCount));
     } catch (error) {
         console.log(error);
     }; 

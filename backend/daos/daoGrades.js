@@ -1,11 +1,11 @@
 const { pool } = require('../datamodule/index');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/tipos_produto
+// @route GET /api/grades
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from tipos_produto', (err, res) => {
+            pool.query('select * from grades', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -13,7 +13,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from tipos_produto where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from grades where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -26,7 +26,7 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from tipos_produto order by id asc', (err, res) => {
+            pool.query('select * from grades order by id asc', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -34,7 +34,7 @@ async function buscarTodosSemPg(url) {
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from tipos_produto order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
+            pool.query(`select * from grades order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -51,7 +51,7 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from tipos_produto order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from grades order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -60,10 +60,11 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from tipos_produto where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from grades where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
+                console.log(res);
                 return resolve(res.rows);
             })
         }
@@ -71,10 +72,10 @@ async function buscarTodosComPg (url) {
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/tipos_produto
+// @route GET /api/grades
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from tipos_produto where id = $1', [id], (err, res) => {
+        pool.query('select * from grades where id = $1', [id], (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -87,8 +88,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/tipos_produto
-async function salvar (tipo_produto) {
+// @route POST /api/grades
+async function salvar (grades) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -107,14 +108,14 @@ async function salvar (tipo_produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into tipos_produto (descricao) values($1)', [tipo_produto.descricao.toUpperCase()], async (err, res) => {
+                client.query('insert into grades (descricao, flsituacao, datacad, ultalt) values($1, $2, $3, $4)', [grades.descricao.toUpperCase(), grades.flsituacao.toUpperCase(), grades.datacad, grades.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from tipos_produto where id = (select max(id) from tipos_produto)');
+                        const response = await client.query('select * from grades where id = (select max(id) from grades)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -126,8 +127,8 @@ async function salvar (tipo_produto) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/tipos_produto/:id
-async function alterar (id, tipo_produto) {
+// @route PUT /api/grades/:id
+async function alterar (id, grades) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -146,7 +147,7 @@ async function alterar (id, tipo_produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update tipos_produto set id = $1, descricao = $2 where id = $3 ', [tipo_produto.id, tipo_produto.descricao.toUpperCase(), id], (err, res) => {
+                client.query('update grades set id = $1, descricao = $2, flsituacao = $3, ultalt = $4 where id = $5 ', [grades.id, grades.descricao.toUpperCase(), grades.flsituacao.toUpperCase(), grades.ultalt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -163,7 +164,7 @@ async function alterar (id, tipo_produto) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/tipos_produto/:id
+// @route GET /api/grades/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -183,7 +184,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from tipos_produto where id = ${id}`, (err, res) => {
+                client.query(`delete from grades where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -196,21 +197,12 @@ async function deletar (id) {
                 })
             })
         })
-
-
-
-        // pool.query(`delete from tipos_produto where id = ${id}`, (err, res) => {
-        //     if (err) {
-        //         return reject(err);
-        //     }
-        //     return resolve(res);
-        // })
     })
 };
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from tipos_produto where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from grades where descricao like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

@@ -6,7 +6,7 @@ const { daoFormasPagamento } = require('./daoFormasPagamento');
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from condicoes_pagamento', (err, res) => {
+            pool.query('select * from condicoespagamento', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -14,7 +14,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from condicoes_pagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from condicoespagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -27,7 +27,7 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from condicoes_pagamento order by id asc', async (err, res) => {
+            pool.query('select * from condicoespagamento order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -36,7 +36,7 @@ async function buscarTodosSemPg(url) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
                     let mListaParcelas = [];
                     for (let j = 0; j < responseParcelas.rowCount; j++) {
-                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        let responseFormaPgto = await pool.query('select * from formaspagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
                         mListaParcelas.push({
                             numero: responseParcelas.rows[j].numero,
                             dias: responseParcelas.rows[j].dias,
@@ -61,7 +61,7 @@ async function buscarTodosSemPg(url) {
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from condicoes_pagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, async (err, res) => {
+            pool.query(`select * from condicoespagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -70,7 +70,7 @@ async function buscarTodosSemPg(url) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
                     let mListaParcelas = [];
                     for (let j = 0; j < responseParcelas.rowCount; j++) {
-                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        let responseFormaPgto = await pool.query('select * from formaspagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
                         mListaParcelas.push({
                             numero: responseParcelas.rows[j].numero,
                             dias: responseParcelas.rows[j].dias,
@@ -104,7 +104,7 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from condicoes_pagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query(`select * from condicoespagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -113,7 +113,7 @@ async function buscarTodosComPg (url) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
                     let mListaParcelas = [];
                     for (let j = 0; j < responseParcelas.rowCount; j++) {
-                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        let responseFormaPgto = await pool.query('select * from formaspagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
                         mListaParcelas.push({
                             numero: responseParcelas.rows[j].numero,
                             dias: responseParcelas.rows[j].dias,
@@ -139,7 +139,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from condicoes_pagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
+            pool.query('select * from condicoespagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -148,7 +148,7 @@ async function buscarTodosComPg (url) {
                     let responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[i].id]);
                     let mListaParcelas = [];
                     for (let j = 0; j < responseParcelas.rowCount; j++) {
-                        let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                        let responseFormaPgto = await pool.query('select * from formaspagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
                         mListaParcelas.push({
                             numero: responseParcelas.rows[j].numero,
                             dias: responseParcelas.rows[j].dias,
@@ -179,7 +179,7 @@ async function buscarTodosComPg (url) {
 // @route GET /api/condicoes_pagamento
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from condicoes_pagamento where id = $1', [id], async (err, res) => {
+        pool.query('select * from condicoespagamento where id = $1', [id], async (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -187,7 +187,7 @@ async function buscarUm (id) {
                 const responseParcelas = await pool.query('select * from parcelas where fk_idcondpgto = $1', [res.rows[0].id]);
                 const mListaParcelas = [];
                 for (let j = 0; j < responseParcelas.rowCount; j++) {
-                    let responseFormaPgto = await pool.query('select * from formas_pagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
+                    let responseFormaPgto = await pool.query('select * from formaspagamento where id = $1', [responseParcelas.rows[j].fk_idformapgto]);
                     mListaParcelas.push({
                         numero: responseParcelas.rows[j].numero,
                         dias: responseParcelas.rows[j].dias,
@@ -234,14 +234,14 @@ async function salvar (condicaoPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into condicoes_pagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt) values($1, $2, $3, $4, $5, $6)', [condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.datacad, condicaoPagamento.ultalt], async (err, res) => {
+                client.query('insert into condicoespagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt) values($1, $2, $3, $4, $5, $6)', [condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.datacad, condicaoPagamento.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from condicoes_pagamento where id = (select max(id) from condicoes_pagamento)');
+                        const response = await client.query('select * from condicoespagamento where id = (select max(id) from condicoes_pagamento)');
                         console.log(response.rows[0]);
                         client.query('BEGIN', err => {
                             if (shouldAbort(err)) return reject(err);
@@ -288,7 +288,7 @@ async function alterar (id, condicaoPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update condicoes_pagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6 where id = $7', [condicaoPagamento.id, condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.ultalt, id], async (err, res) => {
+                client.query('update condicoespagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6 where id = $7', [condicaoPagamento.id, condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.ultalt, id], async (err, res) => {
                     console.log("ID", id);
                     console.log("COND PGTO", condicaoPagamento);
                     if (shouldAbort(err)) return reject(err);
@@ -327,7 +327,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('delete from parcelas where fk_idcondpgto = $1', [id], (err, res) => {
+                client.query('delete from parcelas where fkidcondpgto = $1', [id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -336,7 +336,7 @@ async function deletar (id) {
                         }
                         client.query('BEGIN', err => {
                             if (shouldAbort(err)) return reject(err);
-                            client.query('delete from condicoes_pagamento where id = $1', [id], (err, res) => {
+                            client.query('delete from condicoespagamento where id = $1', [id], (err, res) => {
                                 if (shouldAbort(err)) return reject(err);
                                 client.query('COMMIT', err => {
                                     if (err) {
@@ -357,7 +357,7 @@ async function deletar (id) {
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from condicoes_pagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from condicoespagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

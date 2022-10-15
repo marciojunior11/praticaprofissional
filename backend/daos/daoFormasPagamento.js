@@ -5,7 +5,7 @@ const { pool } = require('../datamodule/index');
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from formas_pagamento', (err, res) => {
+            pool.query('select * from formaspagamento', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -13,7 +13,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from formas_pagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from formaspagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -26,7 +26,7 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from formas_pagamento order by id asc', (err, res) => {
+            pool.query('select * from formaspagamento order by id asc', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -34,7 +34,7 @@ async function buscarTodosSemPg(url) {
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from formas_pagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
+            pool.query(`select * from formaspagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -51,7 +51,7 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from formas_pagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from formaspagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -60,7 +60,7 @@ async function buscarTodosComPg (url) {
         } else {
             var filter = url.split('=')[3];
             console.log(filter);
-            pool.query('select * from formas_pagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from formaspagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -75,7 +75,7 @@ async function buscarTodosComPg (url) {
 // @route GET /api/formas_pagamento
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from formas_pagamento where id = $1', [id], (err, res) => {
+        pool.query('select * from formaspagamento where id = $1', [id], (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -108,14 +108,14 @@ async function salvar (formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into formas_pagamento (descricao, datacad, ultalt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.dataCad, formaPagamento.ultAlt], async (err, res) => {
+                client.query('insert into formaspagamento (descricao, datacad, ultalt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.dataCad, formaPagamento.ultAlt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from formas_pagamento where id = (select max(id) from formas_pagamento)');
+                        const response = await client.query('select * from formaspagamento where id = (select max(id) from formas_pagamento)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -147,7 +147,7 @@ async function alterar (id, formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update formas_pagamento set id = $1, descricao = $2, ultAlt = $3 where id = $4 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), formaPagamento.ultAlt, id], (err, res) => {
+                client.query('update formaspagamento set id = $1, descricao = $2, ultAlt = $3 where id = $4 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), formaPagamento.ultAlt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -184,7 +184,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from formas_pagamento where id = ${id}`, (err, res) => {
+                client.query(`delete from formaspagamento where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -202,7 +202,7 @@ async function deletar (id) {
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from formas_pagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from formaspagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
