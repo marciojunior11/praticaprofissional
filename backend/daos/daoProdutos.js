@@ -1,11 +1,12 @@
 const { pool } = require('../datamodule/index');
+const daoVariacoes = require('./daoVariacoes');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/formaspagamento
+// @route GET /api/produtos
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from formaspagamento', (err, res) => {
+            pool.query('select * from produtos', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -13,7 +14,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from formaspagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from produtos where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -26,19 +27,41 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from formaspagamento order by id asc', (err, res) => {
+            pool.query('select * from produtos order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaProdutos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    mListaProdutos.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        variacao: mVariacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
+                    });
+                }
+                return resolve(mListaProdutos);
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from formaspagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
+            pool.query(`select * from produtos order by id asc where descricao like '%${filter.toUpperCase()}%'`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaProdutos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    mListaProdutos.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        variacao: mVariacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
+                    });
+                }
+                return resolve(mListaProdutos);
             })
         }
     })
@@ -51,36 +74,64 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from formaspagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from produtos order by id asc limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaProdutos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    mListaProdutos.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        variacao: mVariacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
+                    });
+                }
+                return resolve(mListaProdutos);
             })
         } else {
             var filter = url.split('=')[3];
-            console.log(filter);
-            pool.query('select * from formaspagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query('select * from produtos where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log(res);
-                return resolve(res.rows);
+                const mListaProdutos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    mListaProdutos.push({
+                        id: res.rows[i].id,
+                        descricao: res.rows[i].descricao,
+                        variacao: mVariacao,
+                        datacad: res.rows[i].datacad,
+                        ultalt: res.rows[i].ultalt
+                    });
+                }
+                return resolve(mListaProdutos);
             })
         }
     })
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/formaspagamento
+// @route GET /api/produtos
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from formaspagamento where id = $1', [id], (err, res) => {
+        pool.query('select * from produtos where id = $1', [id], async (err, res) => {
             if (err) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                return resolve(res.rows[0]);
+                const mVariacao = await daoVariacoes.buscarUm(res.rows[0].fk_idvariacao);
+                const mProduto = {
+                    id: res.rows[0].id,
+                    descricao: res.rows[0].descricao,
+                    variacao: mVariacao,
+                    datacad: res.rows[0].datacad,
+                    ultalt: res.rows[0].ultalt
+                }
+                return resolve(mProduto);
             }
             return resolve(null);
         })
@@ -88,8 +139,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/formaspagamento
-async function salvar (formaPagamento) {
+// @route POST /api/produtos
+async function salvar (produtos) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -108,14 +159,14 @@ async function salvar (formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into formaspagamento (descricao, datacad, ultalt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.datacad, formaPagamento.ultalt], async (err, res) => {
+                client.query('insert into produtos (descricao, fk_idvariacao, datacad, ultalt) values($1, $2, $3, $4)', [produtos.descricao.toUpperCase(), produtos.variacao.id, produtos.datacad, produtos.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from formaspagamento where id = (select max(id) from formaspagamento)');
+                        const response = await client.query('select * from produtos where id = (select max(id) from produtos)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -127,8 +178,8 @@ async function salvar (formaPagamento) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/formaspagamento/:id
-async function alterar (id, formaPagamento) {
+// @route PUT /api/produtos/:id
+async function alterar (id, produtos) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -147,7 +198,7 @@ async function alterar (id, formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update formaspagamento set id = $1, descricao = $2, ultAlt = $3 where id = $4 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), formaPagamento.ultalt, id], (err, res) => {
+                client.query('update produtos set id = $1, descricao = $2, fk_idvariacao = $3, ultalt = $4 where id = $5 ', [produtos.id, produtos.descricao.toUpperCase(), produtos.variacao.id, produtos.ultalt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -164,7 +215,7 @@ async function alterar (id, formaPagamento) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/formaspagamento/:id
+// @route GET /api/produtos/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -184,7 +235,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from formaspagamento where id = ${id}`, (err, res) => {
+                client.query(`delete from produtos where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -202,7 +253,7 @@ async function deletar (id) {
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from formaspagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from produtos where descricao like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

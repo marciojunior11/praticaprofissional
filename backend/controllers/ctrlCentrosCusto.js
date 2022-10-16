@@ -1,10 +1,10 @@
-const daoFormasPagamento = require('../daos/daoFormasPagamento');
+const daoCentrosCusto = require('../daos/daoCentrosCusto');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/paises
 async function buscarTodosSemPg(req, res) {
     try {
-        const response = await daoFormasPagamento.buscarTodosSemPg(req.url);
+        const response = await daoCentrosCusto.buscarTodosSemPg(req.url);
         console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
@@ -18,8 +18,8 @@ async function buscarTodosSemPg(req, res) {
 
 async function buscarTodosComPg(req, res) {
     try {
-        const response = await daoFormasPagamento.buscarTodosComPg(req.url);
-        const qtd = await daoFormasPagamento.getQtd(req.url);
+        const response = await daoCentrosCusto.buscarTodosComPg(req.url);
+        const qtd = await daoCentrosCusto.getQtd(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -34,7 +34,7 @@ async function buscarTodosComPg(req, res) {
 // @route GET /api/paises/:id
 async function buscarUm(req, res, id) {
     try {
-        const response = await daoFormasPagamento.buscarUm(id);
+        const response = await daoCentrosCusto.buscarUm(id);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' }));
@@ -59,14 +59,14 @@ async function salvar(req, res) {
 
         req.on('end', async () => {
             const { descricao, datacad, ultalt } = JSON.parse(body);
-            const mFormaPagamento = {
+            const mCentroCusto = {
                 descricao,
                 datacad,
                 ultalt
             };
-            const novaFormaPagamento = await daoFormasPagamento.salvar(mFormaPagamento);
+            const novaGrade = await daoCentrosCusto.salvar(mCentroCusto);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novaFormaPagamento));
+            res.end(JSON.stringify(novaGrade));
         })
     } catch (error) {
         console.log(error);
@@ -77,7 +77,7 @@ async function salvar(req, res) {
 // @route PUT /api/paises/:id
 async function alterar(req, res, id) {
     try {
-        const response = await daoFormasPagamento.buscarUm(id);
+        const response = await daoCentrosCusto.buscarUm(id);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' })); 
@@ -88,15 +88,15 @@ async function alterar(req, res, id) {
         })
         req.on('end', async () => {
             const { id, descricao, datacad, ultalt } = JSON.parse(body);
-            const mFormaPagamento = {
+            const mCentroCusto = {
                 id,
                 descricao,
                 datacad,
                 ultalt
             };
-            const novaFormaPagamento = await daoFormasPagamento.alterar(id, mFormaPagamento)
+            const novaGrade = await daoCentrosCusto.alterar(id, mCentroCusto)
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novaFormaPagamento));
+            res.end(JSON.stringify(novaGrade));
         })
     } catch (error) {
         console.log(error);
@@ -107,12 +107,12 @@ async function alterar(req, res, id) {
 // @route GET /api/paises/:id
 async function deletar(req, res, id) {
     try {
-        const response = await daoFormasPagamento.buscarUm(id);
+        const response = await daoCentrosCusto.buscarUm(id);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' }));
         }
-        const responseDelete = await daoFormasPagamento.deletar(id);
+        const responseDelete = await daoCentrosCusto.deletar(id);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(responseDelete));
     } catch (error) {
@@ -123,7 +123,7 @@ async function deletar(req, res, id) {
 async function validate(req, res) {
     try {
             const filter = req.url.split('=')[1];
-            const response = await daoFormasPagamento.validate(filter);
+            const response = await daoCentrosCusto.validate(filter);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
     } catch (error) {

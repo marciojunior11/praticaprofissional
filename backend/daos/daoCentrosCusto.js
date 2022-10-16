@@ -1,11 +1,11 @@
 const { pool } = require('../datamodule/index');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/formaspagamento
+// @route GET /api/centroscusto
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from formaspagamento', (err, res) => {
+            pool.query('select * from centroscusto', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -13,7 +13,7 @@ async function getQtd(url) {
             })
         } else {
             var filter = url.split('=')[3];
-            pool.query('select * from formaspagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
+            pool.query('select * from centroscusto where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%'", (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -26,7 +26,7 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from formaspagamento order by id asc', (err, res) => {
+            pool.query('select * from centroscusto order by id asc', (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -34,7 +34,7 @@ async function buscarTodosSemPg(url) {
             })
         } else {
             const filter = url.split('=')[2];
-            pool.query(`select * from formaspagamento order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
+            pool.query(`select * from centroscusto order by id asc where descricao like '%${filter.toUpperCase()}%'`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -51,7 +51,7 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query(`select * from formaspagamento order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
+            pool.query(`select * from centroscusto order by id asc limit ${limit} offset ${(limit*page)-limit}`,(err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -59,8 +59,7 @@ async function buscarTodosComPg (url) {
             })
         } else {
             var filter = url.split('=')[3];
-            console.log(filter);
-            pool.query('select * from formaspagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query(`select * from centroscusto where descricao like '%${filter.toUpperCase()}%' limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
@@ -72,10 +71,10 @@ async function buscarTodosComPg (url) {
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/formaspagamento
+// @route GET /api/centroscusto
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from formaspagamento where id = $1', [id], (err, res) => {
+        pool.query('select * from centroscusto where id = $1', [id], (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -88,8 +87,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/formaspagamento
-async function salvar (formaPagamento) {
+// @route POST /api/centroscusto
+async function salvar (centroscusto) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -108,14 +107,14 @@ async function salvar (formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into formaspagamento (descricao, datacad, ultalt) values($1, $2, $3)', [formaPagamento.descricao.toUpperCase(), formaPagamento.datacad, formaPagamento.ultalt], async (err, res) => {
+                client.query('insert into centroscusto (descricao, datacad, ultalt) values($1, $2, $3)', [centroscusto.descricao.toUpperCase(), centroscusto.datacad, centroscusto.ultalt], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from formaspagamento where id = (select max(id) from formaspagamento)');
+                        const response = await client.query('select * from centroscusto where id = (select max(id) from centroscusto)');
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -127,8 +126,8 @@ async function salvar (formaPagamento) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/formaspagamento/:id
-async function alterar (id, formaPagamento) {
+// @route PUT /api/centroscusto/:id
+async function alterar (id, centroscusto) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -147,7 +146,7 @@ async function alterar (id, formaPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update formaspagamento set id = $1, descricao = $2, ultAlt = $3 where id = $4 ', [formaPagamento.id, formaPagamento.descricao.toUpperCase(), formaPagamento.ultalt, id], (err, res) => {
+                client.query('update centroscusto set id = $1, descricao = $2, ultalt = $3 where id = $4 ', [centroscusto.id, centroscusto.descricao.toUpperCase(), centroscusto.ultalt, id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -164,7 +163,7 @@ async function alterar (id, formaPagamento) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/formaspagamento/:id
+// @route GET /api/centroscusto/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -184,7 +183,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from formaspagamento where id = ${id}`, (err, res) => {
+                client.query(`delete from centroscusto where id = ${id}`, (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
@@ -202,7 +201,7 @@ async function deletar (id) {
 
 async function validate(filter) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from formaspagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from centroscusto where descricao like '${filter.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

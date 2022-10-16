@@ -2,7 +2,7 @@ const { pool } = require('../datamodule/index');
 const { daoFormasPagamento } = require('./daoFormasPagamento');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/condicoes_pagamento
+// @route GET /api/condicoespagamento
 async function getQtd(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
@@ -52,9 +52,10 @@ async function buscarTodosSemPg(url) {
                         txdesc: res.rows[i].txdesc,
                         txmulta: res.rows[i].txmulta,
                         txjuros: res.rows[i].txjuros,
+                        flsituacao: res.rows[i].flsituacao,
+                        listaparcelas: mListaParcelas,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -86,9 +87,10 @@ async function buscarTodosSemPg(url) {
                         txdesc: res.rows[i].txdesc,
                         txmulta: res.rows[i].txmulta,
                         txjuros: res.rows[i].txjuros,
+                        flsituacao: res.rows[i].flsituacao,
+                        listaparcelas: mListaParcelas,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -129,9 +131,10 @@ async function buscarTodosComPg (url) {
                         txdesc: res.rows[i].txdesc,
                         txmulta: res.rows[i].txmulta,
                         txjuros: res.rows[i].txjuros,
+                        flsituacao: res.rows[i].flsituacao,
+                        listaparcelas: mListaParcelas,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -164,9 +167,10 @@ async function buscarTodosComPg (url) {
                         txdesc: res.rows[i].txdesc,
                         txmulta: res.rows[i].txmulta,
                         txjuros: res.rows[i].txjuros,
+                        flsituacao: res.rows[i].flsituacao,
+                        listaparcelas: mListaParcelas,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
-                        listaparcelas: mListaParcelas
                     })
                 }
                 return resolve(mListaCondicoesPagamento);
@@ -176,7 +180,7 @@ async function buscarTodosComPg (url) {
 };
 
 // @descricao BUSCA UM REGISTRO
-// @route GET /api/condicoes_pagamento
+// @route GET /api/condicoespagamento
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
         pool.query('select * from condicoespagamento where id = $1', [id], async (err, res) => {
@@ -203,9 +207,10 @@ async function buscarUm (id) {
                     txdesc: res.rows[0].txdesc,
                     txmulta: res.rows[0].txmulta,
                     txjuros: res.rows[0].txjuros,
+                    flsituacao: res.rows[0].flsituacao,
+                    listaparcelas: mListaParcelas,
                     datacad: res.rows[0].datacad,
                     ultalt: res.rows[0].ultalt,
-                    listaparcelas: mListaParcelas
                 }
                 return resolve(mCondicaoPagamento);
             }
@@ -215,8 +220,8 @@ async function buscarUm (id) {
 };
 
 // @descricao SALVA UM REGISTRO
-// @route POST /api/condicoes_pagamento
-async function salvar (condicaoPagamento) {
+// @route POST /api/condicoespagamento
+async function salvar (condicaopagamento) {
     return new Promise((resolve, reject) => {
         pool.connect((err, client, done) => {
             const shouldAbort = err => {
@@ -234,19 +239,19 @@ async function salvar (condicaoPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into condicoespagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt) values($1, $2, $3, $4, $5, $6)', [condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.datacad, condicaoPagamento.ultalt], async (err, res) => {
+                client.query('insert into condicoespagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt, flsituacao) values($1, $2, $3, $4, $5, $6, $7)', [condicaopagamento.descricao.toUpperCase(), condicaopagamento.txdesc, condicaopagamento.txmulta, condicaopagamento.txjuros, condicaopagamento.datacad, condicaopagamento.ultalt, condicaopagamento.flsituacao], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
                             reject(err);
                         }
-                        const response = await client.query('select * from condicoespagamento where id = (select max(id) from condicoes_pagamento)');
+                        const response = await client.query('select * from condicoespagamento where id = (select max(id) from condicoespagamento)');
                         console.log(response.rows[0]);
                         client.query('BEGIN', err => {
                             if (shouldAbort(err)) return reject(err);
-                            for (let i = 0; i < condicaoPagamento.listaparcelas.length; i++) {
-                                client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [response.rows[0].id, condicaoPagamento.listaparcelas[i].numero, condicaoPagamento.listaparcelas[i].dias, condicaoPagamento.listaparcelas[i].percentual, condicaoPagamento.listaparcelas[i].formapagamento.id, condicaoPagamento.listaparcelas[i].datacad, condicaoPagamento.listaparcelas[i].ultalt], (err, res) => {
+                            for (let i = 0; i < condicaopagamento.listaparcelas.length; i++) {
+                                client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [response.rows[0].id, condicaopagamento.listaparcelas[i].numero, condicaopagamento.listaparcelas[i].dias, condicaopagamento.listaparcelas[i].percentual, condicaopagamento.listaparcelas[i].formapagamento.id, condicaopagamento.listaparcelas[i].datacad, condicaopagamento.listaparcelas[i].ultalt], (err, res) => {
                                     if (shouldAbort(err)) return reject(err);
                                     client.query('COMMIT', err => {
                                         if (err) {
@@ -268,8 +273,8 @@ async function salvar (condicaoPagamento) {
 };
 
 // @descricao ALTERA UM REGISTRO
-// @route PUT /api/condicoes_pagamento/:id
-async function alterar (id, condicaoPagamento) {
+// @route PUT /api/condicoespagamento/:id
+async function alterar (id, condicaopagamento) {
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -288,9 +293,7 @@ async function alterar (id, condicaoPagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update condicoespagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6 where id = $7', [condicaoPagamento.id, condicaoPagamento.descricao.toUpperCase(), condicaoPagamento.txdesc, condicaoPagamento.txmulta, condicaoPagamento.txjuros, condicaoPagamento.ultalt, id], async (err, res) => {
-                    console.log("ID", id);
-                    console.log("COND PGTO", condicaoPagamento);
+                client.query('update condicoespagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6, flsituacao = $7 where id = $8', [condicaopagamento.id, condicaopagamento.descricao.toUpperCase(), condicaopagamento.txdesc, condicaopagamento.txmulta, condicaopagamento.txjuros, condicaopagamento.ultalt, condicaopagamento.flsituacao, id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', async err => {
                         if (err) {
@@ -307,7 +310,7 @@ async function alterar (id, condicaoPagamento) {
 };
 
 // @descricao DELETA UM REGISTRO
-// @route GET /api/condicoes_pagamento/:id
+// @route GET /api/condicoespagamento/:id
 async function deletar (id) {
     return new Promise((resolve, reject) => {
 
@@ -327,7 +330,7 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('delete from parcelas where fkidcondpgto = $1', [id], (err, res) => {
+                client.query('delete from parcelas where fk_idcondpgto = $1', [id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query('COMMIT', err => {
                         if (err) {
