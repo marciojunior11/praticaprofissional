@@ -7,6 +7,7 @@ const { formasPagamentoRoutes } = require('./formasPagamentoRoutes');
 const { condicoesPagamentoRoutes } = require('./condicoesPagamentoRoutes');
 const { gradesRoutes } = require('./gradesRoutes');
 const { caracteristicasRoutes } = require('./caracteristicasRoutes');
+const { variacoesRoutes } = require('./variacoesRoutes');
 
 function router(req, res) {
     if (req.url.includes('/paises')) {
@@ -27,6 +28,8 @@ function router(req, res) {
         gradesRoutes(req, res);
     } else if (req.url.includes('caracteristicas')) {
         caracteristicasRoutes(req, res);
+    } else if (req.url.includes('variacoes')) {
+        variacoesRoutes(req, res);
     }
 }
 
