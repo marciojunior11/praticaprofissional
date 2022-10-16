@@ -34,7 +34,7 @@ function router(req, res) {
         variacoesRoutes(req, res);
     } else if (req.url.includes('centroscusto')) {
         centrosCustoRoutes(req, res);
-    } else if (req.url.includes('centroscusto')) {
+    } else if (req.url.includes('produtos')) {
         produtosRoutes(req, res);
     }
 }

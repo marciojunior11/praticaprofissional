@@ -212,8 +212,8 @@ async function buscarUm (id) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
-                let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
+                let mVariacao = await daoVariacoes.buscarUm(res.rows[0].fk_idvariacao);
+                let mFornecedor = await daoFornecedores.buscarUm(res.rows[0].fk_idfornecedor);
                 const mProduto = {
                     id: res.rows[0].id,
                     gtin: res.rows[0].gtin,
