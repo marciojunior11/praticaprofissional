@@ -262,7 +262,13 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/paises/cadastro/novo') }
-                    onClickVoltar={() => navigate('/paises') }
+                    onClickVoltar={() => {
+                        if (isDialog) {
+                            toggleOpen?.();
+                        } else {
+                            navigate('/paises');
+                        }
+                    }}
                 />
             }
         >
@@ -343,7 +349,7 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                             </Grid>
                         </Grid>
 
-                        {id != 'novo' && (
+                        {(id != 'novo' || (selectedId && selectedId != 0)) && (
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                     <VTextField

@@ -17,11 +17,10 @@ export interface IHeaderProps {
 }
 
 interface IDataTableProps {
-    collapse: React.ReactNode;
     headers: IHeaderProps[];
     collapseHeaders: IHeaderProps[];
     rows: any[];
-    collapseRows: any[];
+    collapseRows: string;
     rowId: string;
     collapseRowId: string;
     selectable?: boolean;
@@ -32,7 +31,7 @@ interface IDataTableProps {
     onPageChange?: (page: number) => void;
 }
 
-export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapse, headers, collapseHeaders, rows, collapseRows, rowId, collapseRowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
+export const CollapsedDataTable: React.FC<IDataTableProps> = ( { headers, collapseHeaders, rows, collapseRows, rowId, collapseRowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     const Row = (props: { row: any }) => {
@@ -49,23 +48,20 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapse, heade
                         )
                     }}
                 >
+                    <TableCell>
+                        <IconButton 
+                            aria-label="expand-row" 
+                            size="small" 
+                            onClick={() => setOpen(!open)}
+                        >
+                            <Icon>{open ? "keyboard_arrow_up_icon" : "keyboard_arrow_down_icon"}</Icon>
+                        </IconButton>
+                    </TableCell>
                     { headers.map((header) => {
                         return (
-                            <>
-                                <TableCell>
-                                    <IconButton 
-                                        aria-label="expand-row" 
-                                        size="small" 
-                                        onClick={() => setOpen(!open)}
-                                    >
-                                        <Icon>{open ? "keyboard_arrow_up_icon" : "keyboard_arrow_down_icon"}</Icon>
-                                    </IconButton>
-            
-                                </TableCell>
-                                <TableCell align={header.align && header.align}>
-                                    { !header.render ? getNestedObjectPropValue(row, header.name) : header.render(row) }
-                                </TableCell>
-                            </>
+                            <TableCell align={header.align && header.align}>
+                                { !header.render ? getNestedObjectPropValue(row, header.name) : header.render(row) }
+                            </TableCell>
                         )
                     }) }
                 </TableRow>
@@ -89,7 +85,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapse, heade
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {collapseRows.map((item: any) => (
+                                        {row[collapseRows].map((item: any) => (
                                             <TableRow key={item[collapseRowId]}>
                                                 { collapseHeaders.map((header) => {
                                                     return (
@@ -115,6 +111,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapse, heade
             <Table>
                 <TableHead>
                     <TableRow>
+                        <TableCell></TableCell>
                         { headers.map(header => {
                             return (
                                 <TableCell align={header.align && header.align}>

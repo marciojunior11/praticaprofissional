@@ -69,6 +69,62 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
     // #endregion
 
     // #region ACTIONS
+    const headers: IHeaderProps[] = [
+        {
+            label: "Número",
+            name: "numero"
+        },
+        {
+            label: "Dias",
+            name: "dias"
+        },
+        {
+            label: "Percentual",
+            name: "percentual"
+        },
+        {
+            label: "Forma de Pagamento",
+            name: "formapagamento.descricao"
+        },
+        {
+            label: "Ações",
+            name: " ",
+            align: "right",
+            render: (row) => {
+                return (
+                    <>
+                        <IconButton
+                            disabled={isEditingParcela} 
+                            color="error" 
+                            size="small" 
+                            onClick={() => {
+                                if (window.confirm('Deseja excluir esta parcela?')) {
+                                    const mArray = listaparcelas.slice();
+                                    delete mArray[row.numero-1];
+                                    mArray.length = listaparcelas.length-1;
+                                    setListaParcelas(mArray);
+                                }
+                            }}
+                        >
+                            <Icon>delete</Icon>
+                        </IconButton>
+                        <IconButton
+                            disabled={isEditingParcela} 
+                            color="primary" 
+                            size="small"
+                            onClick={() => {
+                                setIsEditingParcela(true);
+                                setParcelaSelected(row);
+                            }}
+                        >
+                            <Icon>edit</Icon>
+                        </IconButton>
+                    </>
+                )
+            }
+        }
+    ]
+
     const toggleConsultaFormasPgtoDialogOpen = () => {
         setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
     }
@@ -86,30 +142,56 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
     }, [isEditingParcela])
 
     useEffect(() => {
-        if (id !== 'novo') {
-            setIsLoading(true);
-
-            controller.getOne(Number(id))
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                        navigate('/condicoespagamento');
-                    } else {
-                        result.datacad = new Date(result.datacad).toLocaleString();
-                        result.ultalt = new Date(result.ultalt).toLocaleString();
-                        formRef.current?.setData(result);
-                        setIsValid(true);
-                        setIsValidParcelas(true);
-                        setCondicaoPagamentoOriginal(result);
-                        setDescricao(result.descricao);
-                        setListaParcelas(result.listaparcelas);
-                    }
+        if (isDialog) {
+            if (selectedId !== 0) {
+                setIsLoading(true);
+                controller.getOne(Number(selectedId))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/condicoespagamento');
+                        } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            formRef.current?.setData(result);
+                            setIsValid(true);
+                            setIsValidParcelas(true);
+                            setCondicaoPagamentoOriginal(result);
+                            setDescricao(result.descricao);
+                            setListaParcelas(result.listaparcelas);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    descricao: ''
                 });
+            }
         } else {
-            formRef.current?.setData({
-                descricao: ''
-            });
+            if (id !== 'novo') {
+                setIsLoading(true);
+                controller.getOne(Number(id))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/condicoespagamento');
+                        } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            formRef.current?.setData(result);
+                            setIsValid(true);
+                            setIsValidParcelas(true);
+                            setCondicaoPagamentoOriginal(result);
+                            setDescricao(result.descricao);
+                            setListaParcelas(result.listaparcelas);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    descricao: ''
+                });
+            }
         }
     }, [id]);
 
@@ -211,51 +293,86 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                 .then((dadosValidados) => {
                     if(isValid && isValidParcelas) {
                         setIsLoading(true);
-                        if (id === 'novo') {
-                            controller.create({
-                                ...dadosValidados,
-                                listaparcelas
-                            })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message)
-                                    } else {
-                                        toast.success('Cadastrado com sucesso!')
-                                        if (isSaveAndClose()) {
-                                            navigate('/condicoespagamento');
-                                        } else if (isSaveAndNew()) {
-                                            setIsValidating('');
-                                            setIsValid(false);
-                                            navigate('/condicoespagamento/cadastro/novo');
-                                            formRef.current?.setData({
-                                                descricao: ''
-                                            });
+                        if (isDialog) {
+                            if (selectedId === 0) {
+                                controller.create({
+                                    ...dadosValidados,
+                                    listaparcelas
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
                                         } else {
-                                            setIsValidating(null);
-                                            navigate(`/condicoespagamento/cadastro/${result}`);
+                                            toast.success('Cadastrado com sucesso!');
+                                            reloadDataTableIfDialog?.();
+                                            toggleOpen?.();
                                         }
-                                    }
-                                });
+                                    });
+                            } else {
+                                controller.update(Number(id), {
+                                    ...dadosValidados,
+                                    listaparcelas,
+                                    flsituacao: formRef.current?.getData().flsituacao
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message);
+                                        } else {
+                                            toast.success('Alterado com sucesso!');
+                                            reloadDataTableIfDialog?.();
+                                            toggleOpen?.();
+                                        }
+                                    });
+                            }
                         } else {
-                            controller.update(Number(id), {
-                                ...dadosValidados,
-                                listaparcelas,
-                                flsituacao: formRef.current?.getData().flsituacao
-                            })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        if (isSaveAndClose()) {
-                                            navigate('/condicoespagamento')
+                            if (id === 'novo') {
+                                controller.create({
+                                    ...dadosValidados,
+                                    listaparcelas
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
                                         } else {
-                                            setIsValidating(null);
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                navigate('/condicoespagamento');
+                                            } else if (isSaveAndNew()) {
+                                                setIsValidating('');
+                                                setIsValid(false);
+                                                navigate('/condicoespagamento/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    descricao: ''
+                                                });
+                                            } else {
+                                                setIsValidating(null);
+                                                navigate(`/condicoespagamento/cadastro/${result}`);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                            } else {
+                                controller.update(Number(id), {
+                                    ...dadosValidados,
+                                    listaparcelas,
+                                    flsituacao: formRef.current?.getData().flsituacao
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message);
+                                        } else {
+                                            toast.success('Alterado com sucesso!');
+                                            if (isSaveAndClose()) {
+                                                navigate('/condicoespagamento')
+                                            } else {
+                                                setIsValidating(null);
+                                            }
+                                        }
+                                    });
+                            }
                         }
                     } else {
                         if (!isValid) toast.error('Verifique os campos.');
@@ -298,16 +415,22 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo={id == 'novo'}
-                    mostrarBotaoApagar={id !== 'novo'}
-                    mostrarBotaoNovo={id !== 'novo'}
+                    mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
+                    mostrarBotaoApagar={id !== 'novo' && !isDialog}
+                    mostrarBotaoNovo={id !== 'novo' && !isDialog}
                     
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/condicoespagamento/cadastro/novo') }
-                    onClickVoltar={() => navigate('/condicoespagamento') }
+                    onClickVoltar={() => {
+                        if (isDialog) {
+                            toggleOpen?.();
+                        } else {
+                            navigate('/condicoespagamento');
+                        }
+                    }}
                 />
             }
         >
@@ -522,7 +645,12 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                         </Grid>
                         <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
-                                <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
+                                <DataTable
+                                    headers={headers}
+                                    rowId="numero"
+                                    rows={listaparcelas}
+                                />
+                                {/* <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
                                     <Table>
                                         <TableHead>
                                             <TableRow>
@@ -575,11 +703,11 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                             <caption>{Environment.LISTAGEM_VAZIA}</caption>
                                         )}
                                     </Table>
-                                </TableContainer>                                
+                                </TableContainer>                                 */}
                             </Grid>
                         </Grid>
 
-                        {id != 'novo' && (
+                        {(id != 'novo' || (selectedId && selectedId != 0)) && (
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                     <VTextField
@@ -612,8 +740,9 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                         onClose={toggleConsultaFormasPgtoDialogOpen}
                         handleClose={toggleConsultaFormasPgtoDialogOpen} 
                         open={isConsultaFormasPgtoDialogOpen} 
-                        title="Cadastrar Forma de Pagamento"
+                        title="Consultar Formas de Pagamento"
                         fullWidth
+                        maxWidth="xl"
                     >
                         <ConsultaFormasPagamento 
                             isDialog

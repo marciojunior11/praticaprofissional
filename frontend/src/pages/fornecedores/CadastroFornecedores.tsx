@@ -16,6 +16,9 @@ import { number } from "../../shared/utils/validations";
 import ControllerFornecedores from "../../shared/controllers/FornecedoresController";
 import ControllerCidades from "../../shared/controllers/CidadesController";
 import { ConsultaCidades } from "../cidades/ConsultaCidades";
+import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
+import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondicoesPagamento";
+import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 // #endregion
 
 // #region INTERFACES
@@ -69,10 +72,11 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 
 
 
-export const CadastroFornecedores: React.FC = () => {
+export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
     // #region CONTROLLERS
         const controller = new ControllerFornecedores();
         const controllerCidades = new ControllerCidades();
+        const controllerCondicoesPagamento = new ControllerCondicoesPagamento();
     // #endregion
 
     // #region HOOKS
@@ -86,34 +90,67 @@ export const CadastroFornecedores: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isValid, setIsValid] = useState(true);
     const [isConsultaCidadesDialogOpen, setIsConsultaCidadesDialogOpen] = useState(false);
+    const [isConsultaCondicoesPagamentoDialogOpen, setIsConsultaCondicoesPagamentoDialogOpen] = useState(false);
     // #endregion
 
     // #region ACTIONS
     useEffect(() => {
-        if (id !== 'novo') {
-            setIsLoading(true);
-
-            controller.getOne(Number(id))
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                        navigate('/fornecedores');
-                    } else {
-                        formRef.current?.setData(result);
-                    }
+        if (isDialog) {
+            if (selectedId !== 0) {
+                setIsLoading(true);
+                controller.getOne(Number(selectedId))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/fornecedores');
+                        } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            formRef.current?.setData(result);
+                            setIsValid(true);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    razSocial: '',
+                    cnpj: '',
+                    nomeFantasia: '',
+                    telefone: '',
+                    endereco: '',
+                    numEnd: '',
+                    bairro: '',
+                    cidade: null
                 });
+            }
         } else {
-            formRef.current?.setData({
-                razSocial: '',
-                cnpj: '',
-                nomeFantasia: '',
-                telefone: '',
-                endereco: '',
-                numEnd: '',
-                bairro: '',
-                cidade: null
-            });
+            if (id !== 'novo') {
+                setIsLoading(true);
+                controller.getOne(Number(id))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/fornecedores');
+                        } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            formRef.current?.setData(result);
+                            setIsValid(true);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    razSocial: '',
+                    cnpj: '',
+                    nomeFantasia: '',
+                    telefone: '',
+                    endereco: '',
+                    numEnd: '',
+                    bairro: '',
+                    cidade: null
+                });
+            }
         }
     }, [id]);
 
@@ -203,6 +240,10 @@ export const CadastroFornecedores: React.FC = () => {
     const toggleConsultaCidadesDialogOpen = () => {
         setIsConsultaCidadesDialogOpen(oldValue => !oldValue);
     }
+
+    const toggleConsultaCondicoesPagamentoDialogOpen = () => {
+        setIsConsultaCondicoesPagamentoDialogOpen(oldValue => !oldValue);
+    }
     // #endregion
 
     return (
@@ -220,7 +261,13 @@ export const CadastroFornecedores: React.FC = () => {
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/fornecedores/cadastro/novo') }
-                    onClickVoltar={() => navigate('/fornecedores') }
+                    onClickVoltar={() => {
+                        if (isDialog) {
+                            toggleOpen?.();
+                        } else {
+                            navigate('/fornecedores') 
+                        }
+                    }}
                 />
             }
         >
@@ -272,6 +319,23 @@ export const CadastroFornecedores: React.FC = () => {
                                         name='inscestadual' 
                                         label="Inscrição Estadual"
                                         disabled={isLoading}  
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                    <VAutocompleteSearch
+                                        size="small"
+                                        required
+                                        name="condicaopagamento"
+                                        label={["descricao"]}
+                                        TFLabel="Condição de Pagamento"
+                                        getAll={controllerCondicoesPagamento.getAll}
+                                        onClickSearch={() => {
+                                            toggleConsultaCondicoesPagamentoDialogOpen();
+                                        }}
+                                        onInputchange={() => {
+                                            formRef.current?.setFieldError('condicaopagamento', '');
+                                        }}
+                                        isDialogOpen={isConsultaCondicoesPagamentoDialogOpen}
                                     />
                                 </Grid>
                             </Grid>
@@ -329,14 +393,9 @@ export const CadastroFornecedores: React.FC = () => {
                                         label={["nmcidade", "estado.uf", "estado.pais.nmpais"]}
                                         TFLabel="Cidade"
                                         getAll={controllerCidades.getAll}
-                                        // onInputchange={() => {
-                                        //     setIsValid(false);
-                                        //     setIsValidating(false);
-                                        //     formRef.current?.setFieldError('nmcidade', '');
-                                        // }}
-                                        // onChange={(newValue) => {
-                                        //     setEstado(newValue);
-                                        // }}
+                                        onInputchange={() => {
+                                            formRef.current?.setFieldError('nmcidade', '');
+                                        }}
                                         onClickSearch={toggleConsultaCidadesDialogOpen}
                                         isDialogOpen={isConsultaCidadesDialogOpen}
                                     />
@@ -384,8 +443,9 @@ export const CadastroFornecedores: React.FC = () => {
                         onClose={toggleConsultaCidadesDialogOpen}
                         handleClose={toggleConsultaCidadesDialogOpen}
                         open={isConsultaCidadesDialogOpen}
-                        title="Cadastrar País"
+                        title="Consultar Cidades"
                         fullWidth
+                        maxWidth="xl"
                     >
                         <ConsultaCidades
                             isDialog
@@ -395,6 +455,24 @@ export const CadastroFornecedores: React.FC = () => {
                                 //setEstado(row);
                             }}
                             toggleDialogOpen={toggleConsultaCidadesDialogOpen}
+                        />
+                    </CustomDialog>
+
+                    <CustomDialog
+                        onClose={toggleConsultaCondicoesPagamentoDialogOpen}
+                        handleClose={toggleConsultaCondicoesPagamentoDialogOpen}
+                        open={isConsultaCondicoesPagamentoDialogOpen}
+                        title="Consultar Condições de Pagamento"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaCondicoesPagamento
+                            isDialog
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldValue("condicaopagamento", row);
+                                formRef.current?.setFieldError('condicaopagamento', '');
+                            }}
+                            toggleDialogOpen={toggleConsultaCondicoesPagamentoDialogOpen}
                         />
                     </CustomDialog>
                 </Box>

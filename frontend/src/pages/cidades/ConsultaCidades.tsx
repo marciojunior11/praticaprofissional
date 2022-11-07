@@ -181,11 +181,11 @@ export const ConsultaCidades: React.FC<IConsultaProps> = ({ isDialog = false, on
             />
             <CustomDialog
                 fullWidth
-                maxWidth="md"
+                maxWidth="xl"
                 onClose={toggleCadastroCidadesDialogOpen}
                 handleClose={toggleCadastroCidadesDialogOpen}
                 open={isCadastroCidadesDialogOpen}
-                title="Cadastrar Estado"
+                title="Cadastrar Cidade"
             >
                 <CadastroCidades
                     isDialog

@@ -146,7 +146,7 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
 
     return (
         <LayoutBase 
-            titulo={!isDialog ? "Consultar Países" : ""}
+            titulo="Consultar Países"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
@@ -182,7 +182,7 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
             />
             <CustomDialog
                 fullWidth
-                maxWidth="md"
+                maxWidth="xl"
                 onClose={toggleCadastroPaisesDialogOpen}
                 handleClose={toggleCadastroPaisesDialogOpen}
                 open={isCadastroPaisesDialogOpen}

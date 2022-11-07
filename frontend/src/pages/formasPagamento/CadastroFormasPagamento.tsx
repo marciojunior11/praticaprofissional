@@ -280,7 +280,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
 
     return (
         <LayoutBase 
-            titulo={!isDialog ? (id === 'novo' ? 'Cadastrar Forma de Pagamento' : 'Editar Forma de Pagamento') : ""}
+            titulo={id === 'novo' ? 'Cadastrar Forma de Pagamento' : 'Editar Forma de Pagamento'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -355,7 +355,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                             </Grid>
                         </Grid>
 
-                        {id != 'novo' && (
+                        {(id != 'novo' || (selectedId && selectedId != 0)) && (
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                     <VTextField

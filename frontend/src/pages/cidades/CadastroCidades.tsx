@@ -283,7 +283,13 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/cidades/cadastro/novo') }
-                    onClickVoltar={() => navigate('/cidades') }
+                    onClickVoltar={() => {
+                        if (isDialog) {
+                            toggleOpen?.();
+                        } else {
+                            navigate('/cidades')
+                        }
+                    }}
                 />
             }
         >
@@ -366,7 +372,7 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
                                 />
                             </Grid>  
 
-                            {id != 'novo' && (
+                            {(id != 'novo' || (selectedId && selectedId != 0)) && (
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                     <VTextField
@@ -400,8 +406,9 @@ export const CadastroCidades: React.FC<ICadastroProps> = ({isDialog = false, tog
                         onClose={toggleConsultaEstadosDialogOpen}
                         handleClose={toggleConsultaEstadosDialogOpen}
                         open={isConsultaEstadosOpen}
-                        title="Cadastrar País"
+                        title="Consultar Estados"
                         fullWidth
+                        maxWidth="xl"
                     >
                         <ConsultaEstados
                             isDialog

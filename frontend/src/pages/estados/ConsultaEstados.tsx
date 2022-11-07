@@ -127,7 +127,14 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
                         <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>delete</Icon>
                         </IconButton>
-                        <IconButton color="primary" size="small" onClick={() => navigate(`/estados/cadastro/${row.id}`)}>
+                        <IconButton color="primary" size="small" onClick={() => {
+                            if (isDialog) {
+                                setSelectedId(row.id);
+                                toggleCadastroEstadosDialogOpen();
+                            } else {
+                                navigate(`/estados/cadastro/${row.id}`)
+                            }
+                        }}>
                             <Icon>edit</Icon>
                         </IconButton>
                         {isDialog && (
@@ -146,7 +153,7 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
 
     return (
         <LayoutBase 
-            titulo={!isDialog ? "Consultar Estados" : ""}
+            titulo="Consultar Estados"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
@@ -182,7 +189,7 @@ export const ConsultaEstados: React.FC<IConsultaProps> = ({ isDialog = false, on
             />
             <CustomDialog
                 fullWidth
-                maxWidth="md"
+                maxWidth="xl"
                 onClose={toggleCadastroEstadosDialogOpen}
                 handleClose={toggleCadastroEstadosDialogOpen}
                 open={isCadastroEstadosDialogOpen}

@@ -146,7 +146,7 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
 
     return (
         <LayoutBase 
-            titulo={!isDialog ? "Consultar Formas de Pagamento" : ""}
+            titulo="Consultar Formas de Pagamento"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
@@ -182,7 +182,7 @@ export const ConsultaFormasPagamento: React.FC<IConsultaProps> = ({ isDialog = f
             />
             <CustomDialog
                 fullWidth
-                maxWidth="md"
+                maxWidth="xl"
                 onClose={toggleCadastroFormaPgtoDialogOpen}
                 handleClose={toggleCadastroFormaPgtoDialogOpen} 
                 open={isCadastroFormaPgtoDialogOpen} 

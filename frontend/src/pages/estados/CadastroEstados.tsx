@@ -63,30 +63,58 @@ export const CadastroEstados: React.FC<ICadastroProps> = ({isDialog = false, tog
         setIsConsultaPaisesDialogOpen(oldValue => !oldValue);
     }
     useEffect(() => {
-        if (id !== 'novo') {
-            setIsLoading(true);
-            controller.getOne(Number(id))
-                .then((result) => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                        navigate('/estados');
-                    } else {
-                        result.datacad = new Date(result.datacad).toLocaleString();
-                        result.ultalt = new Date(result.ultalt).toLocaleString();
-                        formRef.current?.setData(result);
-                        setIsValid(true);
-                        setPais(result.pais);
-                        setNmEstado(result.nmestado);
-                        setEstadoOriginal(result);
-                    }
+        if (isDialog) {
+            if (selectedId !== 0) {
+                setIsLoading(true);
+                controller.getOne(Number(selectedId))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/estados');
+                        } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            formRef.current?.setData(result);
+                            setIsValid(true);
+                            setPais(result.pais);
+                            setNmEstado(result.nmestado);
+                            setEstadoOriginal(result);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    nmestado: '',
+                    uf: '',
+                    pais: null
                 });
+            }
         } else {
-            formRef.current?.setData({
-                nmestado: '',
-                uf: '',
-                pais: null
-            });
+            if (id !== 'novo') {
+                setIsLoading(true);
+                controller.getOne(Number(id))
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                            navigate('/estados');
+                        } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            formRef.current?.setData(result);
+                            setIsValid(true);
+                            setPais(result.pais);
+                            setNmEstado(result.nmestado);
+                            setEstadoOriginal(result);
+                        }
+                    });
+            } else {
+                formRef.current?.setData({
+                    nmestado: '',
+                    uf: '',
+                    pais: null
+                });
+            }
         }
     }, [id]);
 
@@ -279,7 +307,13 @@ export const CadastroEstados: React.FC<ICadastroProps> = ({isDialog = false, tog
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
                     onClickNovo={() => navigate('/estados/cadastro/novo') }
-                    onClickVoltar={() => navigate('/estados') }
+                    onClickVoltar={() => {
+                        if (isDialog) {
+                            toggleOpen?.();
+                        } else {
+                            navigate('/estados')
+                        }
+                    }}
                 />
             }
         >
@@ -368,7 +402,7 @@ export const CadastroEstados: React.FC<ICadastroProps> = ({isDialog = false, tog
                             </Grid>
                         </Grid>
 
-                        {id != 'novo' && (
+                        {(id != 'novo' || (selectedId && selectedId != 0)) && (
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
                                     <VTextField
@@ -402,8 +436,9 @@ export const CadastroEstados: React.FC<ICadastroProps> = ({isDialog = false, tog
                         onClose={toggleConsultaPaisesDialogOpen}
                         handleClose={toggleConsultaPaisesDialogOpen}
                         open={isConsultaPaisesDialogOpen}
-                        title="Cadastrar País"
+                        title="Consultar Países"
                         fullWidth
+                        maxWidth="xl"
                     >
                         <ConsultaPaises
                             isDialog
