@@ -15,8 +15,12 @@ function condicoesPagamentoRoutes(req, res) {
         } else {
             ctrlCondicoesPagamento.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/condicoespagamento' && req.method === 'POST') {
-        ctrlCondicoesPagamento.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url.includes('validate')) {
+            ctrlCondicoesPagamento.validate(req, res);
+        } else {
+            ctrlCondicoesPagamento.salvar(req, res);
+        }
     } else if(req.url.match(/\/api\/condicoespagamento\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlCondicoesPagamento.alterar(req, res, id);

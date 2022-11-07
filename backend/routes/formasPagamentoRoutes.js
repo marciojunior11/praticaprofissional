@@ -8,15 +8,17 @@ function formasPagamentoRoutes(req, res) {
         if(req.url.match(/\/api\/formaspagamento\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlFormasPagamento.buscarUm(req, res, id);
-        } else if (req.url.includes('filter')) {
-            ctrlFormasPagamento.validate(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlFormasPagamento.buscarTodosSemPg(req, res)
         } else {
             ctrlFormasPagamento.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/formaspagamento' && req.method === 'POST') {
-        ctrlFormasPagamento.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url.includes('validate')) {
+            ctrlFormasPagamento.validate(req, res);
+        } else {
+            ctrlFormasPagamento.salvar(req, res);
+        }
     } else if(req.url.match(/\/api\/formaspagamento\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlFormasPagamento.alterar(req, res, id);

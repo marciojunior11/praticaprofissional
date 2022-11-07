@@ -1,5 +1,4 @@
-import { ICidades } from "./Cidades";
-import { IParcelas } from "./Parcelas";
+import { IDetalhesParcelas, IParcelas } from "./Parcelas";
 
 export interface ICondicoesPagamento {
     id: number;
@@ -20,8 +19,10 @@ export interface IDetalhesCondicoesPagamento {
     txjuros: number;
     listaparcelas: IParcelas[];
     flsituacao: string;
-    datacad: string | Date;
-    ultalt: string | Date;
+}
+
+export interface IValidator {
+    descricao: string;
 }
 
 export type TListaCondicoesPagamento = {

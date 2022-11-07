@@ -112,7 +112,8 @@ async function salvar (centroscusto) {
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         const response = await client.query('select * from centroscusto where id = (select max(id) from centroscusto)');
                         done();
@@ -151,7 +152,8 @@ async function alterar (id, centroscusto) {
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);
@@ -188,7 +190,8 @@ async function deletar (id) {
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);

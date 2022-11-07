@@ -84,6 +84,8 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                         toast.error(result.message);
                         navigate('/paises');
                     } else {
+                        result.datacad = new Date(result.datacad).toLocaleString();
+                        result.ultalt = new Date(result.ultalt).toLocaleString();
                         formRef.current?.setData(result);
                         setIsValid(true);
                         setNmPais(result.nmpais);
@@ -295,7 +297,7 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (isValid) && (
+                                                { (isValid && formRef.current?.getData().nmpais) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -340,6 +342,35 @@ export const CadastroPaises: React.FC<ICadastroProps> = ({isDialog = false, togg
                                 />
                             </Grid>
                         </Grid>
+
+                        {id != 'novo' && (
+                            <Grid container item direction="row" spacing={2}>
+                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='datacad' 
+                                        label="Data Cad."
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='ultalt' 
+                                        label="Ult. Alt."
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        )}
 
                     </Grid>
 

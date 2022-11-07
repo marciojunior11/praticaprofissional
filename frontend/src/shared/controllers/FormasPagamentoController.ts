@@ -1,24 +1,22 @@
 import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
-import { IPaises, IDetalhesPaises, TListaPaises } from '../interfaces/entities/Paises';
-import Paises from '../models/entities/Paises';
+import { IFormasPagamento, IDetalhesFormasPagamento, TListaFormasPagamento } from '../interfaces/entities/FormasPagamento';
+import FormasPagamento from '../models/entities/FormasPagamento';
 import { IController } from './../interfaces/controllers/Controller';
 
-class ControllerPaises implements IController {
+class ControllerFormasPagamento implements IController {
 
     constructor() {
 
     }
 
-    getAll = async (page?: number, filter = ''): Promise<TListaPaises | Error> => {
+    getAll = async (page?: number, filter = ''): Promise<TListaFormasPagamento | Error> => {
         try {
             var urlRelativa = '';
-            if (page != 0) urlRelativa = `/api/paises?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
-            else urlRelativa = 'api/paises?_page=all'
-            console.log(urlRelativa);
-    
+            if (page != 0) urlRelativa = `/api/formaspagamento?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
+            else urlRelativa = `api/formaspagamento?_page=all`;
             const { data } = await Api.get(urlRelativa);
-            
+    
             if (data) {
                 return {
                     data: data.data,
@@ -34,27 +32,28 @@ class ControllerPaises implements IController {
         }
     }
 
-    getOne = async (id: number): Promise<IPaises | Error> => {
+    getOne = async (id: number): Promise<IFormasPagamento | Error> => {
         try {
-
-            const { data } = await Api.get(`/api/paises/${id}`);
-    
+            const { data } = await Api.get(`/api/formaspagamento/${id}`);
             if (data) {
                 return data;
             }
-    
             return new Error('Erro ao consultar o registros.');
-    
         } catch (error) {
             console.error(error);
             return new Error((error as {message:string}).message || 'Erro ao consultar o registros.');
-        }         
+        }        
     }
 
-    create = async (dados: Omit<IDetalhesPaises, 'id'>): Promise<number | undefined | Error> => {
-        let pais = new Paises(0, dados.nmpais, dados.sigla, dados.ddi, new Date(), new Date());
+    create = async (dados: Omit<IDetalhesFormasPagamento, 'id'>): Promise<number | undefined | Error> => {
+        let formapagamento = new FormasPagamento(
+            0,
+            dados.descricao,
+            new Date(),
+            new Date()
+        );
         try {
-            const { data } = await Api.post<IPaises>('/api/paises', pais);
+            const { data } = await Api.post<IFormasPagamento>('/api/formaspagamento', formapagamento);
             if (data) {
                 return data.id;
             }
@@ -63,10 +62,15 @@ class ControllerPaises implements IController {
         }  
     }
 
-    update = async (id: number, dados: IDetalhesPaises): Promise<void | Error> => {
-        let pais = new Paises(id, dados.nmpais, dados.sigla, dados.ddi, new Date(), new Date())
+    update = async (id: number, dados: IDetalhesFormasPagamento): Promise<void | Error> => {
+        let formapagamento = new FormasPagamento(
+            id,
+            dados.descricao,
+            new Date(),
+            new Date()
+        )
         try {
-            await Api.put(`/api/paises/${id}`, pais);
+            await Api.put(`/api/formaspagamento/${id}`, formapagamento);
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao atualizar o registros.');
         }  
@@ -74,16 +78,15 @@ class ControllerPaises implements IController {
 
     delete = async (id: number): Promise<void | Error> => {
         try {
-            await Api.delete(`/api/paises/${id}`);
+            await Api.delete(`/api/formaspagamento/${id}`);
         } catch (error) {
-            console.log(error);
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
         }           
     }
 
-    validate = async (filter: string): Promise<boolean | Error> => {
+    validate = async (dados: Omit<IDetalhesFormasPagamento, 'id'>): Promise<boolean | Error> => {
         try {
-            const { data } = await Api.get(`/api/paises?_filter=${filter}`);
+            const { data } = await Api.post(`/api/formaspagamento/validate`, dados);
             if (data != 0) {
                 return false;
             } else {
@@ -92,8 +95,8 @@ class ControllerPaises implements IController {
             
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');    
-        }        
+        }       
     }
 }
 
-export default ControllerPaises;
+export default ControllerFormasPagamento;

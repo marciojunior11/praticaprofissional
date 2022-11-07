@@ -1,17 +1,47 @@
+// #region EXTERNAL IMPORTS
 import React, { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography, Chip } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Box } from "@mui/system";
+// #endregion
+
+// #region INTERNAL IMPORTS
 import { ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
 import { CondicoesPagamentoService } from '../../shared/services/api/condicoesPagamento/CondicoesPagamentoService';
-import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento";
+import { ICondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
 import { Environment } from "../../shared/environment";
-import { toast } from "react-toastify";
-import { Box } from "@mui/system";
+import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
+// #endregion
 
 export const ConsultaCondicoesPagamento: React.FC = () => {
-    
+    // #region CONTROLLERS
+    const controller = new ControllerCondicoesPagamento();
+    // #endregion
+
+    // #region HOOKS
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { debounce } = useDebounce();
+    const navigate = useNavigate();
+    const busca = useMemo(() => {
+        return searchParams.get('busca')?.toUpperCase() || ''; 
+    }, [searchParams]);
+
+    const pagina = useMemo(() => {
+        return Number(searchParams.get('pagina') || '1');   
+    }, [searchParams]);
+    // #endregion
+
+    // #region STATES
+    const [rows, setRows] = useState<ICondicoesPagamento[]>([]);
+    const [rowOpen, setRowOpen] = useState(false);
+    const [qtd, setQtd] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    // #endregion
+
+    // #region ACTIONS
     const Row = (props: { row: ICondicoesPagamento }) => {
         const { row } = props;
         const [open, setOpen] = useState(false);
@@ -32,6 +62,11 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                     <TableCell>{row.txdesc}</TableCell>
                     <TableCell>{row.txmulta}</TableCell>
                     <TableCell>{row.txjuros}</TableCell>
+                    <TableCell>{row.flsituacao == 'A' ? (
+                        <Chip label="ATIVO" color="success"/>
+                    ) : (
+                        <Chip label="INATIVO" color="error"/>
+                    )}</TableCell>
                     <TableCell align="right">
                         <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>delete</Icon>
@@ -41,7 +76,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                         </IconButton>
                     </TableCell>
                 </TableRow>
-                <TableRow sx={{ backgroundColor: "#ECECEC" }}>
+                <TableRow>
                     <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
                         <Collapse in={open} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 1 }}>
@@ -75,20 +110,12 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
             </React.Fragment>
         )
     }
-    const [searchParams, setSearchParams] = useSearchParams();
-    const { debounce } = useDebounce();
-    const navigate = useNavigate();
-
-    const [rows, setRows] = useState<ICondicoesPagamento[]>([]);
-    const [rowOpen, setRowOpen] = useState(false);
-    const [qtd, setQtd] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-
+    
     const reloadDataTable = () => {
         setIsLoading(true);
 
         debounce(() => {
-            CondicoesPagamentoService.getAll(pagina, busca)
+            controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -103,21 +130,13 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
         })        
     }
 
-    const busca = useMemo(() => {
-        return searchParams.get('busca')?.toUpperCase() || ''; 
-    }, [searchParams]);
-
-    const pagina = useMemo(() => {
-        return Number(searchParams.get('pagina') || '1');   
-    }, [searchParams]);
-
     useEffect(() => {
         setIsLoading(true);
 
         debounce(() => {
             let data = new Date();
             console.log(data.toLocaleString());
-            CondicoesPagamentoService.getAll(pagina, busca)
+            controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -151,6 +170,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
         }
 
     }
+    // #endregion
 
     return (
         <LayoutBase 
@@ -174,6 +194,7 @@ export const ConsultaCondicoesPagamento: React.FC = () => {
                             <TableCell>Desconto</TableCell>
                             <TableCell>Multa</TableCell>
                             <TableCell>Juros</TableCell>
+                            <TableCell>Situação</TableCell>
                             <TableCell align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>

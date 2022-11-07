@@ -5,3 +5,4 @@ export * from './useVForm';
 export * from './IVFormErrors';
 export * from './VAutocomplete';
 export * from './VAutocompleteSearch';
+export * from './VSelect';

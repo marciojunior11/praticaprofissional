@@ -155,7 +155,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen
                 />
             </Grid>
             <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
-                <Button variant="outlined" size="large" color={!!error ? 'error' : 'primary'} onClick={onClickSearch}>
+                <Button fullWidth variant="outlined" size="large" color={!!error ? 'error' : 'primary'} onClick={onClickSearch}>
                     <Icon>search</Icon>
                 </Button>
             </Grid>

@@ -14,8 +14,6 @@ import {
     CadastroFornecedores,
     ConsultaClientes,
     CadastroClientes,
-    ConsultaTiposProduto,
-    CadastroTiposProduto,
     ConsultaProdutos,
     CadastroProdutos,
     ConsultaCondicoesPagamento,
@@ -62,11 +60,6 @@ export const AppRoutes = () => {
                 path: '/clientes',
             },
             {
-                label: 'Tipos de Produto',
-                icon: 'fastfood',
-                path: '/tiposproduto',
-            },
-            {
                 label: 'Produtos',
                 icon: 'shopping_cart',
                 path: '/produtos',
@@ -107,9 +100,6 @@ export const AppRoutes = () => {
 
             <Route path="/clientes" element={<ConsultaClientes/>}/>
             <Route path="/clientes/cadastro/:id" element={<CadastroClientes/>}/>
-
-            <Route path="/tiposproduto" element={<ConsultaTiposProduto/>}/>
-            <Route path="/tiposproduto/cadastro/:id" element={<CadastroTiposProduto/>}/>
 
             <Route path="/formaspagamento" element={<ConsultaFormasPagamento/>}/>
             <Route path="/formaspagamento/cadastro/:id" element={<CadastroFormasPagamento/>}/>

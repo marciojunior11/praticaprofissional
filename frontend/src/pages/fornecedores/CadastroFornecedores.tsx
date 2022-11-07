@@ -70,6 +70,11 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 
 
 export const CadastroFornecedores: React.FC = () => {
+    // #region CONTROLLERS
+        const controller = new ControllerFornecedores();
+        const controllerCidades = new ControllerCidades();
+    // #endregion
+
     // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
@@ -200,11 +205,6 @@ export const CadastroFornecedores: React.FC = () => {
     }
     // #endregion
 
-    // #region CONTROLLERS
-    const controller = new ControllerFornecedores();
-    const controllerCidades = new ControllerCidades();
-    // #endregion
-
     return (
         <LayoutBase 
             titulo={id === 'novo' ? 'Cadastrar Fornecedor' : 'Editar Fornecedor'}
@@ -321,7 +321,7 @@ export const CadastroFornecedores: React.FC = () => {
                                         disabled={isLoading}  
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                     <VAutocompleteSearch
                                         size="small"
                                         required

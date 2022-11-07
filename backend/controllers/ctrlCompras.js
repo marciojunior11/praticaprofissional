@@ -1,10 +1,10 @@
-const daoCondicoesPagamento = require('../daos/daoCondicoesPagamento');
+const daoCompras = require('../daos/daoCompras');
 
 // @descricao BUSCA TODOS OS REGISTROS
-// @route GET /api/tiposproduto
+// @route GET /api/paises
 async function buscarTodosSemPg(req, res) {
     try {
-        const response = await daoCondicoesPagamento.buscarTodosSemPg(req.url);
+        const response = await daoCompras.buscarTodosSemPg(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -17,8 +17,8 @@ async function buscarTodosSemPg(req, res) {
 
 async function buscarTodosComPg(req, res) {
     try {
-        const response = await daoCondicoesPagamento.buscarTodosComPg(req.url);
-        const qtd = await daoCondicoesPagamento.getQtd(req.url);
+        const response = await daoCompras.buscarTodosComPg(req.url);
+        const qtd = await daoCompras.getQtd(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -30,13 +30,13 @@ async function buscarTodosComPg(req, res) {
 };
 
 // @descricao BUSCA UM REGISTROS
-// @route GET /api/tiposproduto/:id
-async function buscarUm(req, res, id) {
+// @route GET /api/paises/:id
+async function buscarUm(req, res) {
     try {
-        const response = await daoCondicoesPagamento.buscarUm(id);
+        const response = await daoCompras.buscarUm(req.url);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Condição de pagamento não encontrada.' }));
+            res.end(JSON.stringify({ message: 'Compra não encontrada.' }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(response));
@@ -47,7 +47,7 @@ async function buscarUm(req, res, id) {
 };
 
 // @descricao SALVA UM REGISTROS
-// @route POST /api/tiposproduto
+// @route POST /api/paises
 async function salvar(req, res) {
     try {
         let body = '';
@@ -57,20 +57,23 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { descricao, txdesc, txmulta, txjuros, flsituacao, listaparcelas, datacad, ultalt } = JSON.parse(body);
-            const mCondicaoPagamento = {
-                descricao,
-                txdesc,
-                txmulta,
-                txjuros,
-                flsituacao,
-                listaparcelas,
+            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, datacad, ultalt } = JSON.parse(body);
+            const mCompra = {
+                numnf,
+                serienf,
+                modelonf,
+                fornecedor,
+                condicaopagamento,
+                centrocusto,
+                listaprodutos,
+                observacao,
+                vltotal,
                 datacad,
                 ultalt
             };
-            const response = await daoCondicoesPagamento.salvar(mCondicaoPagamento);
+            const novaCompra = await daoCompras.salvar(mCompra);
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(response));
+            res.end(JSON.stringify(novaCompra));
         })
     } catch (error) {
         console.log(error);
@@ -78,34 +81,37 @@ async function salvar(req, res) {
 };
 
 // @descricao ALTERA UM REGISTROS
-// @route PUT /api/tiposproduto/:id
+// @route PUT /api/paises/:id
 async function alterar(req, res, id) {
     try {
-        const response = await daoCondicoesPagamento.buscarUm(id);
+        const response = await daoCompras.buscarUm(id);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Condição de pagamento não encontrada.' })); 
+            res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' })); 
         };
         let body = '';
         req.on('data', (chunk) => {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { id, descricao, txdesc, txmulta, txjuros, flsituacao, listaparcelas, datacad, ultalt } = JSON.parse(body);
-            const mCondicaoPagamento = {
-                id,
-                descricao,
-                txdesc,
-                txmulta,
-                txjuros,
-                flsituacao,
-                listaparcelas,
+            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, datacad, ultalt, flsituacao } = JSON.parse(body);
+            const mCompra = {
+                numnf,
+                serienf,
+                modelonf,
+                fornecedor,
+                condicaopagamento,
+                centrocusto,
+                listaprodutos,
+                observacao,
+                vltotal,
                 datacad,
-                ultalt
+                ultalt,
+                flsituacao
             };
-            const novaResponse = await daoCondicoesPagamento.alterar(id, mCondicaoPagamento)
+            const novaCompra = await daoCompras.alterar(id, mCompra)
             res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(novaResponse));
+            res.end(JSON.stringify(novaCompra));
         })
     } catch (error) {
         console.log(error);
@@ -113,17 +119,17 @@ async function alterar(req, res, id) {
 };
 
 // @descricao DELETA UM REGISTROS
-// @route GET /api/tiposproduto/:id
-async function deletar(req, res, id) {
+// @route GET /api/paises/:id
+async function deletar(req, res) {
     try {
-        const response = await daoCondicoesPagamento.buscarUm(id);
+        const response = await daoCompras.buscarUm(req.url);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Condição de pagamento não encontrada.' }));
+            res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' }));
         }
-        const novaResponse = await daoCondicoesPagamento.deletar(id);
+        const responseDelete = await daoCompras.deletar(req.url);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(novaResponse));
+        res.end(JSON.stringify(responseDelete));
     } catch (error) {
         console.log(error);
     }
@@ -131,21 +137,10 @@ async function deletar(req, res, id) {
 
 async function validate(req, res) {
     try {
-        let body = '';
-
-        req.on('data', (chunk) => {
-            body += chunk.toString();
-        })
-
-        req.on('end', async () => {
-            const { descricao } = JSON.parse(body);
-            const mCondicaoPagamento = {
-                descricao
-            };
-            const response = await daoCondicoesPagamento.validate(mCondicaoPagamento);
+            const filter = req.url.split('=')[1];
+            const response = await daoCompras.validate(filter);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
-        })
     } catch (error) {
         console.log(error);
     }; 

@@ -200,9 +200,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(filter) {
+async function validate(formapagamento) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from formaspagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from formaspagamento where descricao like '${formapagamento.descricao.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

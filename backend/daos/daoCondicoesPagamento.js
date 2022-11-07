@@ -141,7 +141,6 @@ async function buscarTodosComPg (url) {
             })
         } else {
             var filter = url.split('=')[3];
-            console.log(filter);
             pool.query('select * from condicoespagamento where descricao like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
@@ -241,27 +240,18 @@ async function salvar (condicaopagamento) {
                 if (shouldAbort(err)) return reject(err);
                 client.query('insert into condicoespagamento (descricao, txdesc, txmulta, txjuros, datacad, ultalt, flsituacao) values($1, $2, $3, $4, $5, $6, $7)', [condicaopagamento.descricao.toUpperCase(), condicaopagamento.txdesc, condicaopagamento.txmulta, condicaopagamento.txjuros, condicaopagamento.datacad, condicaopagamento.ultalt, condicaopagamento.flsituacao], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
-                    client.query('COMMIT', async err => {
+                    const response = await client.query('select * from condicoespagamento where id = (select max(id) from condicoespagamento)');
+                    for (let i = 0; i < condicaopagamento.listaparcelas.length; i++) {
+                        client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [response.rows[0].id, condicaopagamento.listaparcelas[i].numero, condicaopagamento.listaparcelas[i].dias, condicaopagamento.listaparcelas[i].percentual, condicaopagamento.listaparcelas[i].formapagamento.id, condicaopagamento.listaparcelas[i].datacad, condicaopagamento.listaparcelas[i].ultalt], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                        })
+                    }
+                    client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
-                        const response = await client.query('select * from condicoespagamento where id = (select max(id) from condicoespagamento)');
-                        console.log(response.rows[0]);
-                        client.query('BEGIN', err => {
-                            if (shouldAbort(err)) return reject(err);
-                            for (let i = 0; i < condicaopagamento.listaparcelas.length; i++) {
-                                client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [response.rows[0].id, condicaopagamento.listaparcelas[i].numero, condicaopagamento.listaparcelas[i].dias, condicaopagamento.listaparcelas[i].percentual, condicaopagamento.listaparcelas[i].formapagamento.id, condicaopagamento.listaparcelas[i].datacad, condicaopagamento.listaparcelas[i].ultalt], (err, res) => {
-                                    if (shouldAbort(err)) return reject(err);
-                                    client.query('COMMIT', err => {
-                                        if (err) {
-                                            console.error('Erro durante o commit da transação', err.stack);
-                                            reject(err);
-                                        }
-                                    })
-                                })
-                            }
-                        })
                         done();
                         return resolve(response.rows[0]);
                     })
@@ -293,12 +283,39 @@ async function alterar (id, condicaopagamento) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update condicoespagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6, flsituacao = $7 where id = $8', [condicaopagamento.id, condicaopagamento.descricao.toUpperCase(), condicaopagamento.txdesc, condicaopagamento.txmulta, condicaopagamento.txjuros, condicaopagamento.ultalt, condicaopagamento.flsituacao, id], async (err, res) => {
+                client.query('update condicoespagamento set id = $1, descricao = $2, txdesc = $3, txmulta = $4, txjuros = $5, ultalt = $6, flsituacao = $7 where id = $8', [
+                    condicaopagamento.id, 
+                    condicaopagamento.descricao.toUpperCase(), 
+                    condicaopagamento.txdesc, 
+                    condicaopagamento.txmulta, 
+                    condicaopagamento.txjuros, 
+                    condicaopagamento.ultalt, 
+                    condicaopagamento.flsituacao, 
+                    id
+                ], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+                    client.query('delete from parcelas where fk_idcondpgto = $1', [id], (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        for (let i = 0; i < condicaopagamento.listaparcelas.length; i++) {
+                            client.query('insert into parcelas (fk_idcondpgto, numero, dias, percentual, fk_idformapgto, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7)', [
+                                condicaopagamento.id, 
+                                condicaopagamento.listaparcelas[i].numero, 
+                                condicaopagamento.listaparcelas[i].dias, 
+                                condicaopagamento.listaparcelas[i].percentual, 
+                                condicaopagamento.listaparcelas[i].formapagamento.id, 
+                                condicaopagamento.listaparcelas[i].datacad, 
+                                condicaopagamento.listaparcelas[i].ultalt
+                            ], (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                            })
+                        }
+                    })
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            console.log("aqui");
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);
@@ -332,35 +349,27 @@ async function deletar (id) {
                 if (shouldAbort(err)) return reject(err);
                 client.query('delete from parcelas where fk_idcondpgto = $1', [id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
-                    client.query('COMMIT', err => {
-                        if (err) {
-                            console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
-                        }
-                        client.query('BEGIN', err => {
-                            if (shouldAbort(err)) return reject(err);
-                            client.query('delete from condicoespagamento where id = $1', [id], (err, res) => {
-                                if (shouldAbort(err)) return reject(err);
-                                client.query('COMMIT', err => {
-                                    if (err) {
-                                        console.error('Erro durante o commit da transação', err.stack);
-                                        reject(err);
-                                    }
-                                })
-                            })
+                    client.query('delete from condicoespagamento where id = $1', [id], (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        client.query('COMMIT', err => {
+                            if (err) {
+                                console.error('Erro durante o commit da transação', err.stack);
+                                done();
+                                return reject(err);
+                            }
+                            done();
                         })
-                        done();
-                        return resolve(res);
                     })
+                    return resolve(res);
                 })
             })
         })
     })
 };
 
-async function validate(filter) {
+async function validate(condicaopagamento) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from condicoespagamento where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from condicoespagamento where descricao like '${condicaopagamento.descricao.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }

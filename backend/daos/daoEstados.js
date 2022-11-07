@@ -170,7 +170,8 @@ async function salvar (estado) {
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         const response = await client.query('select * from estados where id = (select max(id) from estados)');
                         done();
@@ -209,7 +210,8 @@ async function alterar (id, estado) {
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);
@@ -246,7 +248,8 @@ async function deletar (id) {
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);

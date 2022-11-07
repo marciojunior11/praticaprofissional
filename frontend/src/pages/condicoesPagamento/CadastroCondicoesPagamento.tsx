@@ -1,62 +1,74 @@
+// #region EXTERNAL IMPORTS
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, CircularProgress, Collapse, Divider, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Divider, FormHelperText, Grid, Icon, IconButton, InputAdornment, LinearProgress, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import * as yup from 'yup';
+import { toast } from "react-toastify";
+// #endregion
 
+// #region INTERNAL IMPORTS
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { CondicoesPagamentoService } from "../../shared/services/api/condicoesPagamento/CondicoesPagamentoService";
-import { FormasPagamentoService } from "../../shared/services/api/formasPagamento/FormasPagamentoService";
-import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
-import { toast } from "react-toastify";
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
-import { IParcelas, TListaParcelas, utils as parcelasUtils } from "../../shared/models/ModelParcelas";
+import { IDetalhesParcelas, IParcelas, TListaParcelas } from "../../shared/interfaces/entities/Parcelas";
 import { Environment } from "../../shared/environment";
 import { CadastroPaises } from "../paises/CadastroPaises";
 import { ConsultaFormasPagamento } from "../formasPagamento/ConsultaFormasPagamento";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
-import { positiveInteger, positiveDecimal } from "../../shared/utils/validations";
+import { ICondicoesPagamento, IDetalhesCondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
+import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
+import ControllerFormasPagamento from "../../shared/controllers/FormasPagamentoController";
+import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
+// #endregion
 
+// #region INTERFACES
 interface IFormData {
     descricao: string;
     txdesc: number;
     txmulta: number;
     txjuros: number;
-    datacad: string;
-    ultalt: string;
 }
+
+// #endregion
+
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     descricao: yup.string().required(),
     txdesc: yup.number().required(),
     txmulta: yup.number().required(),
     txjuros: yup.number().required(),
-    datacad: yup.string().required(),
-    ultalt: yup.string().required(),
 })
 
-export const CadastroCondicoesPagamento: React.FC = () => {
-    //HOOKS
+export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+    // #region CONTROLLERS
+        const controller = new ControllerCondicoesPagamento();
+        const controllerFormasPagamento = new ControllerFormasPagamento();
+    // #endregion
+
+    // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
     const { debounce } = useDebounce();
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+    // #endregion
 
-    //STATES
+    // #region STATES
     const [obj, setObj] = useState<ICondicoesPagamento | null>(null);
-    const [listaParcelas, setListaParcelas] = useState<IParcelas[]>([]);
+    const [listaparcelas, setListaParcelas] = useState<IParcelas[]>([]);
     const [parcela, setParcela] = useState<IParcelas | null>(null);
     const [isConsultaFormasPgtoDialogOpen, setIsConsultaFormasPgtoDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [readOnly, setReadOnly] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
     const [isValid, setIsValid] = useState(false);
     const [isValidParcelas, setIsValidParcelas] = useState(false);
     const [isEditingParcela, setIsEditingParcela] = useState(false);
     const [parcelaSelected, setParcelaSelected] = useState<IParcelas | null>(null);
+    const [descricao, setDescricao] = useState("");
+    const [condicaoPagamentoOriginal, setCondicaoPagamentoOriginal] = useState<IDetalhesCondicoesPagamento | null>(null);
+    // #endregion
 
-    //FUNCTIONS
+    // #region ACTIONS
     const toggleConsultaFormasPgtoDialogOpen = () => {
         setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
     }
@@ -77,18 +89,20 @@ export const CadastroCondicoesPagamento: React.FC = () => {
         if (id !== 'novo') {
             setIsLoading(true);
 
-            setReadOnly(true);
-
-            CondicoesPagamentoService.getById(Number(id))
+            controller.getOne(Number(id))
                 .then((result) => {
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
                         navigate('/condicoespagamento');
                     } else {
-                        console.log('RESULT', result);
+                        result.datacad = new Date(result.datacad).toLocaleString();
+                        result.ultalt = new Date(result.ultalt).toLocaleString();
                         formRef.current?.setData(result);
-                        setObj(result);
+                        setIsValid(true);
+                        setIsValidParcelas(true);
+                        setCondicaoPagamentoOriginal(result);
+                        setDescricao(result.descricao);
                         setListaParcelas(result.listaparcelas);
                     }
                 });
@@ -100,14 +114,12 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     }, [id]);
 
     useEffect(() => {
-        if (obj) setIsValid(true)
-        else setIsValid(false);
-    }, [obj]);
+        if (descricao != "") validate(descricao);
+    }, [descricao]);
 
     const insertParcela = () => {
-        console.log('PARCELAS OK', isValidParcelas);
         var totalPercParcelas: number = 0;
-        listaParcelas.forEach((parcela) => totalPercParcelas += Number(parcela.percentual));
+        listaparcelas.forEach((parcela) => totalPercParcelas += Number(parcela.percentual));
         totalPercParcelas += Number(formRef.current?.getData().parcela.percentual);
         if (isEditingParcela && parcelaSelected) {
             totalPercParcelas -= parcelaSelected?.percentual;
@@ -130,7 +142,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
         }
         else {
             if (isEditingParcela) {
-                const newArray = listaParcelas.map((item) => {
+                const newArray = listaparcelas.map((item) => {
                     if (item.numero == parcelaSelected?.numero) {
                         return {
                             ...item,
@@ -146,9 +158,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
             } else {
                 let data = new Date();
                 setListaParcelas([
-                    ...listaParcelas,
+                    ...listaparcelas,
                     {
-                        numero: listaParcelas.length + 1,
+                        numero: listaparcelas.length + 1,
                         dias: formRef.current?.getData().parcela.dias,
                         percentual: formRef.current?.getData().parcela.percentual,
                         formapagamento: formRef.current?.getData().parcela.formapagamento,
@@ -165,40 +177,45 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     }
 
     const validate = (filter: string) => {
-        if (filter != obj?.descricao) {
-            setIsValidating(true);
-            debounce(() => {
-                CondicoesPagamentoService.validate(filter)
-                    .then((result) => {
-                        setIsValidating(false);
-                        if (result instanceof Error) {
-                            toast.error(result.message);
-                        } else {
-                            setIsValid(result);
-                            if (result === false) {
-                                const validationErrors: IVFormErrors = {};
-                                validationErrors['descricao'] = 'Esta forma de pagamento já está cadastrada';
-                                formRef.current?.setErrors(validationErrors);
-                            }
-                        }
+        debounce(() => {
+            if (!isValid && filter != "" && (filter.toUpperCase() != condicaoPagamentoOriginal?.descricao)) {
+                setIsValidating(true);
+                debounce(() => {
+                    controller.validate({
+                        descricao: filter
                     })
-            })
-        } else {
-            setIsValid(true);
-        }
+                        .then((result) => {
+                            setIsValidating(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message);
+                            } else {
+                                setIsValid(result);
+                                if (result === false) {
+                                    const validationErrors: IVFormErrors = {};
+                                    validationErrors['descricao'] = 'Essa condição de pagamento já está cadastrada.';
+                                    formRef.current?.setErrors(validationErrors);
+                                }
+                            }
+                        })
+                });        
+            } else {
+                setIsValid(true);
+            }
+        })
     }
 
     const handleSave = (dados: IFormData) => {
-        let data = new Date();
-        dados.datacad = data.toLocaleString();
-        dados.ultalt = data.toLocaleString();
+        console.log(formRef.current?.getData().flsituacao);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
                     if(isValid && isValidParcelas) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            CondicoesPagamentoService.create({ listaparcelas: listaParcelas, ...dadosValidados})
+                            controller.create({
+                                ...dadosValidados,
+                                listaparcelas
+                            })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -221,7 +238,11 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     }
                                 });
                         } else {
-                            CondicoesPagamentoService.updateById(Number(id), { id: Number(id), listaparcelas: listaParcelas, ...dadosValidados })
+                            controller.update(Number(id), {
+                                ...dadosValidados,
+                                listaparcelas,
+                                flsituacao: formRef.current?.getData().flsituacao
+                            })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -258,7 +279,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            CondicoesPagamentoService.deleteById(id)
+            controller.delete(id)
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);
@@ -269,6 +290,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                 })
         }
     }
+    // #endregion
 
     return (
         <LayoutBase 
@@ -298,10 +320,25 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                 <LinearProgress variant="indeterminate"/>
                             </Grid>
                         )}
-
-                        <Grid item>
-                            <Typography variant="h6">Dados Gerais</Typography>
+                        
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={12} sm={12} md={10} lg={10} xl={8}>
+                                <Typography variant="h6">Dados Gerais</Typography>
+                            </Grid>
+                            { id != "novo" && (
+                                <Grid container item xs={12} sm={12} md={2} lg={2} xl={4} alignItems="center" justifyContent="right">
+                                    <Typography marginRight="4px" variant="subtitle1">Situação</Typography>
+                                    <VSelect
+                                        name="flsituacao"
+                                        size="small"
+                                    >
+                                        <MenuItem value="A">ATIVO</MenuItem>
+                                        <MenuItem value="I">INATIVO</MenuItem>
+                                    </VSelect>
+                                </Grid>
+                            ) }
                         </Grid>
+
 
                         <Grid container item direction="row" spacing={2} justifyContent="center">
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
@@ -320,7 +357,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (!isValidating && formRef.current?.getData().descricao && isValid) && (
+                                                { (isValid && formRef.current?.getData().descricao) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -330,11 +367,9 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     }}
                                     onChange={(e) => {
                                         setIsValid(false);
-                                        setIsValidating('');
+                                        setIsValidating(false);
                                         formRef.current?.setFieldError('descricao', '');
-                                        debounce(() => {
-                                            validate(e.target.value)
-                                        })
+                                        validate(e.target.value);
                                     }}
                                 />
                             </Grid>
@@ -350,7 +385,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     fullWidth
                                     name="txdesc"
                                     label="Desconto"
-                                    disabled={isLoading || readOnly}
+                                    disabled={isLoading}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>
                                     }}
@@ -365,7 +400,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     fullWidth
                                     name="txmulta"
                                     label="Multa"
-                                    disabled={isLoading || readOnly}
+                                    disabled={isLoading}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>
                                     }}
@@ -380,7 +415,7 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                     fullWidth
                                     name="txjuros"
                                     label="Juros"
-                                    disabled={isLoading || readOnly}
+                                    disabled={isLoading}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>
                                     }}
@@ -388,97 +423,95 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                             </Grid>
                         </Grid>
 
-                        { id == 'novo' && (
-                            <>
-                                <Grid item>
-                                    <Divider orientation="horizontal"/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="h6">Dados da Parcela</Typography>
-                                </Grid>
+                        <Grid item>
+                            <Divider orientation="horizontal"/>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="h6">Dados da Parcela</Typography>
+                        </Grid>
 
-                                <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="start">
-                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                        <VTextField
-                                            type="number"
-                                            size="small"
-                                            required
-                                            fullWidth
-                                            name="parcela.dias"
-                                            label="Dias"
-                                            disabled={isLoading}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                        <VTextField
-                                            type="number"
-                                            inputMode="decimal"
-                                            size="small"
-                                            required
-                                            fullWidth
-                                            name="parcela.percentual"
-                                            label="Percentual"
-                                            disabled={isLoading}
-                                            InputProps={{
-                                                endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
-                                        <VAutocompleteSearch
-                                            size="small"
-                                            required
-                                            name="parcela.formapagamento"
-                                            label={["descricao"]}
-                                            TFLabel="Forma de Pagamento"
-                                            getAll={FormasPagamentoService.getAll}
-                                            onClickSearch={() => {
-                                                toggleConsultaFormasPgtoDialogOpen();
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                        <Button
-                                            variant="contained" 
-                                            color={ isEditingParcela ? "warning" : "success"} 
-                                            size="large"
-                                            onClick={e => {
-                                                if (!!formRef.current?.getData().parcela.dias && !!formRef.current?.getData().parcela.percentual && !!formRef.current?.getData().parcela.formapagamento) {
-                                                    insertParcela();
-                                                } else {
-                                                    const validationErrors: IVFormErrors = {};
-                                                    if (!formRef.current?.getData().parcela.dias) validationErrors['parcela.dias'] = 'O campo é obrigatório';
-                                                    if (!formRef.current?.getData().parcela.percentual) validationErrors['parcela.percentual'] = 'O campo é obrigatório';
-                                                    if (!formRef.current?.getData().parcela.formapagamento) validationErrors['parcela.formapagamento'] = 'O campo é obrigatório';
-                                                    formRef.current?.setErrors(validationErrors);                                                   
-                                                }
-                                            }}
-                                        >
-                                            <Icon>{isEditingParcela ? "check" : "add"}</Icon>
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                        <Button
-                                            variant="contained" 
-                                            color="error"
-                                            size="large"
-                                            onClick={(e) => {
-                                                const validationErrors: IVFormErrors = {};
-                                                validationErrors['parcela.dias'] = '';
-                                                validationErrors['parcela.percentual'] = '';
-                                                formRef.current?.setErrors(validationErrors);
-                                                if (isEditingParcela) setIsEditingParcela(false);
-                                                formRef.current?.setFieldValue('parcela.dias', '');
-                                                formRef.current?.setFieldValue('parcela.percentual', '');
-                                                formRef.current?.setFieldValue('parcela.formapagamento', null);
-                                            }}
-                                        >
-                                            <Icon>close</Icon>
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </>
-                        )}
+                        <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="start">
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                                <VTextField
+                                    type="number"
+                                    size="small"
+                                    required
+                                    fullWidth
+                                    name="parcela.dias"
+                                    label="Dias"
+                                    disabled={isLoading}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                                <VTextField
+                                    type="number"
+                                    inputMode="decimal"
+                                    size="small"
+                                    required
+                                    fullWidth
+                                    name="parcela.percentual"
+                                    label="Percentual"
+                                    disabled={isLoading}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
+                                <VAutocompleteSearch
+                                    size="small"
+                                    required
+                                    name="parcela.formapagamento"
+                                    label={["descricao"]}
+                                    TFLabel="Forma de Pagamento"
+                                    getAll={controllerFormasPagamento.getAll}
+                                    onClickSearch={() => {
+                                        toggleConsultaFormasPgtoDialogOpen();
+                                    }}
+                                    isDialogOpen={isConsultaFormasPgtoDialogOpen}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                <Button
+                                    variant="contained" 
+                                    color={ isEditingParcela ? "warning" : "success"} 
+                                    size="large"
+                                    onClick={e => {
+                                        if (!!formRef.current?.getData().parcela.dias && !!formRef.current?.getData().parcela.percentual && !!formRef.current?.getData().parcela.formapagamento) {
+                                            insertParcela();
+                                        } else {
+                                            const validationErrors: IVFormErrors = {};
+                                            if (!formRef.current?.getData().parcela.dias) validationErrors['parcela.dias'] = 'O campo é obrigatório';
+                                            if (!formRef.current?.getData().parcela.percentual) validationErrors['parcela.percentual'] = 'O campo é obrigatório';
+                                            if (!formRef.current?.getData().parcela.formapagamento) validationErrors['parcela.formapagamento'] = 'O campo é obrigatório';
+                                            formRef.current?.setErrors(validationErrors);                                                   
+                                        }
+                                    }}
+                                >
+                                    <Icon>{isEditingParcela ? "check" : "add"}</Icon>
+                                </Button>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                                <Button
+                                    variant="contained" 
+                                    color="error"
+                                    size="large"
+                                    onClick={(e) => {
+                                        const validationErrors: IVFormErrors = {};
+                                        validationErrors['parcela.dias'] = '';
+                                        validationErrors['parcela.percentual'] = '';
+                                        formRef.current?.setErrors(validationErrors);
+                                        if (isEditingParcela) setIsEditingParcela(false);
+                                        formRef.current?.setFieldValue('parcela.dias', '');
+                                        formRef.current?.setFieldValue('parcela.percentual', '');
+                                        formRef.current?.setFieldValue('parcela.formapagamento', null);
+                                    }}
+                                >
+                                    <Icon>close</Icon>
+                                </Button>
+                            </Grid>
+                        </Grid>
+
                         <Grid item>
                             <Divider orientation="horizontal"/>
                         </Grid>
@@ -497,58 +530,83 @@ export const CadastroCondicoesPagamento: React.FC = () => {
                                                 <TableCell>Dias</TableCell>
                                                 <TableCell>Percentual</TableCell>
                                                 <TableCell>Forma de pagamento</TableCell>
-                                                { id == 'novo' && (
-                                                    <TableCell align="right">Ações</TableCell>
-                                                )}
+                                                <TableCell align="right">Ações</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {listaParcelas?.map(row => (
+                                            {listaparcelas?.map(row => (
                                                 <TableRow key={row.numero}>
                                                     <TableCell >{row.numero}</TableCell>
                                                     <TableCell>{row.dias}</TableCell>
                                                     <TableCell>{row.percentual+"%"}</TableCell>
                                                     <TableCell>{row.formapagamento.descricao}</TableCell>
-                                                    { id == 'novo' && (
-                                                        <TableCell align="right">
-                                                            <IconButton
-                                                                disabled={isEditingParcela} 
-                                                                color="error" 
-                                                                size="small" 
-                                                                onClick={() => {
-                                                                    if (window.confirm('Deseja excluir esta parcela?')) {
-                                                                        const mArray = listaParcelas.slice();
-                                                                        delete mArray[row.numero-1];
-                                                                        mArray.length = listaParcelas.length-1;
-                                                                        setListaParcelas(mArray);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Icon>delete</Icon>
-                                                            </IconButton>
-                                                            <IconButton
-                                                                disabled={isEditingParcela} 
-                                                                color="primary" 
-                                                                size="small"
-                                                                onClick={() => {
-                                                                    setIsEditingParcela(true);
-                                                                    setParcelaSelected(row);
-                                                                }}
-                                                            >
-                                                                <Icon>edit</Icon>
-                                                            </IconButton>
-                                                        </TableCell>
-                                                    ) }
+                                                    <TableCell align="right">
+                                                        <IconButton
+                                                            disabled={isEditingParcela} 
+                                                            color="error" 
+                                                            size="small" 
+                                                            onClick={() => {
+                                                                if (window.confirm('Deseja excluir esta parcela?')) {
+                                                                    const mArray = listaparcelas.slice();
+                                                                    delete mArray[row.numero-1];
+                                                                    mArray.length = listaparcelas.length-1;
+                                                                    setListaParcelas(mArray);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Icon>delete</Icon>
+                                                        </IconButton>
+                                                        <IconButton
+                                                            disabled={isEditingParcela} 
+                                                            color="primary" 
+                                                            size="small"
+                                                            onClick={() => {
+                                                                setIsEditingParcela(true);
+                                                                setParcelaSelected(row);
+                                                            }}
+                                                        >
+                                                            <Icon>edit</Icon>
+                                                        </IconButton>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
-                                        { listaParcelas.length === 0 && !isLoading && (
+                                        { listaparcelas.length === 0 && !isLoading && (
                                             <caption>{Environment.LISTAGEM_VAZIA}</caption>
                                         )}
                                     </Table>
                                 </TableContainer>                                
                             </Grid>
                         </Grid>
+
+                        {id != 'novo' && (
+                            <Grid container item direction="row" spacing={2}>
+                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='datacad' 
+                                        label="Data Cad."
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='ultalt' 
+                                        label="Ult. Alt."
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        )}
                     </Grid>
                     <CustomDialog 
                         onClose={toggleConsultaFormasPgtoDialogOpen}

@@ -5,7 +5,6 @@ const daoFormasPagamento = require('../daos/daoFormasPagamento');
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoFormasPagamento.buscarTodosSemPg(req.url);
-        console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -122,10 +121,21 @@ async function deletar(req, res, id) {
 
 async function validate(req, res) {
     try {
-            const filter = req.url.split('=')[1];
-            const response = await daoFormasPagamento.validate(filter);
+        let body = '';
+
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+
+        req.on('end', async () => {
+            const { descricao } = JSON.parse(body);
+            const mFormaPagamento = {
+                descricao
+            };
+            const response = await daoFormasPagamento.validate(mFormaPagamento);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
+        })
     } catch (error) {
         console.log(error);
     }; 

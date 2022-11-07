@@ -164,7 +164,8 @@ async function salvar (caracteristicas) {
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         const response = await client.query('select * from caracteristicas where id = (select max(id) from caracteristicas)');
                         done();
@@ -203,7 +204,8 @@ async function alterar (id, caracteristicas) {
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);
@@ -240,7 +242,8 @@ async function deletar (id) {
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
-                            reject(err);
+                            done();
+                            return reject(err);
                         }
                         done();
                         return resolve(res);

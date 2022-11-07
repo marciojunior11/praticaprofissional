@@ -10,16 +10,15 @@ import { toast } from "react-toastify";
 import { DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { FormasPagamentoService } from "../../shared/services/api/formasPagamento/FormasPagamentoService";
-import { IFormasPagamento } from "../../shared/models/ModelFormasPagamento";
+import { IDetalhesFormasPagamento, IFormasPagamento } from "../../shared/interfaces/entities/FormasPagamento";
 import { VTextField, VForm, useVForm, IVFormErrors } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
+import ControllerFormasPagamento from "../../shared/controllers/FormasPagamentoController";
 // #endregion
 
 // #region INTERFACES
 interface IFormData {
     descricao: string,
-    dataCad: string,
-    ultAlt: string
 }
 
 interface ICadastroProps {
@@ -33,11 +32,13 @@ interface ICadastroProps {
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     descricao: yup.string().required(),
-    dataCad: yup.string().required(),
-    ultAlt: yup.string().required(),
 })
 
 export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+    // #region CONTROLLERS
+        const controller = new ControllerFormasPagamento();
+    // #endregion
+
     // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
@@ -50,6 +51,8 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
     const [isValid, setIsValid] = useState(false);
+    const [descricao, setDescricao] = useState("");
+    const [formaPgtoOriginal, setFormaPgtoOriginal] = useState<IDetalhesFormasPagamento | null>(null);
     // #endregion
 
     // #region ACTIONS
@@ -57,7 +60,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
         if (isDialog) {
             if (selectedId !== 0) {
                 setIsLoading(true);
-                FormasPagamentoService.getById(Number(selectedId))
+                controller.getOne(Number(selectedId))
                     .then((result) => {
                         setIsLoading(false);
                         if (result instanceof Error) {
@@ -65,7 +68,9 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                             navigate('/formaspagamento');
                         } else {
                             formRef.current?.setData(result);
-                            setObj(result);
+                            setIsValid(true);
+                            setDescricao(result.descricao);
+                            setFormaPgtoOriginal(result);
                         }
                     });
             } else {
@@ -76,16 +81,19 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
         } else {
             if (id !== 'novo') {
                 setIsLoading(true);
-                FormasPagamentoService.getById(Number(id))
+                controller.getOne(Number(id))
                     .then((result) => {
                         setIsLoading(false);
                         if (result instanceof Error) {
                             toast.error(result.message);
                             navigate('/formaspagamento');
                         } else {
-                            console.log('RESULT', result);
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);
-                            setObj(result);
+                            setIsValid(true);
+                            setDescricao(result.descricao);
+                            setFormaPgtoOriginal(result);
                         }
                     });
             } else {
@@ -97,38 +105,38 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
     }, [id]);
 
     useEffect(() => {
-        if (obj) setIsValid(true)
-        else setIsValid(false);
-    }, [obj])
+        if (descricao != "") validate(descricao);
+    }, [descricao]);
 
     const validate = (filter: string) => {
-        if (filter != obj?.descricao) {
-            setIsValidating(true);
-            debounce(() => {
-                FormasPagamentoService.validate(filter)
-                    .then((result) => {
-                        setIsValidating(false);
-                        if (result instanceof Error) {
-                            toast.error(result.message);
-                        } else {
-                            setIsValid(result);
-                            if (result === false) {
-                                const validationErrors: IVFormErrors = {};
-                                validationErrors['descricao'] = 'Esta forma de pagamento já está cadastrada';
-                                formRef.current?.setErrors(validationErrors);
-                            }
-                        }
+        debounce(() => {
+            if (!isValid && filter != "" && (filter.toUpperCase() != formaPgtoOriginal?.descricao)) {
+                setIsValidating(true);
+                debounce(() => {
+                    controller.validate({
+                        descricao: filter
                     })
-            })
-        } else {
-            setIsValid(true);
-        }
+                        .then((result) => {
+                            setIsValidating(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message);
+                            } else {
+                                setIsValid(result);
+                                if (result === false) {
+                                    const validationErrors: IVFormErrors = {};
+                                    validationErrors['descricao'] = 'Essa forma de pagamento já está cadastrada.';
+                                    formRef.current?.setErrors(validationErrors);
+                                }
+                            }
+                        })
+                });        
+            } else {
+                setIsValid(true);
+            }
+        })
     }
 
     const handleSave = (dados: IFormData) => {
-        let data = new Date();
-        dados.dataCad = data.toLocaleString();
-        dados.ultAlt = data.toLocaleString();
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -136,7 +144,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                         setIsLoading(true);
                         if (isDialog) {
                             if (selectedId === 0) {
-                                FormasPagamentoService.create(dadosValidados)
+                                controller.create(dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -165,7 +173,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                                         }
                                     });
                             } else {
-                                FormasPagamentoService.updateById(Number(selectedId), { id: Number(selectedId), ...dadosValidados })
+                                controller.update(Number(selectedId), dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -188,7 +196,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                             }
                         } else {
                             if (id === 'novo') {
-                                FormasPagamentoService.create(dadosValidados)
+                                controller.create(dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -217,7 +225,7 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                                         }
                                     });
                             } else {
-                                FormasPagamentoService.updateById(Number(id), { id: Number(id), ...dadosValidados })
+                                controller.update(Number(id), dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -280,6 +288,8 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                     mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
                     mostrarBotaoApagar={id !== 'novo' && !isDialog}
                     mostrarBotaoNovo={id !== 'novo' && !isDialog}
+
+                    disableButtons={isValidating}
                     
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}
@@ -309,21 +319,22 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                                <VTextField
+                                <VTextField 
+                                    size="small"
                                     required
                                     fullWidth
-                                    name="descricao"
+                                    name='descricao' 
                                     label="Descrição"
-                                    disabled={isLoading}
-                                    inputProps={{
+                                    disabled={isLoading}                             
+                                    InputProps={{
                                         endAdornment: (
-                                            <InputAdornment position="start">
+                                            <InputAdornment position="end">
                                                 { (isValidating && formRef.current?.getData().descricao) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (!isValidating && formRef.current?.getData().descricao && isValid) && (
+                                                { (isValid && formRef.current?.getData().descricao) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -331,19 +342,47 @@ export const CadastroFormasPagamento: React.FC<ICadastroProps> = ({isDialog = fa
                                             </InputAdornment>
                                         )
                                     }}
+                                    onBlur={e => {
+                                        setIsValidating(false);
+                                    }}
                                     onChange={(e) => {
                                         setIsValid(false);
-                                        setIsValidating('');
-                                        console.log(id);
-                                        formRef.current?.setFieldError('pais', '');
-                                        debounce(() => {
-                                            validate(e.target.value)
-                                        })
+                                        setIsValidating(false);
+                                        formRef.current?.setFieldError('descricao', '');
+                                        validate(e.target.value);
                                     }}
                                 />
                             </Grid>
                         </Grid>
 
+                        {id != 'novo' && (
+                            <Grid container item direction="row" spacing={2}>
+                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='datacad' 
+                                        label="Data Cad."
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+                                    <VTextField
+                                        size="small"
+                                        required
+                                        fullWidth
+                                        name='ultalt' 
+                                        label="Ult. Alt."
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        )}
                     </Grid>
 
                 </Box>
