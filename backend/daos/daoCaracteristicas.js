@@ -24,6 +24,29 @@ async function getQtd(url) {
     })
 };
 
+async function buscarPorGrade(url) {
+    return new Promise((resolve, reject) => {
+        const idgrade = url.split('=')[1];
+        pool.query('select * from caracteristicas where fk_idgrade = $1 order by id asc', [idgrade], async (err, res) => {
+            if (err) {
+                return reject(err);
+            }
+            const mListaCaracteristicas = [];
+            for (let i = 0; i < res.rows.length; i++) {
+                let mGrade = await daoGrades.buscarUm(idgrade);
+                mListaCaracteristicas.push({
+                    id: res.rows[i].id,
+                    descricao: res.rows[i].descricao,
+                    grade: mGrade,
+                    datacad: res.rows[i].datacad,
+                    ultalt: res.rows[i].ultalt
+                });
+            }
+            return resolve(mListaCaracteristicas);
+        })
+    }) 
+}
+
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
@@ -268,6 +291,7 @@ async function validate(caracteristica) {
 
 module.exports = {
     getQtd,
+    buscarPorGrade,
     buscarTodosSemPg,
     buscarTodosComPg,
     buscarUm,

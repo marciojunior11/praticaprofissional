@@ -13,6 +13,27 @@ class ControllerVariacoes implements IController {
 
     }
 
+    getByCaracteristica = async (idcaracteristica: number): Promise<TListaVariacoes | Error> => {
+        console.log(idcaracteristica);
+        try {
+            var urlRelativa = `/api/variacoes?_idcaracteristica=${idcaracteristica}`;
+            const { data } = await Api.get(urlRelativa);
+
+            if (data) {
+                return {
+                    data: data.data,
+                    qtd: data.totalCount
+                }
+            }
+
+            return new Error('Erro ao listar os registros.');
+
+        } catch (error) {
+            console.error(error);
+            return new Error((error as {message:string}).message || 'Erro ao listar os registros.');
+        }
+    }
+
     getAll = async (page?: number, filter = ''): Promise<TListaVariacoes | Error> => {
         try {
             var urlRelativa = '';

@@ -2,6 +2,20 @@ const daoVariacoes = require('../daos/daoVariacoes');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/paises
+
+async function buscarPorCaracteristica(req, res) {
+    try {
+        const response = await daoVariacoes.buscarPorCaracteristica(req.url);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            data: response,
+            totalCount: response.length
+        }));
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoVariacoes.buscarTodosSemPg(req.url);
@@ -148,6 +162,7 @@ async function validate(req, res) {
 }
 
 module.exports = {
+    buscarPorCaracteristica,
     buscarTodosSemPg,
     buscarTodosComPg,
     buscarUm,

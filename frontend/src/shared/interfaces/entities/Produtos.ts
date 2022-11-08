@@ -35,25 +35,25 @@ export interface IProdutos {
 export interface IDetalhesProdutos {
     gtin: string;
     descricao: string;
-    apelido: string;
+    apelido: string | undefined;
     marca: string;
     undmedida: string;
-    unidade: number;
+    unidade: number | undefined;
     vlcusto: number;
     vlcompra: number;
     vlvenda: number;
     lucro: number;
-    pesoliq: number;
-    pesobruto: number;
+    pesoliq: number | undefined;
+    pesobruto: number | undefined;
     ncm: string;
     cfop: string;
-    percicmssaida: number;
-    percipi: number;
+    percicmssaida: number | undefined;
+    percipi: number | undefined;
     cargatribut: number;
     vlfrete: number;
     qtdatual: number;
-    qtdideal: number;
-    qtdmin: number;
+    qtdideal: number | undefined;
+    qtdmin: number | undefined;
     fornecedor: IFornecedores;
     listavariacoes: IVariacoes[];
 }

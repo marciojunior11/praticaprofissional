@@ -27,9 +27,10 @@ type TVAutocompleteProps = {
     required?: boolean,
     onClickSearch?: () => void,
     isDialogOpen: boolean,
+    disabled?: boolean
 }
 
-export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, ...rest}) => {
+export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, disabled, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -110,7 +111,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen
                             error={!!error}
                             helperText={error}
                             required={rest.required}
-                            disabled={isLoading}
+                            disabled={isLoading || disabled}
                         />
                     )}
 
@@ -155,7 +156,14 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen
                 />
             </Grid>
             <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
-                <Button fullWidth variant="outlined" size="large" color={!!error ? 'error' : 'primary'} onClick={onClickSearch}>
+                <Button 
+                    fullWidth 
+                    variant="outlined" 
+                    size="large" 
+                    color={!!error ? 'error' : 'primary'} 
+                    onClick={onClickSearch}
+                    disabled={isLoading || disabled}
+                >
                     <Icon>search</Icon>
                 </Button>
             </Grid>

@@ -24,6 +24,30 @@ async function getQtd(url) {
     })
 };
 
+async function buscarPorCaracteristica(url) {
+    return new Promise((resolve, reject) => {
+        const idcaracteristica = url.split('=')[1];
+        console.log(url);
+        pool.query('select * from variacoes where fk_idcaracteristica = $1 order by id asc', [idcaracteristica], async (err, res) => {
+            if (err) {
+                return reject(err);
+            }
+            const mListaVariacoes = [];
+            for (let i = 0; i < res.rows.length; i++) {
+                let mCaracteristica = await daoCaracteristicas.buscarUm(idcaracteristica);
+                mListaVariacoes.push({
+                    id: res.rows[i].id,
+                    descricao: res.rows[i].descricao,
+                    caracteristica: mCaracteristica,
+                    datacad: res.rows[i].datacad,
+                    ultalt: res.rows[i].ultalt
+                });
+            }
+            return resolve(mListaVariacoes);
+        })
+    }) 
+}
+
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
@@ -267,6 +291,7 @@ async function validate(variacao) {
 
 module.exports = {
     getQtd,
+    buscarPorCaracteristica,
     buscarTodosSemPg,
     buscarTodosComPg,
     buscarUm,

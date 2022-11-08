@@ -8,6 +8,8 @@ function caracteristicasRoutes(req, res) {
         if(req.url.match(/\/api\/caracteristicas\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlCaracteristicas.buscarUm(req, res, id);
+        } else if (req.url.includes('idgrade')) {
+            ctrlCaracteristicas.buscarPorGrade(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlCaracteristicas.buscarTodosSemPg(req, res)
         } else {

@@ -2,10 +2,23 @@ const daoCaracteristicas = require('../daos/daoCaracteristicas');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/paises
+
+async function buscarPorGrade(req, res) {
+    try {
+        const response = await daoCaracteristicas.buscarPorGrade(req.url);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            data: response,
+            totalCount: response.length
+        }));
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoCaracteristicas.buscarTodosSemPg(req.url);
-        console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,
@@ -148,6 +161,7 @@ async function validate(req, res) {
 }
 
 module.exports = {
+    buscarPorGrade,
     buscarTodosSemPg,
     buscarTodosComPg,
     buscarUm,

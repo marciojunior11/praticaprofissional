@@ -8,6 +8,8 @@ function variacoesRoutes(req, res) {
         if(req.url.match(/\/api\/variacoes\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlVariacoes.buscarUm(req, res, id);
+        } else if (req.url.includes("idcaracteristica")) {
+            ctrlVariacoes.buscarPorCaracteristica(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlVariacoes.buscarTodosSemPg(req, res)
         } else {

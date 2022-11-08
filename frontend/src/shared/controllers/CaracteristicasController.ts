@@ -11,6 +11,27 @@ class ControllerCaracteristicas implements IController {
 
     }
 
+    getByGrade = async (idgrade: number): Promise<TListaCaracteristicas | Error> => {
+        console.log('idgrade', idgrade);
+        try {
+            var urlRelativa = `/api/caracteristicas?_idgrade=${idgrade}`;
+            const { data } = await Api.get(urlRelativa);
+
+            if (data) {
+                return {
+                    data: data.data,
+                    qtd: data.totalCount
+                }
+            }
+
+            return new Error('Erro ao listar os registros.');
+
+        } catch (error) {
+            console.error(error);
+            return new Error((error as {message:string}).message || 'Erro ao listar os registros.');
+        }
+    }
+
     getAll = async (page?: number, filter = ''): Promise<TListaCaracteristicas | Error> => {
         try {
             var urlRelativa = '';

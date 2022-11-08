@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Select, SelectProps } from "@mui/material";
+import { FormHelperText, Select, SelectProps, Typography } from "@mui/material";
 import { useField } from "@unform/core";
 import { format } from "path";
 
@@ -28,10 +28,11 @@ export const VSelect: React.FC<TVSelectProps> = ({ children, name, ...rest }) =>
             error={!!error}
             defaultValue={defaultValue}
 
-            
             value={value}
             onChange={e => { 
-                setValue(e.target.value.toUpperCase());
+                error && clearError();
+                rest.onChange?.(e, null);
+                setValue(typeof e.target.value == 'string' ?  e.target.value.toUpperCase() : e.target.value);
             }}
 
             onKeyDown={(e) => {

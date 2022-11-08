@@ -287,7 +287,6 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
     }
 
     const handleSave = (dados: IFormData) => {
-        console.log(formRef.current?.getData().flsituacao);
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
