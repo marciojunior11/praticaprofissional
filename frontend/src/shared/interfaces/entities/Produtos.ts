@@ -1,6 +1,7 @@
 import { ICidades } from "./Cidades";
 import { ICondicoesPagamento } from "./CondicoesPagamento";
 import { IFornecedores } from "./Fornecedores";
+import { IVariacoes } from "./Variacoes";
 
 export interface IProdutos {
     id: number;
@@ -26,6 +27,7 @@ export interface IProdutos {
     qtdideal: number;
     qtdmin: number;
     fornecedor: IFornecedores;
+    listavariacoes: IVariacoes[];
     datacad: string | Date;
     ultalt: string | Date;
 }
@@ -53,6 +55,7 @@ export interface IDetalhesProdutos {
     qtdideal: number;
     qtdmin: number;
     fornecedor: IFornecedores;
+    listavariacoes: IVariacoes[];
 }
 
 export interface IValidator {
