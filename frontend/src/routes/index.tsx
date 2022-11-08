@@ -14,7 +14,7 @@ import {
     CadastroFornecedores,
     // ConsultaClientes,
     // CadastroClientes,
-    // ConsultaProdutos,
+    ConsultaProdutos,
     // CadastroProdutos,
     ConsultaCondicoesPagamento,
     CadastroFormasPagamento,
@@ -128,8 +128,8 @@ export const AppRoutes = () => {
             <Route path="/condicoespagamento" element={<ConsultaCondicoesPagamento/>}/>
             <Route path="/condicoespagamento/cadastro/:id" element={<CadastroCondicoesPagamento/>}/>
 
-            {/* <Route path="/produtos" element={<ConsultaProdutos/>}/>
-            <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/> */}
+            <Route path="/produtos" element={<ConsultaProdutos/>}/>
+            {/* <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/> */}
 
             <Route path="/compras" element={<ConsultaCompras/>}/>
             <Route path="/compras/cadastro/:id" element={<CadastroCompras/>}/>

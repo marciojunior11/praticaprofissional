@@ -292,6 +292,7 @@ export const ConsultaCondicoesPagamento: React.FC<IConsultaProps> = ({ isDialog 
             }
         >
             <CollapsedDataTable
+                collapseLabel="Parcelas"
                 collapseHeaders={collapsedHeaders}
                 collapseRowId="numero"
                 collapseRows="listaparcelas"

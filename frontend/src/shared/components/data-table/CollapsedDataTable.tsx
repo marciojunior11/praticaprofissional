@@ -17,6 +17,7 @@ export interface IHeaderProps {
 }
 
 interface IDataTableProps {
+    collapseLabel: string;
     headers: IHeaderProps[];
     collapseHeaders: IHeaderProps[];
     rows: any[];
@@ -31,7 +32,7 @@ interface IDataTableProps {
     onPageChange?: (page: number) => void;
 }
 
-export const CollapsedDataTable: React.FC<IDataTableProps> = ( { headers, collapseHeaders, rows, collapseRows, rowId, collapseRowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
+export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, headers, collapseHeaders, rows, collapseRows, rowId, collapseRowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     const Row = (props: { row: any }) => {
@@ -70,7 +71,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { headers, collap
                         <Collapse in={open} timeout="auto" unmountOnExit>
                             <Box sx={{ margin: 1 }}>
                                 <Typography variant="h6">
-                                    Parcelas
+                                    {collapseLabel}
                                 </Typography>
                                 <Table size="small">
                                     <TableHead>
@@ -85,17 +86,31 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { headers, collap
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {row[collapseRows].map((item: any) => (
-                                            <TableRow key={item[collapseRowId]}>
-                                                { collapseHeaders.map((header) => {
-                                                    return (
-                                                        <TableCell align={header.align && header.align}>
-                                                            { !header.render ? getNestedObjectPropValue(item, header.name) : header.render(row) }
-                                                        </TableCell>
-                                                    )
-                                                }) }
-                                            </TableRow>
-                                        ))}
+                                        {collapseRows != "" ? (
+                                            row[collapseRows].map((item: any) => (
+                                                <TableRow key={item[collapseRowId]}>
+                                                    { collapseHeaders.map((header) => {
+                                                        return (
+                                                            <TableCell align={header.align && header.align}>
+                                                                { !header.render ? getNestedObjectPropValue(item, header.name) : header.render(row) }
+                                                            </TableCell>
+                                                        )
+                                                    }) }
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            rows.map((item: any) => (
+                                                <TableRow key={item[collapseRowId]}>
+                                                    { collapseHeaders.map((header) => {
+                                                        return (
+                                                            <TableCell align={header.align && header.align}>
+                                                                { !header.render ? getNestedObjectPropValue(item, header.name) : header.render(row) }
+                                                            </TableCell>
+                                                        )
+                                                    }) }
+                                                </TableRow>
+                                            ))
+                                        )}
                                     </TableBody>
                                 </Table>
                             </Box>
