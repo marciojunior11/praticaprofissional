@@ -1,5 +1,5 @@
 import PaiComId from "./PaiComId";
-import Grades from "./Paises";
+import Grades from "./Grades";
 
 class Caracteristicas extends PaiComId {
     // #region ATRIBUTOS
