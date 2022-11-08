@@ -17,3 +17,5 @@ export * from './condicoesPagamento/CadastroCondicoesPagamento';
 export * from './compras/ConsultaCompras';
 export * from './compras/CadastroCompras';
 export * from './dashboard/Dashboard';
+export * from './grades/ConsultaGrades';
+export * from './grades/CadastroGrades';

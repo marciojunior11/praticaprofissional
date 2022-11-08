@@ -81,6 +81,7 @@ class ControllerGrades implements IController {
     }
 
     validate = async (dados: IValidator): Promise<boolean | Error> => {
+        console.log(dados);
         try {
             const { data } = await Api.post("/api/grades/validate", dados);
             if (data != 0) {

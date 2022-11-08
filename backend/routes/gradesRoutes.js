@@ -8,15 +8,17 @@ function gradesRoutes(req, res) {
         if(req.url.match(/\/api\/grades\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlGrades.buscarUm(req, res, id);
-        } else if (req.url.includes('filter')) {
-            ctrlGrades.validate(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlGrades.buscarTodosSemPg(req, res)
         } else {
             ctrlGrades.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/grades' && req.method === 'POST') {
-        ctrlGrades.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url.includes('validate')) {
+            ctrlGrades.validate(req, res);
+        } else {
+            ctrlGrades.salvar(req, res);
+        }
     } else if(req.url.match(/\/api\/grades\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlGrades.alterar(req, res, id);
