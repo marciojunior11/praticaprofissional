@@ -57,7 +57,7 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { gtin, descricao, apelido, marca, undmedida, unidade, vlcusto, vlcompra, vlvenda, lucro, pesoliq, pesobruto, ncm, cfop, percicmssaida, percipi, cargatribut, vlfrete, qtdatual, qtdideal, qtdmin, variacao, fornecedor, datacad, ultalt } = JSON.parse(body);
+            const { gtin, descricao, apelido, marca, undmedida, unidade, vlcusto, vlcompra, vlvenda, lucro, pesoliq, pesobruto, ncm, cfop, percicmssaida, percipi, cargatribut, vlfrete, qtdatual, qtdideal, qtdmin, listavariacoes, fornecedor, datacad, ultalt } = JSON.parse(body);
             const mProduto = {
                 gtin,
                 descricao,
@@ -80,7 +80,7 @@ async function salvar(req, res) {
                 qtdatual,
                 qtdideal,
                 qtdmin,
-                variacao,
+                listavariacoes,
                 fornecedor,
                 datacad,
                 ultalt
@@ -165,10 +165,21 @@ async function deletar(req, res, id) {
 
 async function validate(req, res) {
     try {
-            const filter = req.url.split('=')[1];
-            const response = await daoProdutos.validate(filter);
+        let body = '';
+
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+
+        req.on('end', async () => {
+            const { descricao } = JSON.parse(body);
+            const mProduto = {
+                descricao
+            };
+            const response = await daoProdutos.validate(mProduto);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
+        })
     } catch (error) {
         console.log(error);
     }; 

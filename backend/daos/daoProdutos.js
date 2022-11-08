@@ -270,12 +270,12 @@ async function salvar (produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into produtos (gtin, descricao, apelido, marca, undmedida, unidade, vlcusto, vlcompra, vlvenda, lucro, pesoliq, pesobruto, ncm, cfop, percicmssaida, percipi, cargatribut, vlfrete, qtdatual, qtdideal, qtdmin, fk_idvariacao, fk_idfornecedor, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)', [
+                client.query('insert into produtos (gtin, descricao, apelido, marca, undmedida, unidade, vlcusto, vlcompra, vlvenda, lucro, pesoliq, pesobruto, ncm, cfop, percicmssaida, percipi, cargatribut, vlfrete, qtdatual, qtdideal, qtdmin, fk_idfornecedor, datacad, ultalt) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)', [
                     produto.gtin,
                     produto.descricao.toUpperCase(),
-                    produto.apelido,
-                    produto.marca,
-                    produto.undmedida,
+                    produto.apelido.toUpperCase(),
+                    produto.marca.toUpperCase(),
+                    produto.undmedida.toUpperCase(),
                     produto.unidade,
                     produto.vlcusto,
                     produto.vlcompra,
@@ -292,12 +292,17 @@ async function salvar (produto) {
                     produto.qtdatual,
                     produto.qtdideal,
                     produto.qtdmin,
-                    produto.variacao.id,
                     produto.fornecedor.id,
                     produto.datacad, 
                     produto.ultalt
                 ], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+                    const response = await client.query('select * from produtos where id = (select max(id) from produtos)');
+                    for (let i = 0; i < produto.listavariacoes; i++) {
+                        client.query('insert into produtos_variacoes values ($1, $2)', [response.id, produto.listavariacoes[i].id], async (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                        })
+                    }
                     client.query('COMMIT', async err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
@@ -336,7 +341,7 @@ async function alterar (id, produto) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('update produtos set id = $1, gtin = $2, descricao = $3, apelido = $4, marca = $5, undmedida = $6, unidade = $7, vlcusto = $8, vlcompra = $9, vlvenda = $10, lucro = $11, pesoliq = $12, pesobruto = $13, ncm = $14, cfop = $15, percicmssaida = $16, percipi = $17, cargatribut = $18, vlfrete = $19, qtdatual = $20, qtdideal = $21, qtdmin = $22, fk_idvariacao = $23, fk_idfornecedor = $24, ultalt = $25 where id = $26', [
+                client.query('update produtos set id = $1, gtin = $2, descricao = $3, apelido = $4, marca = $5, undmedida = $6, unidade = $7, vlcusto = $8, vlcompra = $9, vlvenda = $10, lucro = $11, pesoliq = $12, pesobruto = $13, ncm = $14, cfop = $15, percicmssaida = $16, percipi = $17, cargatribut = $18, vlfrete = $19, qtdatual = $20, qtdideal = $21, qtdmin = $22, fk_idfornecedor = $23, ultalt = $24 where id = $25', [
                     produto.id,
                     produto.gtin,
                     produto.descricao.toUpperCase(),
@@ -359,12 +364,19 @@ async function alterar (id, produto) {
                     produto.qtdatual,
                     produto.qtdideal,
                     produto.qtdmin,
-                    produto.variacao.id,
                     produto.fornecedor.id, 
                     produto.ultalt,
                     id
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+                    client.query('delete from produtos_variacoes where fk_idproduto = $1', [id], async (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                    })
+                    for (let i = 0; i < produto.listavariacoes; i++) {
+                        client.query('insert into produtos_variacoes values ($1, $2)', [response.id, produto.listavariacoes[i].id], async (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                        })
+                    }
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
@@ -401,8 +413,11 @@ async function deletar (id) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query(`delete from produtos where id = ${id}`, (err, res) => {
+                client.query('delete from produtos_variacoes where fk_idproduto = $1', [id], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+                    client.query(`delete from produtos where id = ${id}`, (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                    })
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
@@ -418,9 +433,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(filter) {
+async function validate(produto) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from produtos where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from produtos where descricao like '${produto.descricao.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
