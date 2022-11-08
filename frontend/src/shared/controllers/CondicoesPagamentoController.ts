@@ -133,7 +133,6 @@ class ControllerCondicoesPagamento implements IController {
     }
 
     validate = async (dados: Omit<IValidator, 'id'>): Promise<boolean | Error> => {
-        console.log('aqui');
         try {
             const { data } = await Api.post(`/api/condicoespagamento/validate`, dados);
             if (data != 0) {
