@@ -1,7 +1,7 @@
 // #region EXTERNAL IMPORTS
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, MenuItem, Paper, Tab, Tabs, Typography } from "@mui/material";
 import * as yup from 'yup';
 import { toast } from "react-toastify";
 // #endregion
@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms";
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect } from "../../shared/forms";
 import { ICidades } from "../../shared/interfaces/entities/Cidades";
 import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
@@ -19,6 +19,7 @@ import { ConsultaCidades } from "../cidades/ConsultaCidades";
 import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
 import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondicoesPagamento";
 import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
+import { ICondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
 // #endregion
 
 // #region INTERFACES
@@ -35,7 +36,6 @@ interface IFormData {
     numend: string;
     bairro: string;
     cidade: ICidades;
-    flsituacao: string | undefined;
 }
 // #endregion
 
@@ -65,9 +65,6 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
             }),
         })
     }).required(),
-    flsituacao: yup.string(),
-    datacad: yup.string(),
-    ultalt: yup.string()
 })
 
 
@@ -161,7 +158,10 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                     if(isValid) {
                         setIsLoading(true);
                         if (id === 'novo') {
-                            controller.create(dadosValidados)
+                            controller.create({
+                                ...dadosValidados,
+                                condicaopagamento: formRef.current?.getData().condicaopagamento,
+                            })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -189,7 +189,11 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                                     }
                                 });
                         } else {
-                            controller.update(Number(id), dadosValidados)
+                            controller.update(Number(id), {
+                                ...dadosValidados,
+                                condicaopagamento: formRef.current?.getData().condicaopagamento,
+                                flsituacao: formRef.current?.getData().flsituacao
+                            })
                                 .then((result) => {
                                     setIsLoading(false);
                                     if (result instanceof Error) {
@@ -251,10 +255,11 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
             titulo={id === 'novo' ? 'Cadastrar Fornecedor' : 'Editar Fornecedor'}
             barraDeFerramentas={
                 <DetailTools
-                    mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo={id == 'novo'}
-                    mostrarBotaoApagar={id !== 'novo'}
-                    mostrarBotaoNovo={id !== 'novo'}
+                mostrarBotaoSalvarFechar
+                // mostrarBotaoSalvar={!isDialog}
+                mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
+                mostrarBotaoApagar={id !== 'novo' && !isDialog}
+                mostrarBotaoNovo={id !== 'novo' && !isDialog}
                     
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}
@@ -275,10 +280,29 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                 <Box margin={1} display="flex" flexDirection="column" component={Paper} alignItems="center">
                     <Grid item container xs={12} sm={10} md={6} lg={5} xl={5} direction="column" padding={2} spacing={2} alignItems="left">
 
-
+                        {isLoading && (
                             <Grid item>
+                                <LinearProgress variant="indeterminate"/>
+                            </Grid>
+                        )}
+                        
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={12} sm={12} md={10} lg={10} xl={8}>
                                 <Typography variant="h6">Dados Gerais</Typography>
                             </Grid>
+                            { id != "novo" && (
+                                <Grid container item xs={12} sm={12} md={2} lg={2} xl={4} alignItems="center" justifyContent="right">
+                                    <Typography marginRight="4px" variant="subtitle1">Situação</Typography>
+                                    <VSelect
+                                        name="flsituacao"
+                                        size="small"
+                                    >
+                                        <MenuItem value="A">ATIVO</MenuItem>
+                                        <MenuItem value="I">INATIVO</MenuItem>
+                                    </VSelect>
+                                </Grid>
+                            ) }
+                        </Grid>
 
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -329,6 +353,9 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                                         label={["descricao"]}
                                         TFLabel="Condição de Pagamento"
                                         getAll={controllerCondicoesPagamento.getAll}
+                                        // onChange={(e) => {
+                                        //     setCondicaoPagamento(e.target.value);
+                                        // }}
                                         onClickSearch={() => {
                                             toggleConsultaCondicoesPagamentoDialogOpen();
                                         }}

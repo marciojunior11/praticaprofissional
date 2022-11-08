@@ -34,6 +34,7 @@ export interface IDetalhesFornecedores {
     numend: string;
     bairro: string;
     cidade: ICidades;
+    condicaopagamento: ICondicoesPagamento;
     flsituacao: string | undefined;
 }
 

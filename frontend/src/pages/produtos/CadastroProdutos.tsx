@@ -12,6 +12,7 @@ import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
 import { FornecedoresService, IFornecedores } from "../../shared/services/api/fornecedores/FornecedoresService";
 import { ITiposProduto, TiposProdutoService } from "../../shared/services/api/tiposProduto/TiposProdutoService";
+import ControllerFornecedores from "../../shared/controllers/FornecedoresController";
 
 interface IFormData {
     descricao: string,
@@ -56,6 +57,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
 })
 
 export const CadastroProdutos: React.FC = () => {
+    const controller = new ControllerFornecedores();
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -160,6 +162,10 @@ export const CadastroProdutos: React.FC = () => {
             setIsValid(true);
         }
         
+    }
+
+    const toggleConsultaFornecedoresDialogOpen = () => {
+        setIsConsultaPaisesDialogOpen(oldValue => !oldValue);
     }
 
     const handleSave = (dados: IFormData) => {
@@ -316,7 +322,7 @@ export const CadastroProdutos: React.FC = () => {
                                 />
                             </Grid>
                         </Grid> 
-                        <Grid container item direction='row' spacing={2}>
+                        {/* <Grid container item direction='row' spacing={2}>
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
                                     name='tipoProduto'
@@ -325,23 +331,25 @@ export const CadastroProdutos: React.FC = () => {
                                     TFLabel='Tipo de Produto'
                                 />
                             </Grid>
-                        </Grid>
-                        <Grid container item direction='row' spacing={2}>
+                        </Grid> */}
+                        <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
-                                    name='fornecedor'
-                                    label={["razsocial"]}
-                                    getAll={FornecedoresService.getAll}
-                                    TFLabel='Fornecedor'
+                                    size="small"
                                     required
-                                    onChange={(newValue) => {
-                                        setFornecedor(newValue);
-                                    }}
+                                    name="fornecedor"
+                                    label={["razsocial"]}
+                                    TFLabel="Fornecedor"
+                                    getAll={controller.getAll}
                                     onInputchange={() => {
                                         setIsValid(false);
-                                        setIsValidating('');
-                                        formRef.current?.setFieldError('fornecedor', '');
+                                        setIsValidating(false);
+                                        formRef.current?.setFieldError('nmestado', '');
                                     }}
+                                    onClickSearch={() => {
+                                        toggleConsultaFornecedoresDialogOpen();
+                                    }}
+                                    isDialogOpen={isConsultaFornecedoresDialogOpen}
                                 />
                             </Grid>
                         </Grid>

@@ -4,7 +4,9 @@ import { IFornecedores, IDetalhesFornecedores, TListaFornecedores } from '../int
 import Cidades from '../models/entities/Cidades';
 import CondicoesPagamento from '../models/entities/CondicoesPagamento';
 import Estados from '../models/entities/Estados';
+import FormasPagamento from '../models/entities/FormasPagamento';
 import Juridicas from '../models/entities/Juridicas';
+import Parcelas from '../models/entities/Parcelas';
 import { IController } from './../interfaces/controllers/Controller';
 
 class ControllerFornecedores implements IController {
@@ -53,7 +55,8 @@ class ControllerFornecedores implements IController {
         }         
     }
 
-    create = async (dados: Omit<IDetalhesFornecedores, 'id'>): Promise<number | undefined | Error> => {
+    create = async (dados: Omit<IDetalhesFornecedores, 'flsituacao'>): Promise<number | undefined | Error> => {
+        console.log("DADOS", dados);
         let cidade = new Cidades(
             dados.cidade.id,
             dados.cidade.nmcidade,
@@ -62,20 +65,35 @@ class ControllerFornecedores implements IController {
             dados.cidade.datacad,
             dados.cidade.ultalt
         );
-        // let listaparcelas = new Array();
-        // listaparcelas = dados.condicaopagamento.listaparcelas;
-        // TERMINAR O CRUD CONDICOES PAGAMENTO ANTES DE DESCOMENTAR
-        // let condicaopagamento = new CondicoesPagamento(
-        //     dados.condicaopagamento.id,
-        //     dados.condicaopagamento.descricao,
-        //     dados.condicaopagamento.txdesc,
-        //     dados.condicaopagamento.txmulta,
-        //     dados.condicaopagamento.txjuros,
-        //     listaparcelas,
-        //     dados.condicaopagamento.flsituacao,
-        //     dados.condicaopagamento.datacad,
-        //     dados.condicaopagamento.ultalt
-        // );
+        let listaparcelas = new Array<Parcelas>();
+        let listaparcelasAux = dados.condicaopagamento.listaparcelas;
+        console.log(listaparcelasAux);
+        for (let i = 0; i < listaparcelasAux?.length!; i++) {
+            let formapagamento = new FormasPagamento(
+                listaparcelasAux?.[i].formapagamento.id,
+                listaparcelasAux?.[i].formapagamento.descricao,
+                listaparcelasAux?.[i].formapagamento.datacad,
+                listaparcelasAux?.[i].formapagamento.ultalt
+            );
+            let parcela = new Parcelas(
+                listaparcelasAux?.[i].numero, 
+                listaparcelasAux?.[i].dias, 
+                listaparcelasAux?.[i].percentual, 
+                formapagamento,
+            );
+            listaparcelas.push(parcela);
+        }
+        let condicaopagamento = new CondicoesPagamento(
+            dados.condicaopagamento.id,
+            dados.condicaopagamento.descricao,
+            dados.condicaopagamento.txdesc,
+            dados.condicaopagamento.txmulta,
+            dados.condicaopagamento.txjuros,
+            listaparcelas,
+            dados.condicaopagamento.flsituacao,
+            dados.condicaopagamento.datacad,
+            dados.condicaopagamento.ultalt
+        );
         let fornecedor = new Juridicas(
             0, 
             dados.razsocial, 
@@ -90,7 +108,7 @@ class ControllerFornecedores implements IController {
             dados.numend, 
             dados.bairro, 
             cidade, 
-            new CondicoesPagamento(), 
+            condicaopagamento, 
             'A', 
             new Date(),
             new Date()
@@ -106,6 +124,7 @@ class ControllerFornecedores implements IController {
     }
 
     update = async (id: number, dados: IDetalhesFornecedores): Promise<void | Error> => {
+        console.log("dados", dados.flsituacao);
         let cidade = new Cidades(
             dados.cidade.id,
             dados.cidade.nmcidade,
@@ -114,19 +133,34 @@ class ControllerFornecedores implements IController {
             dados.cidade.datacad,
             dados.cidade.ultalt
         );
-        // let listaparcelas = new Array();
-        // listaparcelas = dados.condicaopagamento.listaparcelas;
-        // let condicaopagamento = new CondicoesPagamento(
-        //     dados.condicaopagamento.id,
-        //     dados.condicaopagamento.descricao,
-        //     dados.condicaopagamento.txdesc,
-        //     dados.condicaopagamento.txmulta,
-        //     dados.condicaopagamento.txjuros,
-        //     listaparcelas,
-        //     dados.condicaopagamento.flsituacao,
-        //     dados.condicaopagamento.datacad,
-        //     dados.condicaopagamento.ultalt
-        // );
+        let listaparcelas = new Array<Parcelas>();
+        let listaparcelasAux = dados.condicaopagamento.listaparcelas;
+        for (let i = 0; i < listaparcelasAux?.length!; i++) {
+            let formapagamento = new FormasPagamento(
+                listaparcelasAux?.[i].formapagamento.id,
+                listaparcelasAux?.[i].formapagamento.descricao,
+                listaparcelasAux?.[i].formapagamento.datacad,
+                listaparcelasAux?.[i].formapagamento.ultalt
+            );
+            let parcela = new Parcelas(
+                listaparcelasAux?.[i].numero, 
+                listaparcelasAux?.[i].dias, 
+                listaparcelasAux?.[i].percentual, 
+                formapagamento,
+            );
+            listaparcelas.push(parcela);
+        }
+        let condicaopagamento = new CondicoesPagamento(
+            dados.condicaopagamento.id,
+            dados.condicaopagamento.descricao,
+            dados.condicaopagamento.txdesc,
+            dados.condicaopagamento.txmulta,
+            dados.condicaopagamento.txjuros,
+            listaparcelas,
+            dados.condicaopagamento.flsituacao,
+            dados.condicaopagamento.datacad,
+            dados.condicaopagamento.ultalt
+        );
         let fornecedor = new Juridicas(
             id, 
             dados.razsocial, 
@@ -141,9 +175,9 @@ class ControllerFornecedores implements IController {
             dados.numend, 
             dados.bairro, 
             cidade, 
-            new CondicoesPagamento(),
-            'A', 
-            new Date(), 
+            condicaopagamento,
+            dados.flsituacao,
+            new Date(),
             new Date()
         );
         try {

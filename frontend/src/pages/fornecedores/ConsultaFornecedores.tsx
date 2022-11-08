@@ -6,17 +6,23 @@ import { toast } from "react-toastify";
 // #endregion
 
 // #region INTERNAL IMPORTS
-import { ListTools } from "../../shared/components";
+import { CustomDialog, ListTools } from "../../shared/components";
 import { useDebounce } from "../../shared/hooks";
 import { LayoutBase } from "../../shared/layouts";
-import { FornecedoresService, IFornecedores } from '../../shared/services/api/fornecedores/FornecedoresService';
 import { Environment } from "../../shared/environment";
+import { IFornecedores } from "../../shared/interfaces/entities/Fornecedores";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import { IConsultaProps } from "../../shared/interfaces/views/Consulta";
 import { mask } from "../../shared/utils/functions";
+import ControllerFornecedores from "../../shared/controllers/FornecedoresController";
+import { CadastroFornecedores } from "./CadastroFornecedores";
 // #endregion
 
 export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
+    // #region CONTROLLERS
+    const controller = new ControllerFornecedores();
+    // #endregion
+   
     // #region HOOKS
     const [searchParams, setSearchParams] = useSearchParams();
     const { debounce } = useDebounce();
@@ -30,17 +36,39 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
     // #endregion
 
     // #region STATES
+    const [selectedId, setSelectedId] = useState<number | undefined>();
     const [rows, setRows] = useState<IFornecedores[]>([]);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCadastroFornecedoresOpen, setIsCadastroFornecedoresOpen] = useState(false);
     // #endregion
 
     // #region ACTIONS
+    const toggleCadastroFornecedoresOpen = () => {
+        setIsCadastroFornecedoresOpen(oldValue => !oldValue);
+    }
+
+    const reloadDataTable = () => {
+        setIsLoading(true);
+        debounce(() => {
+            controller.getAll(pagina, busca)
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                    } else {
+                        setRows(result.data);
+                        setQtd(result.qtd);
+                    }
+                });
+        })        
+    }
+
     useEffect(() => {
         setIsLoading(true);
         console.log(busca, pagina);
         debounce(() => {
-            FornecedoresService.getAll(pagina, busca)
+            controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
 
@@ -58,7 +86,7 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            FornecedoresService.deleteById(id)
+            controller.delete(id)
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
@@ -73,9 +101,6 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
         }
 
     }
-    // #endregion
-
-    // #region CONTROLLERS
     // #endregion
 
     const headers: IHeaderProps[] = [
@@ -102,7 +127,7 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
             label: "CEP",
             name: '',
             render: (row) => {
-                return mask(row.cnpj, '#####-###');
+                return mask(row.cep, '#####-###');
             }
         },
         {
@@ -146,9 +171,24 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
                         <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>delete</Icon>
                         </IconButton>
-                        <IconButton color="primary" size="small" onClick={() => navigate(`/fornecedores/cadastro/${row.id}`)}>
+                        <IconButton color="primary" size="small" onClick={() => {
+                            if (isDialog) {
+                                setSelectedId(row.id);
+                                toggleCadastroFornecedoresOpen();
+                            } else {
+                                navigate(`/fornecedores/cadastro/${row.id}`)
+                            }
+                        }}>
                             <Icon>edit</Icon>
                         </IconButton>
+                        {isDialog && (
+                            <IconButton color="success" size="small" onClick={() => {
+                                onSelectItem?.(row);
+                                toggleDialogOpen?.();
+                            }}>
+                                <Icon>checkbox</Icon>
+                            </IconButton>
+                        )}
                     </>
                 )
             }
@@ -163,7 +203,14 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => navigate('/fornecedores/cadastro/novo')}
+                    onClickNew={() => {
+                        if (isDialog) {
+                            setSelectedId(0);
+                            toggleCadastroFornecedoresOpen();
+                        } else {
+                            navigate('/fornecedores/cadastro/novo')
+                        }
+                    }}
                 />
             }
         >
@@ -184,6 +231,21 @@ export const ConsultaFornecedores: React.FC<IConsultaProps> = ({ isDialog = fals
                 rowCount={qtd}
                 onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}     
             />
+            <CustomDialog
+                fullWidth
+                maxWidth="xl"
+                onClose={toggleCadastroFornecedoresOpen}
+                handleClose={toggleCadastroFornecedoresOpen}
+                open={isCadastroFornecedoresOpen}
+                title="Cadastrar País"
+            >
+                <CadastroFornecedores
+                    isDialog
+                    toggleOpen={toggleCadastroFornecedoresOpen}
+                    selectedId={Number(selectedId)}
+                    reloadDataTableIfDialog={reloadDataTable}
+                />
+            </CustomDialog>
         </LayoutBase>
     );
 };

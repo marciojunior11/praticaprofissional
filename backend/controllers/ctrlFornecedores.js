@@ -156,6 +156,7 @@ async function alterar(req, res, id) {
                 datacad,
                 ultalt
             };
+            console.log("forn", mFornecedor);
             const novoFornecedor = await daoFornecedores.alterar(id, mFornecedor)
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(novoFornecedor));

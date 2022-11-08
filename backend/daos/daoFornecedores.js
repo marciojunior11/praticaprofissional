@@ -304,6 +304,7 @@ async function alterar (id, fornecedor) {
                     id
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);
