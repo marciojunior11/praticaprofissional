@@ -1,6 +1,6 @@
 import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
-import { IProdutos, IDetalhesProdutos, TListaProdutos } from '../interfaces/entities/Produtos';
+import { IProdutos, IDetalhesProdutos, TListaProdutos, IValidator } from '../interfaces/entities/Produtos';
 import Caracteristicas from '../models/entities/Caracteristicas';
 import Juridicas from '../models/entities/Juridicas';
 import Produtos from '../models/entities/Produtos';
@@ -168,9 +168,9 @@ class ControllerProdutos implements IController {
         }           
     }
 
-    validate = async (filter: string): Promise<boolean | Error> => {
+    validate = async (dados: IValidator): Promise<boolean | Error> => {
         try {
-            const { data } = await Api.get(`/api/produtos?_filter=${filter}`);
+            const { data } = await Api.post(`/api/condicoespagamento/validate`, dados);
             if (data != 0) {
                 return false;
             } else {
@@ -179,7 +179,7 @@ class ControllerProdutos implements IController {
             
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');    
-        }        
+        }       
     }
 }
 
