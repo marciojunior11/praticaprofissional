@@ -122,10 +122,10 @@ async function deletar(req, res, id) {
 
 async function validate(req, res) {
     try {
-            const filter = req.url.split('=')[1];
-            const response = await daoGrades.validate(filter);
-            res.writeHead(201, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(response.rowCount));
+        const filter = req.url.split('=')[1];
+        const response = await daoGrades.validate(filter);
+        res.writeHead(201, { 'Content-Type': 'application/json'});
+        res.end(JSON.stringify(response.rowCount));
     } catch (error) {
         console.log(error);
     }; 

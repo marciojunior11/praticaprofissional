@@ -20,6 +20,7 @@ import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPaga
 import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondicoesPagamento";
 import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 import { ICondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
+import { IDetalhesFornecedores } from "../../shared/interfaces/entities/Fornecedores";
 // #endregion
 
 // #region INTERFACES
@@ -86,8 +87,11 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
     // #region STATES
     const [isLoading, setIsLoading] = useState(false);
     const [isValid, setIsValid] = useState(true);
+    const [isValidating, setIsValidating] = useState<any>(null);
     const [isConsultaCidadesDialogOpen, setIsConsultaCidadesDialogOpen] = useState(false);
     const [isConsultaCondicoesPagamentoDialogOpen, setIsConsultaCondicoesPagamentoDialogOpen] = useState(false);
+    const [cnpj, setCnpj] = useState("");
+    const [fornecedorOriginal, setFornecedorOriginal] = useState<IDetalhesFornecedores | null>(null)
     // #endregion
 
     // #region ACTIONS
@@ -151,7 +155,45 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
         }
     }, [id]);
 
+    useEffect(() => {
+        if (cnpj != "") validate(cnpj);
+    }, [cnpj]);
+
+    const validate = (filter: string) => {
+        debounce(() => {
+            if (!isValid && filter != "" && (filter.toUpperCase() != fornecedorOriginal?.cnpj)) {
+                setIsValidating(true);
+                debounce(() => {
+                    controller.validate({
+                        cnpj: filter
+                    })
+                        .then((result) => {
+                            setIsValidating(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message);
+                            } else {
+                                setIsValid(result);
+                                if (result === false) {
+                                    const validationErrors: IVFormErrors = {};
+                                    validationErrors['cnpj'] = 'Já existe um fornecedor cadastrado com este CNPJ.';
+                                    formRef.current?.setErrors(validationErrors);
+                                }
+                            }
+                        })
+                });        
+            } else {
+                setIsValid(true);
+            }
+        })
+    }
+
     const handleSave = (dados: IFormData) => {
+        if (!formRef.current?.getData().condicaopagamento) {
+            const validationErrors: IVFormErrors = {}
+            validationErrors['condicaopagamento'] = 'O campo é obrigatório'
+            formRef.current?.setErrors(validationErrors);
+            return;
+        }
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
@@ -216,12 +258,9 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
 
                     errors.inner.forEach(error => {
                         if ( !error.path ) return;
-                        console.log('path', error.path);
-                        console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
                     validationErrors['cidade'] = 'O campo é obrigatório'
-                    console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
     };
@@ -260,19 +299,21 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                 mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
                 mostrarBotaoApagar={id !== 'novo' && !isDialog}
                 mostrarBotaoNovo={id !== 'novo' && !isDialog}
-                    
-                    onClickSalvar={save}
-                    onClickSalvarNovo={saveAndNew}
-                    onClickSalvarFechar={saveAndClose}
-                    onClickApagar={() => handleDelete(Number(id))}
-                    onClickNovo={() => navigate('/fornecedores/cadastro/novo') }
-                    onClickVoltar={() => {
-                        if (isDialog) {
-                            toggleOpen?.();
-                        } else {
-                            navigate('/fornecedores') 
-                        }
-                    }}
+                
+                disableButtons={isValidating}
+
+                onClickSalvar={save}
+                onClickSalvarNovo={saveAndNew}
+                onClickSalvarFechar={saveAndClose}
+                onClickApagar={() => handleDelete(Number(id))}
+                onClickNovo={() => navigate('/fornecedores/cadastro/novo') }
+                onClickVoltar={() => {
+                    if (isDialog) {
+                        toggleOpen?.();
+                    } else {
+                        navigate('/fornecedores') 
+                    }
+                }}
                 />
             }
         >
@@ -333,6 +374,31 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                                         name='cnpj' 
                                         label="CNPJ"
                                         disabled={isLoading}  
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    { (isValidating && formRef.current?.getData().cnpj) && (
+                                                        <Box sx={{ display: 'flex' }}>
+                                                            <CircularProgress size={24}/>
+                                                        </Box>
+                                                    ) }
+                                                    { (isValid && formRef.current?.getData().cnpj) && (
+                                                        <Box sx={{ display: 'flex' }}>
+                                                            <Icon color="success">done</Icon>
+                                                        </Box>
+                                                    ) }
+                                                </InputAdornment>
+                                            )
+                                        }}
+                                        onBlur={e => {
+                                            setIsValidating(false);
+                                        }}
+                                        onChange={(e) => {
+                                            setIsValid(false);
+                                            setIsValidating(false);
+                                            formRef.current?.setFieldError('condicaopagamento', '');
+                                            validate(e.target.value);
+                                        }}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>

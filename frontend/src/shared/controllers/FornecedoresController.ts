@@ -1,6 +1,6 @@
 import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
-import { IFornecedores, IDetalhesFornecedores, TListaFornecedores } from '../interfaces/entities/Fornecedores';
+import { IFornecedores, IDetalhesFornecedores, TListaFornecedores, IValidator } from '../interfaces/entities/Fornecedores';
 import Cidades from '../models/entities/Cidades';
 import CondicoesPagamento from '../models/entities/CondicoesPagamento';
 import Estados from '../models/entities/Estados';
@@ -195,9 +195,9 @@ class ControllerFornecedores implements IController {
         }           
     }
 
-    validate = async (filter: string): Promise<boolean | Error> => {
+    validate = async (dados: Omit<IValidator, 'id'>): Promise<boolean | Error> => {
         try {
-            const { data } = await Api.get(`/api/fornecedores?_filter=${filter}`);
+            const { data } = await Api.post(`/api/fornecedores/validate`, dados);
             if (data != 0) {
                 return false;
             } else {
@@ -206,7 +206,7 @@ class ControllerFornecedores implements IController {
             
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');    
-        }        
+        }       
     }
 }
 

@@ -38,6 +38,10 @@ export interface IDetalhesFornecedores {
     flsituacao: string | undefined;
 }
 
+export interface IValidator {
+    cnpj: string;
+}
+
 export type TListaFornecedores = {
     data: IFornecedores[];
     qtd: number;

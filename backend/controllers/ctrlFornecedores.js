@@ -193,42 +193,10 @@ async function validate(req, res) {
 
         req.on('end', async () => {
             const { 
-                id,
-                razsocial, 
-                nmfantasia,
                 cnpj, 
-                inscestadual,
-                email, 
-                telefone, 
-                celular,
-                cep,
-                endereco,
-                numend,
-                bairro,
-                cidade,
-                condicaopagamento,
-                flsituacao,
-                datacad,
-                ultalt
             } = JSON.parse(body);
             const mFornecedor = {
-                id,
-                razsocial, 
-                nmfantasia,
-                cnpj, 
-                inscestadual,
-                email, 
-                telefone, 
-                celular,
-                cep,
-                endereco,
-                numend,
-                bairro,
-                cidade,
-                condicaopagamento,
-                flsituacao,
-                datacad,
-                ultalt
+                cnpj,
             };
             const resp = await daoFornecedores.validate(mFornecedor);
             res.writeHead(201, { 'Content-Type': 'application/json'});

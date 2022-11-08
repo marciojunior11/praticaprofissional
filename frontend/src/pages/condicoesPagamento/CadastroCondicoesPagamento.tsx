@@ -419,6 +419,8 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                     mostrarBotaoApagar={id !== 'novo' && !isDialog}
                     mostrarBotaoNovo={id !== 'novo' && !isDialog}
                     
+                    disableButtons={isValidating}
+
                     onClickSalvar={save}
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
