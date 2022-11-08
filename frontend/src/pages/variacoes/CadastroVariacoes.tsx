@@ -10,25 +10,25 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch } from "../../shared/forms"
-import { IGrades } from "../../shared/interfaces/entities/Grades";
-import { IDetalhesCaracteristicas, ICaracteristicas } from "../../shared/interfaces/entities/Caracteristicas";
+import { ICaracteristicas } from "../../shared/interfaces/entities/Caracteristicas";
+import { IDetalhesVariacoes, IVariacoes } from "../../shared/interfaces/entities/Variacoes";
 import { useDebounce } from "../../shared/hooks";
+import ControllerVariacoes from "../../shared/controllers/VariacoesController";
 import ControllerCaracteristicas from "../../shared/controllers/CaracteristicasController";
-import ControllerGrades from "../../shared/controllers/GradesController";
-import { ConsultaGrades } from "../grades/ConsultaGrades";
+import { ConsultaCaracteristicas } from "../caracteristicas/ConsultaCaracteristicas";
 import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 // #endregion
 
 // #region INTERFACES
 interface IFormData {
     descricao: string;
-    grade: IGrades
+    caracteristica: ICaracteristicas
 }
 // #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     descricao: yup.string().required(),
-    grade: yup.object().typeError("Selecione uma grade").shape({
+    caracteristica: yup.object().typeError("Selecione uma característica").shape({
         id: yup.number(),
         descricao: yup.string(),
         datacad: yup.string(),
@@ -36,7 +36,12 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     }).required()
 })
 
-export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+export const CadastroVariacoes: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+    // #region CONTROLLERS
+    const controller = new ControllerVariacoes();
+    const controllerCaracteristicas = new ControllerCaracteristicas();
+    // #endregion
+
     // #region HOOKS
     const { id = 'novo' } = useParams<'id'>();
     const navigate = useNavigate();
@@ -47,17 +52,18 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
     // #region STATES
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState(false);
-    const [grade, setGrade] = useState<IGrades | null>(null);
+    const [caracteristica, setCaracteristica] = useState<ICaracteristicas | null>(null);
     const [descricao, setDescricao] = useState("");
-    const [caracteristicaOriginal, setCaracteristicaOriginal] = useState<IDetalhesCaracteristicas | null>(null);
+    const [variacaoOriginal, setVariacaoOriginal] = useState<IDetalhesVariacoes | null>(null);
     const [isValid, setIsValid] = useState(false);
-    const [isConsultaGradesDialogOpen, setIsConsultaGradesDialogOpen] = useState(false);
+    const [isConsultaCaracteristicasDialogOpen, setIsConsultaCaracteristicasDialogOpen] = useState(false);
     // #endregion
 
     // #region ACTIONS
-    const toggleConsultaGradesDialogOpen = () => {
-        setIsConsultaGradesDialogOpen(oldValue => !oldValue);
+    const toggleConsultaCaracteristicasDialogOpen = () => {
+        setIsConsultaCaracteristicasDialogOpen(oldValue => !oldValue);
     }
+    
     useEffect(() => {
         if (isDialog) {
             if (selectedId !== 0) {
@@ -67,21 +73,21 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                         setIsLoading(false);
                         if (result instanceof Error) {
                             toast.error(result.message);
-                            navigate('/caracteristicas');
+                            navigate('/variacoes');
                         } else {
                             result.datacad = new Date(result.datacad).toLocaleString();
                             result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);
                             setIsValid(true);
-                            setGrade(result.grade);
+                            setCaracteristica(result.caracteristica);
                             setDescricao(result.descricao);
-                            setCaracteristicaOriginal(result);
+                            setVariacaoOriginal(result);
                         }
                     });
             } else {
                 formRef.current?.setData({
                     descricao: '',
-                    grade: null
+                    caracteristica: null
                 });
             }
         } else {
@@ -92,21 +98,21 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                         setIsLoading(false);
                         if (result instanceof Error) {
                             toast.error(result.message);
-                            navigate('/caracteristicas');
+                            navigate('/variacoes');
                         } else {
                             result.datacad = new Date(result.datacad).toLocaleString();
                             result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);
                             setIsValid(true);
-                            setGrade(result.grade);
+                            setCaracteristica(result.caracteristica);
                             setDescricao(result.descricao);
-                            setCaracteristicaOriginal(result);
+                            setVariacaoOriginal(result);
                         }
                     });
             } else {
                 formRef.current?.setData({
                     descricao: '',
-                    grade: null
+                    caracteristica: null
                 });
             }
         }
@@ -116,17 +122,17 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
         const formData = formRef.current?.getData();
         const dados: IFormData = {
             descricao: formData?.descricao,
-            grade: formData?.grade
+            caracteristica: formData?.caracteristica
         }
-        if (descricao != "" && grade != null) {
+        if (descricao != "" && caracteristica != null) {
             if (id !== 'novo' || (selectedId && selectedId != 0)) {
                 const objAlterado = {
                     descricao: descricao,
-                    grade: grade
+                    caracteristica: caracteristica
                 };
                 const objOriginal = {
-                    descricao: caracteristicaOriginal?.descricao,
-                    grade: caracteristicaOriginal?.grade,
+                    descricao: variacaoOriginal?.descricao,
+                    caracteristica: variacaoOriginal?.caracteristica,
                 };
                 console.log(objOriginal);
                 console.log(objAlterado);
@@ -140,16 +146,16 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                 validate(dados);
             }
         }
-    }, [descricao, grade]);
+    }, [descricao, caracteristica]);
 
     const validate = (dados: IFormData) => {
         debounce(() => {
-            if (!isValid && dados.descricao && dados.grade) {
+            if (!isValid && dados.descricao && dados.caracteristica) {
                 setIsValidating(true);
                 debounce(() => {
                     controller.validate({
                         descricao: dados.descricao,
-                        grade: dados.grade
+                        caracteristica: dados.caracteristica
                     })
                     .then((result) => {
                         setIsValidating(false);
@@ -160,7 +166,7 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                             console.log("RESULT", result);
                             if (result === false) {
                                 const validationErrors: IVFormErrors = {};
-                                validationErrors['descricao'] = 'A característica informada já está vinculada a esta grade.';
+                                validationErrors['descricao'] = 'A variação informada já está vinculada a esta característica.';
                                 formRef.current?.setErrors(validationErrors);
                             }
                         }
@@ -214,22 +220,21 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                                         } else {
                                             toast.success('Cadastrado com sucesso!')
                                             if (isSaveAndClose()) {
-                                                navigate('/caracteristicas');
+                                                navigate('/variacoes');
                                             } else if (isSaveAndNew()) {
                                                 setIsValidating(false);
-                                                navigate('/caracteristicas/cadastro/novo');
+                                                navigate('/variacoes/cadastro/novo');
                                                 formRef.current?.setData({
-                                                    nmcaracteristica: '',
-                                                    uf: '',
-                                                    grade: null
+                                                    descricao: '',
+                                                    caracteristica: null
                                                 });
                                                 setIsValid(false);
                                             } else {
                                                 setIsValidating(false);
                                                 setIsValid(true);
                                                 setDescricao(dadosValidados.descricao);
-                                                setGrade(dadosValidados.grade)
-                                                navigate(`/caracteristicas/cadastro/${result}`);
+                                                setCaracteristica(dadosValidados.caracteristica)
+                                                navigate(`/variacoes/cadastro/${result}`);
                                             }
                                         }
                                     });
@@ -242,7 +247,7 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                                     } else {
                                         toast.success('Alterado com sucesso!');
                                         if (isSaveAndClose()) {
-                                            navigate('/caracteristicas')
+                                            navigate('/variacoes')
                                         } else {
                                             setIsValidating(false);
                                         }
@@ -276,21 +281,16 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                         toast.error(result.message);
                     } else {         
                         toast.success('Apagado com sucesso!')
-                        navigate('/caracteristicas');
+                        navigate('/variacoes');
                     }
                 })
         }
     }
     // #endregion
 
-    // #region CONTROLLERS
-    const controller = new ControllerCaracteristicas();
-    const controllerGrades = new ControllerGrades();
-    // #endregion
-
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Característica' : 'Editar Característica'}
+            titulo={id === 'novo' ? 'Cadastrar Variação' : 'Editar Variação'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvarFechar
@@ -305,12 +305,12 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                     onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
-                    onClickNovo={() => navigate('/caracteristicas/cadastro/novo') }
+                    onClickNovo={() => navigate('/variacoes/cadastro/novo') }
                     onClickVoltar={() => {
                         if (isDialog) {
                             toggleOpen?.();
                         } else {
-                            navigate('/caracteristicas')
+                            navigate('/variacoes')
                         }
                     }}
                 />
@@ -347,7 +347,7 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (isValid && descricao != "" && grade != null) && (
+                                                { (isValid && descricao != "" && caracteristica != null) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -370,22 +370,22 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
                                 <VAutocompleteSearch
                                     size="small"
                                     required
-                                    name="grade"
-                                    label={["descricao"]}
-                                    TFLabel="Grade"
-                                    getAll={controllerGrades.getAll}
+                                    name="caracteristica"
+                                    label={["descricao", "grade.descricao"]}
+                                    TFLabel="Característica"
+                                    getAll={controllerCaracteristicas.getAll}
                                     onInputchange={() => {
                                         setIsValid(false);
                                         setIsValidating(false);
                                         formRef.current?.setFieldError('descricao', '');
                                     }}
                                     onChange={newValue => {
-                                        setGrade(newValue);
+                                        setCaracteristica(newValue);
                                     }}
                                     onClickSearch={() => {
-                                        toggleConsultaGradesDialogOpen();
+                                        toggleConsultaCaracteristicasDialogOpen();
                                     }}
-                                    isDialogOpen={isConsultaGradesDialogOpen}
+                                    isDialogOpen={isConsultaCaracteristicasDialogOpen}
                                 />
                             </Grid>
                         </Grid>
@@ -421,21 +421,21 @@ export const CadastroCaracteristicas: React.FC<ICadastroProps> = ({isDialog = fa
 
                     </Grid>
                     <CustomDialog
-                        onClose={toggleConsultaGradesDialogOpen}
-                        handleClose={toggleConsultaGradesDialogOpen}
-                        open={isConsultaGradesDialogOpen}
-                        title="Consultar Grades"
+                        onClose={toggleConsultaCaracteristicasDialogOpen}
+                        handleClose={toggleConsultaCaracteristicasDialogOpen}
+                        open={isConsultaCaracteristicasDialogOpen}
+                        title="Consultar Caracteristicas"
                         fullWidth
                         maxWidth="xl"
                     >
-                        <ConsultaGrades
+                        <ConsultaCaracteristicas
                             isDialog
                             onSelectItem={(row) => {
-                                formRef.current?.setFieldValue("grade", row);
-                                formRef.current?.setFieldError('grade', '');
-                                setGrade(row);
+                                formRef.current?.setFieldValue("caracteristica", row);
+                                formRef.current?.setFieldError('caracteristica', '');
+                                setCaracteristica(row);
                             }}
-                            toggleDialogOpen={toggleConsultaGradesDialogOpen}
+                            toggleDialogOpen={toggleConsultaCaracteristicasDialogOpen}
                         />
                     </CustomDialog>
                 </Box>

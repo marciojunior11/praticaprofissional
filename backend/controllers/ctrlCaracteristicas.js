@@ -134,11 +134,11 @@ async function validate(req, res) {
 
         req.on('end', async () => {
             const { descricao, grade } = JSON.parse(body);
-            const mGrade = {
+            const mCaracteristica = {
                 descricao,
                 grade
             };
-            const response = await daoCaracteristicas.validate(mGrade);
+            const response = await daoCaracteristicas.validate(mCaracteristica);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
         })

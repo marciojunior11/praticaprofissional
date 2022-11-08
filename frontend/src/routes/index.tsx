@@ -25,7 +25,9 @@ import {
     ConsultaGrades,
     CadastroGrades,
     ConsultaCaracteristicas,
-    CadastroCaracteristicas
+    CadastroCaracteristicas,
+    ConsultaVariacoes,
+    CadastroVariacoes
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -93,6 +95,11 @@ export const AppRoutes = () => {
                 icon: 'apps',
                 path: '/caracteristicas',
             },
+            {
+                label: 'Variações',
+                icon: 'app_registration',
+                path: '/variacoes',
+            },
         ]);
     }, []);
 
@@ -132,6 +139,9 @@ export const AppRoutes = () => {
 
             <Route path="/caracteristicas" element={<ConsultaCaracteristicas/>}/>
             <Route path="/caracteristicas/cadastro/:id" element={<CadastroCaracteristicas/>}/>
+
+            <Route path="/variacoes" element={<ConsultaVariacoes/>}/>
+            <Route path="/variacoes/cadastro/:id" element={<CadastroVariacoes/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

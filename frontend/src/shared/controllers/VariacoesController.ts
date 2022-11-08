@@ -83,7 +83,7 @@ class ControllerVariacoes implements IController {
 
     validate = async (dados: IValidator): Promise<boolean | Error> => {
         try {
-            const { data } = await Api.post(`/api/caracteristicas/validate`, dados);
+            const { data } = await Api.post(`/api/variacoes/validate`, dados);
             if (data != 0) {
                 return false;
             } else {

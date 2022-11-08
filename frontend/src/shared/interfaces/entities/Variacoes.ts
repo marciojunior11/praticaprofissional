@@ -15,6 +15,7 @@ export interface IDetalhesVariacoes {
 
 export interface IValidator {
     descricao: string;
+    caracteristica: ICaracteristicas
 }
 
 export type TListaVariacoes = {

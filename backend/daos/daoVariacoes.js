@@ -254,9 +254,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(filter) {
+async function validate(variacao) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from variacoes where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from variacoes where descricao like '${variacao.descricao.toUpperCase()}' and fk_idcaracteristica = ${variacao.caracteristica.id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }

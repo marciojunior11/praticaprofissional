@@ -21,3 +21,5 @@ export * from './grades/ConsultaGrades';
 export * from './grades/CadastroGrades';
 export * from './caracteristicas/ConsultaCaracteristicas';
 export * from './caracteristicas/CadastroCaracteristicas';
+export * from './variacoes/ConsultaVariacoes';
+export * from './variacoes/CadastroVariacoes';
