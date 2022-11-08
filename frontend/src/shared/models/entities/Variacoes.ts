@@ -1,5 +1,5 @@
 import PaiComId from "./PaiComId";
-import Caracteristicas from "./Estados";
+import Caracteristicas from "./Caracteristicas";
 
 class Variacoes extends PaiComId {
     //ATRIBUTOS
