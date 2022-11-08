@@ -254,9 +254,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(filter) {
+async function validate(caracteristica) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from caracteristicas where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from caracteristicas where descricao like '${caracteristica.descricao.toUpperCase()}' and fk_idgrade = ${caracteristica.grade.id}`, (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -264,6 +264,7 @@ async function validate(filter) {
         })
     })
 }
+
 
 module.exports = {
     getQtd,

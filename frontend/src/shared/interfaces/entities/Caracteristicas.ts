@@ -1,4 +1,4 @@
-import { IGrades } from "./Grades";
+import { IDetalhesGrades, IGrades } from "./Grades";
 
 export interface ICaracteristicas {
     id: number;
@@ -15,6 +15,7 @@ export interface IDetalhesCaracteristicas {
 
 export interface IValidator {
     descricao: string;
+    grade: IGrades;
 }
 
 export type TListaCaracteristicas = {

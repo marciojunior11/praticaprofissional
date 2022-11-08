@@ -8,15 +8,17 @@ function caracteristicasRoutes(req, res) {
         if(req.url.match(/\/api\/caracteristicas\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlCaracteristicas.buscarUm(req, res, id);
-        } else if (req.url.includes('filter')) {
-            ctrlCaracteristicas.validate(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlCaracteristicas.buscarTodosSemPg(req, res)
         } else {
             ctrlCaracteristicas.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/caracteristicas' && req.method === 'POST') {
-        ctrlCaracteristicas.salvar(req, res);
+    } else if (req.method === 'POST') {
+        if (req.url.includes('validate')) {
+            ctrlCaracteristicas.validate(req, res);
+        } else {
+            ctrlCaracteristicas.salvar(req, res);
+        }
     } else if(req.url.match(/\/api\/caracteristicas\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlCaracteristicas.alterar(req, res, id);

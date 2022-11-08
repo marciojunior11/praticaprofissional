@@ -19,3 +19,5 @@ export * from './compras/CadastroCompras';
 export * from './dashboard/Dashboard';
 export * from './grades/ConsultaGrades';
 export * from './grades/CadastroGrades';
+export * from './caracteristicas/ConsultaCaracteristicas';
+export * from './caracteristicas/CadastroCaracteristicas';

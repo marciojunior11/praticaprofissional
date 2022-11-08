@@ -23,7 +23,9 @@ import {
     ConsultaCompras,
     CadastroCompras,
     ConsultaGrades,
-    CadastroGrades
+    CadastroGrades,
+    ConsultaCaracteristicas,
+    CadastroCaracteristicas
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -86,6 +88,11 @@ export const AppRoutes = () => {
                 icon: 'grid_3x3',
                 path: '/grades',
             },
+            {
+                label: 'Características',
+                icon: 'apps',
+                path: '/caracteristicas',
+            },
         ]);
     }, []);
 
@@ -122,6 +129,9 @@ export const AppRoutes = () => {
 
             <Route path="/grades" element={<ConsultaGrades/>}/>
             <Route path="/grades/cadastro/:id" element={<CadastroGrades/>}/>
+
+            <Route path="/caracteristicas" element={<ConsultaCaracteristicas/>}/>
+            <Route path="/caracteristicas/cadastro/:id" element={<CadastroCaracteristicas/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>
