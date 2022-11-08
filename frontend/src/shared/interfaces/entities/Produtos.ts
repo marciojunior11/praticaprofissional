@@ -1,48 +1,65 @@
 import { ICidades } from "./Cidades";
 import { ICondicoesPagamento } from "./CondicoesPagamento";
+import { IFornecedores } from "./Fornecedores";
 
-export interface IFornecedores {
+export interface IProdutos {
     id: number;
-    razsocial: string;
-    nmfantasia: string | undefined;
-    email: string | undefined;
-    telefone: string;
-    celular: string;
-    cnpj: string;
-    inscestadual: string;
-    cep: string;
-    endereco: string;
-    numend: string;
-    bairro: string;
-    cidade: ICidades;
-    condicaopagamento: ICondicoesPagamento;
-    flsituacao: string;
+    gtin: string;
+    descricao: string;
+    apelido: string;
+    marca: string;
+    undmedida: string;
+    unidade: number;
+    vlcusto: number;
+    vlcompra: number;
+    vlvenda: number;
+    lucro: number;
+    pesoliq: number;
+    pesobruto: number;
+    ncm: string;
+    cfop: string;
+    percicmssaida: number;
+    percipi: number;
+    cargatribut: number;
+    vlfrete: number;
+    qtdatual: number;
+    qtdideal: number;
+    qtdmin: number;
+    fornecedor: IFornecedores;
     datacad: string | Date;
     ultalt: string | Date;
 }
 
-export interface IDetalhesFornecedores {
-    razsocial: string;
-    nmfantasia: string | undefined;
-    cnpj: string;
-    inscestadual: string;
-    telefone: string | undefined;
-    celular: string | undefined;
-    email: string | undefined;
-    cep: string;
-    endereco: string;
-    numend: string;
-    bairro: string;
-    cidade: ICidades;
-    condicaopagamento: ICondicoesPagamento;
-    flsituacao: string | undefined;
+export interface IDetalhesProdutos {
+    gtin: string;
+    descricao: string;
+    apelido: string;
+    marca: string;
+    undmedida: string;
+    unidade: number;
+    vlcusto: number;
+    vlcompra: number;
+    vlvenda: number;
+    lucro: number;
+    pesoliq: number;
+    pesobruto: number;
+    ncm: string;
+    cfop: string;
+    percicmssaida: number;
+    percipi: number;
+    cargatribut: number;
+    vlfrete: number;
+    qtdatual: number;
+    qtdideal: number;
+    qtdmin: number;
+    fornecedor: IFornecedores;
 }
 
 export interface IValidator {
-    cnpj: string;
+    descricao: string;
 }
 
-export type TListaFornecedores = {
-    data: IFornecedores[];
+export type TListaProdutos = {
+    data: IProdutos[];
     qtd: number;
 }
