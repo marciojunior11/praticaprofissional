@@ -133,7 +133,7 @@ async function validate(req, res) {
             const mCentroCusto = {
                 descricao
             };
-            const response = await daoFormasPagamento.validate(mCentroCusto);
+            const response = await daoCentrosCusto.validate(mCentroCusto);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
         })

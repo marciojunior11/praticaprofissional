@@ -27,7 +27,9 @@ import {
     ConsultaCaracteristicas,
     CadastroCaracteristicas,
     ConsultaVariacoes,
-    CadastroVariacoes
+    CadastroVariacoes,
+    ConsultaCentrosCusto,
+    CadastroCentrosCusto
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -100,6 +102,11 @@ export const AppRoutes = () => {
                 icon: 'app_registration',
                 path: '/variacoes',
             },
+            {
+                label: 'Centros de Custo',
+                icon: 'currency_exchange',
+                path: '/centroscusto',
+            },
         ]);
     }, []);
 
@@ -142,6 +149,9 @@ export const AppRoutes = () => {
 
             <Route path="/variacoes" element={<ConsultaVariacoes/>}/>
             <Route path="/variacoes/cadastro/:id" element={<CadastroVariacoes/>}/>
+
+            <Route path="/centroscusto" element={<ConsultaCentrosCusto/>}/>
+            <Route path="/centroscusto/cadastro/:id" element={<CadastroCentrosCusto/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>
