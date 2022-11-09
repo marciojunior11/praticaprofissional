@@ -198,6 +198,9 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             toast.error(result.message);
                             navigate('/produtos');
                         } else {
+                            result.datacad = new Date(result.datacad).toLocaleString();
+                            result.ultalt = new Date(result.ultalt).toLocaleString();
+                            setListaVariacoes(result.listavariacoes);
                             formRef.current?.setData(result);
                             setIsValid(true);
                             setDescricao(result.descricao);
@@ -219,6 +222,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             toast.error(result.message);
                             navigate('/produtos');
                         } else {
+                            setListaVariacoes(result.listavariacoes);
                             result.datacad = new Date(result.datacad).toLocaleString();
                             result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);

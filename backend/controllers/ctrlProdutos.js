@@ -34,6 +34,7 @@ async function buscarTodosComPg(req, res) {
 async function buscarUm(req, res, id) {
     try {
         const response = await daoProdutos.buscarUm(id);
+        console.log(response);
         if (!response) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Forma de pagamento não encontrada.' }));
@@ -108,7 +109,7 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { id, gtin, descricao, apelido, marca, undmedida, unidade, vlcusto, vlcompra, vlvenda, lucro, pesoliq, pesobruto, ncm, cfop, percicmssaida, percipi, cargatribut, vlfrete, qtdatual, qtdideal, qtdmin, variacao, fornecedor, datacad, ultalt } = JSON.parse(body);
+            const { id, gtin, descricao, apelido, marca, undmedida, unidade, vlcusto, vlcompra, vlvenda, lucro, pesoliq, pesobruto, ncm, cfop, percicmssaida, percipi, cargatribut, vlfrete, qtdatual, qtdideal, qtdmin, variacao, listavariacoes, fornecedor, datacad, ultalt } = JSON.parse(body);
             const mProduto = {
                 id,
                 gtin,
@@ -133,6 +134,7 @@ async function alterar(req, res, id) {
                 qtdideal,
                 qtdmin,
                 variacao,
+                listavariacoes,
                 fornecedor,
                 datacad,
                 ultalt

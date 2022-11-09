@@ -42,6 +42,8 @@ class ControllerProdutos implements IController {
 
             const { data } = await Api.get(`/api/produtos/${id}`);
     
+            console.log('data', data);
+
             if (data) {
                 return data;
             }

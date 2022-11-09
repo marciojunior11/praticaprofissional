@@ -122,10 +122,21 @@ async function deletar(req, res, id) {
 
 async function validate(req, res) {
     try {
-            const filter = req.url.split('=')[1];
-            const response = await daoCentrosCusto.validate(filter);
+        let body = '';
+
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+
+        req.on('end', async () => {
+            const { descricao } = JSON.parse(body);
+            const mCentroCusto = {
+                descricao
+            };
+            const response = await daoFormasPagamento.validate(mCentroCusto);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
+        })
     } catch (error) {
         console.log(error);
     }; 

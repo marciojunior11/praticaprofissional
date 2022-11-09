@@ -27,7 +27,6 @@ async function getQtd(url) {
 async function buscarPorCaracteristica(url) {
     return new Promise((resolve, reject) => {
         const idcaracteristica = url.split('=')[1];
-        console.log(url);
         pool.query('select * from variacoes where fk_idcaracteristica = $1 order by id asc', [idcaracteristica], async (err, res) => {
             if (err) {
                 return reject(err);

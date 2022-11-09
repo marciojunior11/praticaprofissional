@@ -1,5 +1,6 @@
 const { pool } = require('../datamodule/index');
 const daoVariacoes = require('./daoVariacoes');
+const daoCaracteristicas = require('./daoCaracteristicas');
 const daoFornecedores = require('./daoFornecedores');
 
 // @descricao BUSCA TODOS OS REGISTROS
@@ -34,7 +35,17 @@ async function buscarTodosSemPg(url) {
                 }
                 const mListaProdutos = [];
                 for (let i = 0; i < res.rows.length; i++) {
-                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    var listavariacoes = [];
+                    let produtos_variacoes = await pool.query(`
+                    select * from produtos_variacoes 
+                    inner join variacoes on produtos_variacoes.fk_idvariacao = variacoes.id
+                    inner join produtos on produtos_variacoes.fk_idproduto = produtos.id
+                    where produtos_variacoes.fk_idproduto = $1
+                    `, [res.rows[i].id]);
+                    for (let j = 0; j < produtos_variacoes.length; j++) {
+                        let variacao = await pool.query('select * from variacoes where id = $1', [produtos_variacoes[j].fk_idvariacao]);
+                        listavariacoes.push(variacao);
+                    }
                     let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
                     mListaProdutos.push({
                         id: res.rows[i].id,
@@ -59,8 +70,8 @@ async function buscarTodosSemPg(url) {
                         qtdatual: res.rows[i].qtdatual,
                         qtdideal: res.rows[i].qtdideal,
                         qtdmin: res.rows[i].qtdmin,
-                        variacao: mVariacao,
                         fornecedor: mFornecedor,
+                        listavariacoes: listavariacoes,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
                     });
@@ -75,7 +86,17 @@ async function buscarTodosSemPg(url) {
                 }
                 const mListaProdutos = [];
                 for (let i = 0; i < res.rows.length; i++) {
-                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    var listavariacoes = [];
+                    let produtos_variacoes = await pool.query(`
+                    select * from produtos_variacoes 
+                    inner join variacoes on produtos_variacoes.fk_idvariacao = variacoes.id
+                    inner join produtos on produtos_variacoes.fk_idproduto = produtos.id
+                    where produtos_variacoes.fk_idproduto = $1
+                    `, [res.rows[i].id]);
+                    for (let j = 0; j < produtos_variacoes.length; j++) {
+                        let variacao = await pool.query('select * from variacoes where id = $1', [produtos_variacoes[j].fk_idvariacao]);
+                        listavariacoes.push(variacao);
+                    }
                     let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
                     mListaProdutos.push({
                         id: res.rows[i].id,
@@ -100,7 +121,7 @@ async function buscarTodosSemPg(url) {
                         qtdatual: res.rows[i].qtdatual,
                         qtdideal: res.rows[i].qtdideal,
                         qtdmin: res.rows[i].qtdmin,
-                        variacao: mVariacao,
+                        listavariacoes: listavariacoes,
                         fornecedor: mFornecedor,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
@@ -125,7 +146,17 @@ async function buscarTodosComPg (url) {
                 }
                 const mListaProdutos = [];
                 for (let i = 0; i < res.rows.length; i++) {
-                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    var listavariacoes = [];
+                    let produtos_variacoes = await pool.query(`
+                    select * from produtos_variacoes 
+                    inner join variacoes on produtos_variacoes.fk_idvariacao = variacoes.id
+                    inner join produtos on produtos_variacoes.fk_idproduto = produtos.id
+                    where produtos_variacoes.fk_idproduto = $1
+                    `, [res.rows[i].id]);
+                    for (let j = 0; j < produtos_variacoes.length; j++) {
+                        let variacao = await pool.query('select * from variacoes where id = $1', [produtos_variacoes[j].fk_idvariacao]);
+                        listavariacoes.push(variacao);
+                    }
                     let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
                     mListaProdutos.push({
                         id: res.rows[i].id,
@@ -150,8 +181,8 @@ async function buscarTodosComPg (url) {
                         qtdatual: res.rows[i].qtdatual,
                         qtdideal: res.rows[i].qtdideal,
                         qtdmin: res.rows[i].qtdmin,
-                        variacao: mVariacao,
                         fornecedor: mFornecedor,
+                        listavariacoes: listavariacoes,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
                     });
@@ -166,7 +197,17 @@ async function buscarTodosComPg (url) {
                 }
                 const mListaProdutos = [];
                 for (let i = 0; i < res.rows.length; i++) {
-                    let mVariacao = await daoVariacoes.buscarUm(res.rows[i].fk_idvariacao);
+                    var listavariacoes = [];
+                    let produtos_variacoes = await pool.query(`
+                    select * from produtos_variacoes 
+                    inner join variacoes on produtos_variacoes.fk_idvariacao = variacoes.id
+                    inner join produtos on produtos_variacoes.fk_idproduto = produtos.id
+                    where produtos_variacoes.fk_idproduto = $1
+                    `, [res.rows[i].id]);
+                    for (let j = 0; j < produtos_variacoes.length; j++) {
+                        let variacao = await pool.query('select * from variacoes where id = $1', [produtos_variacoes[j].fk_idvariacao]);
+                        listavariacoes.push(variacao);
+                    }
                     let mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
                     mListaProdutos.push({
                         id: res.rows[i].id,
@@ -191,8 +232,8 @@ async function buscarTodosComPg (url) {
                         qtdatual: res.rows[i].qtdatual,
                         qtdideal: res.rows[i].qtdideal,
                         qtdmin: res.rows[i].qtdmin,
-                        variacao: mVariacao,
                         fornecedor: mFornecedor,
+                        listavariacoes: listavariacoes,
                         datacad: res.rows[i].datacad,
                         ultalt: res.rows[i].ultalt,
                     });
@@ -212,7 +253,19 @@ async function buscarUm (id) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                let mVariacao = await daoVariacoes.buscarUm(res.rows[0].fk_idvariacao);
+                var listavariacoes = [];
+                let produtos_variacoes = await pool.query(`
+                select fk_idvariacao from produtos_variacoes 
+                inner join variacoes on produtos_variacoes.fk_idvariacao = variacoes.id
+                inner join produtos on produtos_variacoes.fk_idproduto = produtos.id
+                where produtos_variacoes.fk_idproduto = ${id}
+                `);
+                //console.log('listavariacoes', produtos_variacoes);
+                for (let i = 0; i < produtos_variacoes.rowCount; i++) {
+                    let variacao = await daoVariacoes.buscarUm(produtos_variacoes.rows[i].fk_idvariacao);
+                    listavariacoes.push(variacao);
+                }
+                console.log(listavariacoes);
                 let mFornecedor = await daoFornecedores.buscarUm(res.rows[0].fk_idfornecedor);
                 const mProduto = {
                     id: res.rows[0].id,
@@ -237,8 +290,8 @@ async function buscarUm (id) {
                     qtdatual: res.rows[0].qtdatual,
                     qtdideal: res.rows[0].qtdideal,
                     qtdmin: res.rows[0].qtdmin,
-                    variacao: mVariacao,
                     fornecedor: mFornecedor,
+                    listavariacoes: listavariacoes,
                     datacad: res.rows[0].datacad,
                     ultalt: res.rows[0].ultalt,
                 }
@@ -252,6 +305,7 @@ async function buscarUm (id) {
 // @descricao SALVA UM REGISTRO
 // @route POST /api/produtos
 async function salvar (produto) {
+    console.log("produto", produto);
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -298,7 +352,7 @@ async function salvar (produto) {
                 ], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     const response = await client.query('select * from produtos where id = (select max(id) from produtos)');
-                    for (let i = 0; i < produto.listavariacoes; i++) {
+                    for (let i = 0; i < produto.listavariacoes.length; i++) {
                         client.query('insert into produtos_variacoes values ($1, $2)', [response.id, produto.listavariacoes[i].id], async (err, res) => {
                             if (shouldAbort(err)) return reject(err);
                         })
@@ -395,6 +449,7 @@ async function alterar (id, produto) {
 // @descricao DELETA UM REGISTRO
 // @route GET /api/produtos/:id
 async function deletar (id) {
+    console.log(id);
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {

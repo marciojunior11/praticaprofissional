@@ -202,9 +202,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(filter) {
+async function validate(centrocusto) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from centroscusto where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from centroscusto where descricao like '${centrocusto.descricao.toUpperCase()}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
