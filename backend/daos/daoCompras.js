@@ -400,9 +400,14 @@ async function deletar (url) {
     })
 };
 
-async function validate(filter) {
+async function validate(compra) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from compras where descricao like '${filter.toUpperCase()}'`, (err, res) => {
+        pool.query('select * from compras where numnf = $1 and serienf = $2 and modelonf = $3 and fk_idfornecedor = $4', [
+            compra.numnf, 
+            compra.serienf, 
+            compra.modelonf,
+             compra.fornecedor.id
+        ], (err, res) => {
             if (err) {
                 return reject(err);
             }

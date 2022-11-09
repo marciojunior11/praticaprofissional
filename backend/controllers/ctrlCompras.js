@@ -57,7 +57,7 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, datacad, ultalt } = JSON.parse(body);
+            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, dataemissao, dataentrada, datacad, ultalt } = JSON.parse(body);
             const mCompra = {
                 numnf,
                 serienf,
@@ -68,6 +68,8 @@ async function salvar(req, res) {
                 listaprodutos,
                 observacao,
                 vltotal,
+                dataemissao,
+                dataentrada,
                 datacad,
                 ultalt
             };
@@ -94,7 +96,7 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, datacad, ultalt, flsituacao } = JSON.parse(body);
+            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, dataemissao, dataentrada, datacad, ultalt } = JSON.parse(body);
             const mCompra = {
                 numnf,
                 serienf,
@@ -105,9 +107,10 @@ async function alterar(req, res, id) {
                 listaprodutos,
                 observacao,
                 vltotal,
+                dataemissao,
+                dataentrada,
                 datacad,
                 ultalt,
-                flsituacao
             };
             const novaCompra = await daoCompras.alterar(id, mCompra)
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -137,10 +140,24 @@ async function deletar(req, res) {
 
 async function validate(req, res) {
     try {
-            const filter = req.url.split('=')[1];
-            const response = await daoCompras.validate(filter);
+        let body = '';
+
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+
+        req.on('end', async () => {
+            const { numnf, serienf, modelonf, fornecedor } = JSON.parse(body);
+            const mCompra = {
+                numnf,
+                serienf,
+                modelonf,
+                fornecedor
+            };
+            const response = await daoCompras.validate(mCompra);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.rowCount));
+        })
     } catch (error) {
         console.log(error);
     }; 
