@@ -99,17 +99,15 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, 
                                                 </TableRow>
                                             ))
                                         ) : (
-                                            rows.map((item: any) => (
-                                                <TableRow key={item[collapseRowId]}>
-                                                    { collapseHeaders.map((header) => {
-                                                        return (
-                                                            <TableCell align={header.align && header.align}>
-                                                                { !header.render ? getNestedObjectPropValue(item, header.name) : header.render(row) }
-                                                            </TableCell>
-                                                        )
-                                                    }) }
-                                                </TableRow>
-                                            ))
+                                            <TableRow key={row[collapseRowId]}>
+                                                { collapseHeaders.map((header) => {
+                                                    return (
+                                                        <TableCell align={header.align && header.align}>
+                                                            { !header.render ? getNestedObjectPropValue(row, header.name) : header.render(row) }
+                                                        </TableCell>
+                                                    )
+                                                }) }
+                                            </TableRow>
                                         )}
                                     </TableBody>
                                 </Table>
