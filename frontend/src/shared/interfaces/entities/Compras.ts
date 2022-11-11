@@ -1,5 +1,6 @@
 import { ICondicoesPagamento } from "./CondicoesPagamento";
 import { IFornecedores } from "./Fornecedores";
+import { IProdutosNF } from "./ProdutosNF";
 
 export interface ICompras {
     numnf: string;
@@ -8,6 +9,7 @@ export interface ICompras {
     fornecedor: IFornecedores;
     observacao: string | undefined;
     condicaopagamento: ICondicoesPagamento;
+    listaprodutos: IProdutosNF[];
     vltotal: number;
     dataemissao: string | Date;
     dataentrada: string | Date;
@@ -22,7 +24,9 @@ export interface IDetalhesCompras {
     fornecedor: IFornecedores;
     observacao: string | undefined;
     condicaopagamento: ICondicoesPagamento;
+    listaprodutos: IProdutosNF[];
     vltotal: number;
+    flsituacao: string;
     dataemissao: string | Date;
     dataentrada: string | Date;
 }

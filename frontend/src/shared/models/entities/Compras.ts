@@ -4,15 +4,16 @@ import Produtos from "./Produtos";
 
 class Compras extends PaiSemId {
     // #region ATRIBUTOS
-    numnf: string;
-    serienf: string;
-    modelonf: string;
-    fornecedor: Juridicas;
-    observacao: string;
-    vltotal: number;
-    listaprodutos: Produtos[]
-    dataemissao: string | Date;
-    dataentrada: string | Date;
+    private numnf: string;
+    private serienf: string;
+    private modelonf: string;
+    private fornecedor: Juridicas;
+    private observacao: string;
+    private vltotal: number;
+    private listaprodutos: Produtos[];
+    private flsituacao: string;
+    private dataemissao: string | Date;
+    private dataentrada: string | Date;
     // #endregion
 
     // #region CONSTRUCTOR
@@ -24,6 +25,7 @@ class Compras extends PaiSemId {
         observacao: string = "",
         vltotal: number = 0,
         listaprodutos: Produtos[] = [],
+        flsituacao: string = "",
         dataemissao: string | Date = new Date(),
         dataentrada: string | Date = new Date(),
         datacad: string | Date = new Date(),
@@ -37,6 +39,7 @@ class Compras extends PaiSemId {
         this.observacao = observacao;
         this.vltotal = vltotal;
         this.listaprodutos = listaprodutos;
+        this.flsituacao = flsituacao;
         this.dataemissao = dataemissao;
         this.dataentrada = dataentrada;
         this.datacad = datacad,
@@ -71,6 +74,10 @@ class Compras extends PaiSemId {
 
     public get _listaprodutos() {
         return this.listaprodutos;
+    }
+
+    public get _flsituacao() {
+        return this.flsituacao;
     }
 
     public get _dataemissao() {
@@ -110,6 +117,10 @@ class Compras extends PaiSemId {
 
     public set _listaprodutos(value: Produtos[]) {
         this.listaprodutos = value;
+    }
+
+    public set _flsituacao(value: string) {
+        this.flsituacao = value;
     }
 
     public set _dataemissao(value: string | Date) {
