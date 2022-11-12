@@ -92,7 +92,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, 
                                                     { collapseHeaders.map((header) => {
                                                         return (
                                                             <TableCell align={header.align && header.align}>
-                                                                { !header.render ? getNestedObjectPropValue(item, header.name) : header.render(row) }
+                                                                { !header.render ? getNestedObjectPropValue(item, header.name) : header.render(item) }
                                                             </TableCell>
                                                         )
                                                     }) }

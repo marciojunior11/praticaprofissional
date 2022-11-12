@@ -1,6 +1,7 @@
 import PaiSemId from "./PaiSemId";
 import Juridicas from './Juridicas'
 import Produtos from "./Produtos";
+import ContasPagar from "./ContasPagar";
 
 class Compras extends PaiSemId {
     // #region ATRIBUTOS
@@ -11,6 +12,7 @@ class Compras extends PaiSemId {
     private observacao: string;
     private vltotal: number;
     private listaprodutos: Produtos[];
+    private listacontaspagar: ContasPagar[];
     private flsituacao: string;
     private dataemissao: string | Date;
     private dataentrada: string | Date;
@@ -25,6 +27,7 @@ class Compras extends PaiSemId {
         observacao: string = "",
         vltotal: number = 0,
         listaprodutos: Produtos[] = [],
+        listacontaspagar: ContasPagar[] = [],
         flsituacao: string = "",
         dataemissao: string | Date = new Date(),
         dataentrada: string | Date = new Date(),
@@ -39,11 +42,12 @@ class Compras extends PaiSemId {
         this.observacao = observacao;
         this.vltotal = vltotal;
         this.listaprodutos = listaprodutos;
+        this.listacontaspagar = listacontaspagar;
         this.flsituacao = flsituacao;
         this.dataemissao = dataemissao;
         this.dataentrada = dataentrada;
-        this.datacad = datacad,
-        this.ultalt = ultalt
+        this.datacad = datacad;
+        this.ultalt = ultalt;
     }
     // #endregion
 
@@ -74,6 +78,10 @@ class Compras extends PaiSemId {
 
     public get _listaprodutos() {
         return this.listaprodutos;
+    }
+
+    public get _listacontaspagar() {
+        return this.listacontaspagar;
     }
 
     public get _flsituacao() {
@@ -117,6 +125,10 @@ class Compras extends PaiSemId {
 
     public set _listaprodutos(value: Produtos[]) {
         this.listaprodutos = value;
+    }
+
+    public set _listacontaspagar(value: ContasPagar[]) {
+        this.listacontaspagar = value;
     }
 
     public set _flsituacao(value: string) {

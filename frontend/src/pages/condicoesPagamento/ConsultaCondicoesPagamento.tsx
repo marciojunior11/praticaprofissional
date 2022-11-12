@@ -132,15 +132,30 @@ export const ConsultaCondicoesPagamento: React.FC<IConsultaProps> = ({ isDialog 
         },        
         {
             label: "Desconto",
-            name: "txdesc",  
+            name: "txdesc",
+            render: (row) => {
+                return (
+                    `${row.txdesc} %`
+                )
+            } 
         },
         {
             label: "Multa",
-            name: "txmulta",  
+            name: "txmulta",
+            render: (row) => {
+                return (
+                    `${row.txmulta} %`
+                )
+            } 
         },
         {
             label: "Juros",
-            name: "txjuros",  
+            name: "txjuros",
+            render: (row) => {
+                return (
+                    `${row.txjuros} %`
+                )
+            }  
         },
         {
             label: "Situação",
@@ -199,11 +214,16 @@ export const ConsultaCondicoesPagamento: React.FC<IConsultaProps> = ({ isDialog 
         },
         {
             label: "Dias",
-            name: "dias",  
+            name: "dias", 
         },        
         {
             label: "Percentual",
-            name: "percentual",  
+            name: "percentual",
+            render: (row) => {
+                return (
+                    `${row.percentual} %`
+                )
+            } 
         },
         {
             label: "Forma de Pagamento",

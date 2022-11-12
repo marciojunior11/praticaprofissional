@@ -20,8 +20,8 @@ import {
     CadastroFormasPagamento,
     CadastroCondicoesPagamento,
     ConsultaFormasPagamento,
-    // ConsultaCompras,
-    // CadastroCompras,
+    ConsultaCompras,
+    CadastroCompras,
     ConsultaGrades,
     CadastroGrades,
     ConsultaCaracteristicas,
@@ -82,11 +82,11 @@ export const AppRoutes = () => {
                 icon: 'request_quote',
                 path: '/condicoespagamento',
             },
-            // {
-            //     label: 'Compras',
-            //     icon: 'paid',
-            //     path: '/compras',
-            // },
+            {
+                label: 'Compras',
+                icon: 'paid',
+                path: '/compras',
+            },
             {
                 label: 'Grades',
                 icon: 'grid_3x3',
@@ -138,8 +138,8 @@ export const AppRoutes = () => {
             <Route path="/produtos" element={<ConsultaProdutos/>}/>
             <Route path="/produtos/cadastro/:id" element={<CadastroProdutos/>}/>
 
-            {/* <Route path="/compras" element={<ConsultaCompras/>}/>
-            <Route path="/compras/cadastro/:id" element={<CadastroCompras/>}/> */}
+            <Route path="/compras" element={<ConsultaCompras/>}/>
+            <Route path="/compras/cadastro/:id" element={<CadastroCompras/>}/>
 
             <Route path="/grades" element={<ConsultaGrades/>}/>
             <Route path="/grades/cadastro/:id" element={<CadastroGrades/>}/>

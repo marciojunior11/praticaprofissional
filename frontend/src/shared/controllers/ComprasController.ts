@@ -2,7 +2,9 @@ import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
 import { ICompras, IDetalhesCompras, TListaCompras } from '../interfaces/entities/Compras';
 import { IValidator } from '../interfaces/entities/Compras';
+import CentrosCusto from '../models/entities/CentrosCusto';
 import Compras from '../models/entities/Compras';
+import ContasPagar from '../models/entities/ContasPagar';
 import Estados from '../models/entities/Estados';
 import FormasPagamento from '../models/entities/FormasPagamento';
 import Juridicas from '../models/entities/Juridicas';
@@ -56,7 +58,9 @@ class ControllerCompras implements IController {
 
     create = async (dados: IDetalhesCompras): Promise<number | undefined | Error> => {
         var listaprodutos = new Array<Produtos>();
+        var listacontaspagar = new Array<ContasPagar>();
         var listaprodutosAux = dados.listaprodutos;
+        var listaParcelasAux = dados.condicaopagamento.listaparcelas;
         listaprodutosAux.forEach((produto) => {
             let listavariacoes = new Array<Variacoes>();
             produto.listavariacoes.forEach((variacao) => {
@@ -94,6 +98,26 @@ class ControllerCompras implements IController {
                 produto.ultalt
             );
                 listaprodutos.push(itemNF);
+        });
+        listaParcelasAux.forEach((parcela) => {
+            let dtvencimento = new Date(dados.dataemissao);
+            dtvencimento.setDate(dtvencimento.getDate() + parcela.dias);
+            let vlconta = (dados.vltotal/100)*parcela.percentual;
+            let conta = new ContasPagar(
+                parcela.numero,
+                dtvencimento,
+                vlconta,
+                dados.condicaopagamento.txdesc,
+                dados.condicaopagamento.txmulta,
+                dados.condicaopagamento.txjuros,
+                new Juridicas(dados.fornecedor.id),
+                new FormasPagamento(parcela.formapagamento.id),
+                new CentrosCusto(1),
+                'A',
+                new Date(),
+                new Date()
+            );
+            listacontaspagar.push(conta);
         })
         var compra = new Compras(
             dados.numnf,
@@ -103,6 +127,7 @@ class ControllerCompras implements IController {
             dados.observacao,
             dados.vltotal,
             listaprodutos,
+            listacontaspagar,
             'A',
             dados.dataemissao,
             dados.dataentrada,
@@ -169,6 +194,7 @@ class ControllerCompras implements IController {
             dados.observacao,
             dados.vltotal,
             listaprodutos,
+            new Array<ContasPagar>(),
             dados.flsituacao,
             dados.dataemissao,
             dados.dataentrada,
@@ -182,9 +208,10 @@ class ControllerCompras implements IController {
         }  
     }
 
-    delete = async (id: number): Promise<void | Error> => {
+    delete = async (dados: IValidator): Promise<void | Error> => {
         try {
-            await Api.delete(`/api/compras/${id}`);
+            const url = `/api/compras/?_numnf=${dados.numnf}&_serienf=${dados.serienf}&_modelonf=${dados.modelonf}&_idfornecedor=${dados.fornecedor?.id}`
+            await Api.delete(url);
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
         }           
