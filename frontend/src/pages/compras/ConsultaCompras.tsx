@@ -38,7 +38,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
     // #endregion
 
     // #region STATES
-    const [selectedId, setSelectedId] = useState<IValidator | undefined>();
+    const [selectedRow, setSelectedRow] = useState<IValidator | undefined>();
     const [rows, setRows] = useState<ICompras[]>([]);
     const [rowOpen, setRowOpen] = useState(false);
     const [qtd, setQtd] = useState(0);
@@ -96,10 +96,15 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                         </IconButton>
                         <IconButton color="primary" size="small" onClick={() => {
                             if (isDialog) {
-                                setSelectedId(row.id);
+                                setSelectedRow({
+                                    numnf: row.numnf,
+                                    serienf: row.serienf,
+                                    modelonf: row.modelonf,
+                                    idfornecedor: row.fornecedor.id
+                                });
                                 toggleCadastroComprasDialogOpen();
                             } else {
-                                navigate(`/compras/cadastro/numnf=${row.numnf}_serienf=${row.serienf}_modelonf=${row.modelonf}_idfornecedor=${row.idfornecedor}`);
+                                navigate(`/compras/cadastro/nf=${row.numnf}_serie=${row.serienf}_modelo=${row.modelonf}_fornecedor=${row.fornecedor?.id}`);
                             }
                         }}>
                             <Icon>edit</Icon>
@@ -184,7 +189,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                 numnf: dados.numnf,
                 serienf: dados.serienf,
                 modelonf: dados.modelonf,
-                fornecedor: dados.fornecedor
+                idfornecedor: dados.fornecedor.id
             })
                 .then(result => {
                     console.log(result);
@@ -210,11 +215,11 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
                     onClickNew={() => {
                         if (isDialog) {
-                            setSelectedId({
+                            setSelectedRow({
                                 numnf: "",
                                 serienf: "",
                                 modelonf: "",
-                                fornecedor: null
+                                idfornecedor: 0
                             });
                             toggleCadastroComprasDialogOpen();
                         } else {
@@ -257,7 +262,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                 <CadastroCompras
                     isDialog
                     toggleOpen={toggleCadastroComprasDialogOpen}
-                    selectedId={Number(selectedId)}
+                    selectedRow={selectedRow}
                     reloadDataTableIfDialog={reloadDataTable}
                 />
             </CustomDialog>

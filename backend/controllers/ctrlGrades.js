@@ -5,7 +5,6 @@ const daoGrades = require('../daos/daoGrades');
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoGrades.buscarTodosSemPg(req.url);
-        console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,

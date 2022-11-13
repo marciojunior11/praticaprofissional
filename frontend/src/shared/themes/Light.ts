@@ -1,5 +1,6 @@
 import { createTheme } from '@mui/material';
 import { blue, green } from '@mui/material/colors';
+import type {} from '@mui/x-date-pickers/themeAugmentation';
 
 export const LightTheme = createTheme({
     palette: {
@@ -18,6 +19,15 @@ export const LightTheme = createTheme({
         background: {
             default: '#f7f6f3',
             paper: '#ffffff',
+        }
+    },
+    components: {
+        MuiDatePicker: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: blue[700]
+                }
+            }
         }
     }
 });

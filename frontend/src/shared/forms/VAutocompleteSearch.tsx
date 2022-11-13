@@ -102,6 +102,10 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen
             <Grid item xs={10} sm={10} md={10} lg={10} xl={10}>
                 <Autocomplete
                     //REQUIRED PARAMS
+                    readOnly={disabled}
+                    disabledItemsFocusable={disabled}
+                    disableClearable={disabled}
+                    disableListWrap={disabled}
                     size={size}
                     options={options}
                     renderInput={params => (

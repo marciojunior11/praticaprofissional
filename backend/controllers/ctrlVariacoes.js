@@ -19,7 +19,6 @@ async function buscarPorCaracteristica(req, res) {
 async function buscarTodosSemPg(req, res) {
     try {
         const response = await daoVariacoes.buscarTodosSemPg(req.url);
-        console.log(response);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             data: response,

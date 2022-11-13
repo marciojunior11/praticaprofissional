@@ -1,7 +1,7 @@
 // #region EXTERNAL IMPORTS
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, CircularProgress, Collapse, Divider, FormHelperText, Grid, Icon, IconButton, InputAdornment, LinearProgress, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Collapse, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Typography } from "@mui/material";
 import * as yup from 'yup';
 import { toast } from "react-toastify";
 // #endregion
@@ -9,262 +9,328 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect } from "../../shared/forms"
+import { IDetalhesCompras, ICompras, IValidator } from "../../shared/interfaces/entities/Compras";
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
-import { IDetalhesParcelas, IParcelas, TListaParcelas } from "../../shared/interfaces/entities/Parcelas";
-import { Environment } from "../../shared/environment";
-import { CadastroPaises } from "../paises/CadastroPaises";
-import { ConsultaFormasPagamento } from "../formasPagamento/ConsultaFormasPagamento";
+import ControllerCompras from "../../shared/controllers/ComprasController";
+import { IFornecedores } from "../../shared/interfaces/entities/Fornecedores";
+import { ICadastroComprasProps } from "../../shared/interfaces/views/CadastroCompras";
+import ControllerFornecedores from "../../shared/controllers/FornecedoresController";
+import { ConsultaFornecedores } from "../fornecedores/ConsultaFornecedores";
+import ControllerProdutos from "../../shared/controllers/ProdutosController";
+import { ConsultaProdutos } from "../produtos/ConsultaProdutos";
+import { IProdutosNF } from "../../shared/interfaces/entities/ProdutosNF";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
-import { ICondicoesPagamento, IDetalhesCondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
-import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
-import ControllerFormasPagamento from "../../shared/controllers/FormasPagamentoController";
-import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 // #endregion
 
 // #region INTERFACES
 interface IFormData {
-    descricao: string;
-    txdesc: number;
-    txmulta: number;
-    txjuros: number;
+    nmpais: string;
+    sigla: string;
+    ddi: string;
 }
-
 // #endregion
 
-
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    descricao: yup.string().required(),
-    txdesc: yup.number().required(),
-    txmulta: yup.number().required(),
-    txjuros: yup.number().required(),
+    nmpais: yup.string().required(),
+    sigla: yup.string().required().min(2),
+    ddi: yup.string().required(),
 })
 
-export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
+export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = false, toggleOpen, selectedRow, reloadDataTableIfDialog}) => {
     // #region CONTROLLERS
-        const controller = new ControllerCondicoesPagamento();
-        const controllerFormasPagamento = new ControllerFormasPagamento();
+    const controller = new ControllerCompras();
+    const controllerFornecedores = new ControllerFornecedores();
+    const controllerProdutos = new ControllerProdutos();
     // #endregion
-
+   
     // #region HOOKS
-    const { id = 'novo' } = useParams<'id'>();
+    const { nf = ''} = useParams<'nf'>();
+    const { serie = ''} = useParams<'serie'>();
+    const { modelo = ''} = useParams<'modelo'>();
+    const { fornecedor = ''} = useParams<'fornecedor'>();
+    const id = (nf != '' && serie != '' && modelo != '' && fornecedor != '') ? `nf=${nf}_serie=${serie}_modelo=${modelo}_fornecedor=${fornecedor}` : 'novo';
     const navigate = useNavigate();
-    const { debounce } = useDebounce();
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
+    const { debounce } = useDebounce();
     // #endregion
 
     // #region STATES
-    const [obj, setObj] = useState<ICondicoesPagamento | null>(null);
-    const [listaparcelas, setListaParcelas] = useState<IParcelas[]>([]);
-    const [parcela, setParcela] = useState<IParcelas | null>(null);
-    const [isConsultaFormasPgtoDialogOpen, setIsConsultaFormasPgtoDialogOpen] = useState(false);
+    const [isConsultaFornecedoresDialogOpen, setIsConsultaFornecedoresDialogOpen] = useState(false);
+    const [isConsultaProdutosDialogOpen, setIsConsultaProdutosDialogOpen] = useState(false);
+    const [listaProdutosNF, setListaProdutosNF] = useState<IProdutosNF[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState<any>(null);
+    const [isValidating, setIsValidating] = useState<boolean>(false);
     const [isValid, setIsValid] = useState(false);
-    const [isValidParcelas, setIsValidParcelas] = useState(false);
-    const [isEditingParcela, setIsEditingParcela] = useState(false);
-    const [parcelaSelected, setParcelaSelected] = useState<IParcelas | null>(null);
-    const [descricao, setDescricao] = useState("");
-    const [condicaoPagamentoOriginal, setCondicaoPagamentoOriginal] = useState<IDetalhesCondicoesPagamento | null>(null);
+    const [numnf, setNumNf] = useState("");
+    const [serienf, setSerieNf] = useState("");
+    const [modelonf, setModeloNf] = useState("");
+    const [objFornecedor, setObjFornecedor] = useState<IFornecedores | null>(null);
+    const [compraOriginal, setCompraOriginal] = useState<ICompras | null>(null);
+    const [produto, setProduto] = useState<IProdutosNF | null>(null);
+    const [vlTotalProdutosNota, setVlTotalProdutosNota] = useState(0);
+    const [vlSubTotalNota, setVlSubTotalNota] = useState(0);
+    const [vlUnitario, setVlUnitario] = useState(0);
+    const [qtd, setQtd] = useState(0);
     // #endregion
 
     // #region ACTIONS
+    const toggleConsultaFornecedoresDialogOpen = () => {
+        setIsConsultaFornecedoresDialogOpen(oldValue => !oldValue);
+    }
+
+    const toggleConsultaProdutosDialogOpen = () => {
+        setIsConsultaProdutosDialogOpen(oldValue => !oldValue);
+    }
+
     const headers: IHeaderProps[] = [
         {
-            label: "Número",
-            name: "numero"
+            label: "ID",
+            name: "id",  
         },
         {
-            label: "Dias",
-            name: "dias"
+            label: "Descrição",
+            name: "descricao",  
         },
         {
-            label: "Percentual",
-            name: "percentual"
+            label: "UND",
+            name: "undmedida",  
         },
         {
-            label: "Forma de Pagamento",
-            name: "formapagamento.descricao"
+            label: "Quantidade",
+            name: "qtd",  
+        },
+        {
+            label: "Valor unitário",
+            name: "vlcompra",  
+        },
+        {
+            label: "Custo",
+            name: "vlcusto",  
+        },
+        {
+            label: "Total",
+            name: "vltotal",  
         },
         {
             label: "Ações",
             name: " ",
             align: "right",
-            render: (row) => {
+            render: (row: IProdutosNF) => {
                 return (
                     <>
                         <IconButton
-                            disabled={isEditingParcela} 
                             color="error" 
                             size="small" 
                             onClick={() => {
-                                if (window.confirm('Deseja excluir esta parcela?')) {
-                                    const mArray = listaparcelas.slice();
-                                    delete mArray[row.numero-1];
-                                    mArray.length = listaparcelas.length-1;
-                                    setListaParcelas(mArray);
+                                if (window.confirm('Deseja excluir este produto?')) {
+                                    const mArray = listaProdutosNF.slice();
+                                    const index = mArray.findIndex(item => item.id == row.id);
+                                    delete mArray[index];
+                                    mArray.length = listaProdutosNF.length-1;
+                                    setListaProdutosNF(mArray);
                                 }
                             }}
                         >
                             <Icon>delete</Icon>
                         </IconButton>
-                        <IconButton
-                            disabled={isEditingParcela} 
-                            color="primary" 
-                            size="small"
-                            onClick={() => {
-                                setIsEditingParcela(true);
-                                setParcelaSelected(row);
-                            }}
-                        >
-                            <Icon>edit</Icon>
-                        </IconButton>
                     </>
                 )
             }
         }
-    ]
+    ];
 
-    const toggleConsultaFormasPgtoDialogOpen = () => {
-        setIsConsultaFormasPgtoDialogOpen(oldValue => !oldValue);
+    // useEffect(() => {
+    //     console.log('aqui');
+    //     updateCustoProdutos(); 
+    // }, [listaProdutosNF])
+
+    useEffect(() => {
+        formRef.current?.setFieldValue('total', String(vlUnitario * qtd));        
+    }, [vlUnitario, qtd])
+
+    // const updateCustoProdutos = () => {
+    //     console.log("update");
+    //     let mArray: IProdutosNF[] = [];
+    //     let listaProdutosNFAux = listaProdutosNF.slice();
+    //     let vlTotalNota = 0;
+    //     listaProdutosNFAux.forEach(item => {
+    //         let percProduto = ((item.vlcompra*100)/vlTotalProdutosNota)/100;
+    //         let custo = (item.vlfrete + item.vlpedagio + item.vloutrasdespesas)*percProduto;
+    //         custo = custo + item.vlcompra;
+    //         let mItem = {
+    //             ...item,
+    //             vlcusto: custo,
+    //             lucro: item.vlvenda - custo,
+    //             vltotal: custo * item.qtd
+    //         };
+    //         vlTotalNota += custo * item.qtd;
+    //         mArray.push(mItem);
+    //     })
+    //     setListaProdutosNF(mArray);
+    //     setVlSubTotalNota(vlTotalNota);
+    // }
+
+    const insertProduto = () => {
+        var listaProdutos = listaProdutosNF.slice();
+        var mProduto = listaProdutos.find(item => item.id == produto?.id);
+        if (mProduto) {
+            toast.error('Este produto já está na lista.')
+            const validationErrors: IVFormErrors = {};
+            validationErrors['produto'] = 'Este produto já está na lista.';
+            formRef.current?.setErrors(validationErrors);
+        } else {
+            let totalProdutosNota = vlTotalProdutosNota + vlUnitario;
+            setVlTotalProdutosNota(totalProdutosNota);
+            var item: IProdutosNF;
+            item = {
+                id: produto!.id,
+                gtin: produto!.gtin,
+                descricao: produto!.descricao,
+                apelido: produto!.apelido,
+                marca: produto!.marca,
+                undmedida: produto!.undmedida,
+                unidade: produto!.unidade,
+                vlcusto: 0,
+                vlcompra: vlUnitario,
+                vlvenda: produto!.vlvenda,
+                lucro: 0,
+                pesoliq: produto!.pesoliq,
+                pesobruto: produto!.pesobruto,
+                ncm: produto!.ncm,
+                cfop: produto!.cfop,
+                percicmssaida: produto!.percicmssaida,
+                percipi: produto!.percipi,
+                cargatribut: produto!.cargatribut,
+                qtdatual: produto!.qtdatual,
+                qtdideal: produto!.qtdideal,
+                qtdmin: produto!.qtdmin,
+                fornecedor: produto!.fornecedor,
+                listavariacoes: produto!.listavariacoes,
+                qtd: qtd,
+                vltotal: 0,
+                datacad: produto!.datacad,
+                ultalt: produto!.ultalt
+            }
+            listaProdutos.push(item);
+            var vlTotalNota = 0;
+            var vlfrete = Number(formRef.current?.getData().vlfrete);
+            var vlpedagio = Number(formRef.current?.getData().vlpedagio);
+            var vloutrasdespesas = Number(formRef.current?.getData().vloutrasdespesas);
+            listaProdutos.map(produto => {
+                let percProduto = ((produto.vlcompra*100)/totalProdutosNota)/100;
+                console.log(percProduto);
+                let custo = (vlfrete + vlpedagio + vloutrasdespesas)*percProduto;
+                custo = custo + produto.vlcompra;
+                produto.vlcusto = custo;
+                produto.lucro = produto.vlcompra - custo;
+                produto.vltotal = produto.vlcompra * qtd + custo;
+                vlTotalNota = vlTotalNota + (produto.vltotal);
+            })
+            setVlSubTotalNota(vlTotalNota);
+            setListaProdutosNF(listaProdutos);
+        }
     }
 
     useEffect(() => {
-        if (isEditingParcela) {
-            formRef.current?.setFieldValue('parcela.dias', parcelaSelected?.dias);
-            formRef.current?.setFieldValue('parcela.percentual', parcelaSelected?.percentual);
-            formRef.current?.setFieldValue('parcela.formapagamento', parcelaSelected?.formapagamento);
-        } else {
-            formRef.current?.setFieldValue('parcela.dias', '');
-            formRef.current?.setFieldValue('parcela.percentual', '');
-            formRef.current?.setFieldValue('parcela.formapagamento', null);
-        }
-    }, [isEditingParcela])
-
-    useEffect(() => {
         if (isDialog) {
-            if (selectedId !== 0) {
+            if (selectedRow) {
                 setIsLoading(true);
-                controller.getOne(Number(selectedId))
+                controller.getOne(selectedRow)
                     .then((result) => {
                         setIsLoading(false);
                         if (result instanceof Error) {
                             toast.error(result.message);
-                            navigate('/condicoespagamento');
+                            navigate('/compras')
                         } else {
                             result.datacad = new Date(result.datacad).toLocaleString();
                             result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);
                             setIsValid(true);
-                            setIsValidParcelas(true);
-                            setCondicaoPagamentoOriginal(result);
-                            setDescricao(result.descricao);
-                            setListaParcelas(result.listaparcelas);
+                            setNumNf(result.numnf);
+                            setSerieNf(result.serienf);
+                            setModeloNf(result.modelonf);
+                            setObjFornecedor(result.fornecedor);
+                            setCompraOriginal(result);
                         }
-                    });
+                    })
             } else {
                 formRef.current?.setData({
-                    descricao: ''
+
                 });
             }
         } else {
             if (id !== 'novo') {
                 setIsLoading(true);
-                controller.getOne(Number(id))
-                    .then((result) => {
-                        setIsLoading(false);
-                        if (result instanceof Error) {
-                            toast.error(result.message);
-                            navigate('/condicoespagamento');
-                        } else {
-                            result.datacad = new Date(result.datacad).toLocaleString();
-                            result.ultalt = new Date(result.ultalt).toLocaleString();
-                            formRef.current?.setData(result);
-                            setIsValid(true);
-                            setIsValidParcelas(true);
-                            setCondicaoPagamentoOriginal(result);
-                            setDescricao(result.descricao);
-                            setListaParcelas(result.listaparcelas);
-                        }
-                    });
+                controller.getOne({
+                    numnf: nf,
+                    serienf: serie,
+                    modelonf: modelo,
+                    idfornecedor: Number(fornecedor)
+                })
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result instanceof Error) {
+                        toast.error(result.message);
+                        navigate('/compras');
+                    } else {
+                        result.datacad = new Date(result.datacad).toLocaleString();
+                        result.ultalt = new Date(result.ultalt).toLocaleString();
+                        formRef.current?.setData(result);
+                        setIsValid(true);
+                        setNumNf(result.numnf);
+                        setSerieNf(result.serienf);
+                        setModeloNf(result.modelonf);
+                        setObjFornecedor(result.fornecedor);
+                        setCompraOriginal(result);
+                    }
+                });
             } else {
+                setIsValid(false);
                 formRef.current?.setData({
-                    descricao: ''
+
                 });
             }
         }
     }, [id]);
 
     useEffect(() => {
-        if (descricao != "") validate(descricao);
-    }, [descricao]);
+        if (
+            numnf != "" &&
+            modelonf != "" &&
+            serienf != "" &&
+            objFornecedor
+        ) {
+            validate({
+                numnf: numnf,
+                modelonf: modelonf,
+                serienf: serienf,
+                idfornecedor: objFornecedor.id
+            });
+        }
+    }, [numnf, serienf, modelonf, objFornecedor]);
 
-    const insertParcela = () => {
-        var totalPercParcelas: number = 0;
-        listaparcelas.forEach((parcela) => totalPercParcelas += Number(parcela.percentual));
-        totalPercParcelas += Number(formRef.current?.getData().parcela.percentual);
-        if (isEditingParcela && parcelaSelected) {
-            totalPercParcelas -= parcelaSelected?.percentual;
-        }
-        if ((totalPercParcelas > 100) || (formRef.current?.getData().parcela.percentual <= 0) || (formRef.current?.getData().parcela.dias < 0)) {
-            const validationErrors: IVFormErrors = {};
-            if (totalPercParcelas > 100) {
-                toast.error('A soma do percentual total de parcelas não pode ser maior que 100%. Por favor, verifique.', { autoClose:  15000});
-                validationErrors['parcela.percentual'] = 'Percentual inválido';
-            }
-            if (formRef.current?.getData().parcela.percentual <= 0) {
-                toast.error('O percentual deve ser maior que zero. Por favor verifique.', { autoClose:  15000});
-                validationErrors['parcela.percentual'] = 'Percentual inválido';
-            }
-            if (formRef.current?.getData().parcela.dias < 0) {
-                toast.error('O número de dias deve ser inteiro e maior que zero. Por favor verifique.', { autoClose:  15000});
-                validationErrors['parcela.dias'] = 'Número de dias inválido';
-            }
-            formRef.current?.setErrors(validationErrors);
-        }
-        else {
-            if (isEditingParcela) {
-                const newArray = listaparcelas.map((item) => {
-                    if (item.numero == parcelaSelected?.numero) {
-                        return {
-                            ...item,
-                            dias: formRef.current?.getData().parcela.dias,
-                            percentual: formRef.current?.getData().parcela.percentual,
-                            formapagamento: formRef.current?.getData().parcela.formapagamento
-                        }
-                    }
-                    return item;
-                })
-                setIsEditingParcela(false);
-                setListaParcelas(newArray);
-            } else {
-                let data = new Date();
-                setListaParcelas([
-                    ...listaparcelas,
-                    {
-                        numero: listaparcelas.length + 1,
-                        dias: formRef.current?.getData().parcela.dias,
-                        percentual: formRef.current?.getData().parcela.percentual,
-                        formapagamento: formRef.current?.getData().parcela.formapagamento,
-                        datacad: data.toLocaleString(),
-                        ultalt: data.toLocaleString()
-                    }
-                ]);
-            }
-            formRef.current?.setFieldValue('parcela.dias', '');
-            formRef.current?.setFieldValue('parcela.percentual', '');
-            formRef.current?.setFieldValue('parcela.formapagamento', null);
-            if (totalPercParcelas == 100) setIsValidParcelas(true);
-        }
-    }
-
-    const validate = (filter: string) => {
+    const validate = (dados: IValidator) => {
         debounce(() => {
-            if (!isValid && filter != "" && (filter.toUpperCase() != condicaoPagamentoOriginal?.descricao)) {
+            if (
+                numnf != "" &&
+                serienf != "" &&
+                modelonf != "" &&
+                objFornecedor &&
+                (
+                    dados.numnf != numnf &&
+                    dados.serienf != serienf &&
+                    dados.modelonf != modelonf &&
+                    dados.idfornecedor != objFornecedor.id
+                )
+            ) {
                 setIsValidating(true);
                 debounce(() => {
                     controller.validate({
-                        descricao: filter
+                        numnf: numnf,
+                        serienf: serienf,
+                        modelonf: modelonf,
+                        idfornecedor: objFornecedor.id
                     })
                         .then((result) => {
                             setIsValidating(false);
@@ -274,7 +340,10 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
                                 setIsValid(result);
                                 if (result === false) {
                                     const validationErrors: IVFormErrors = {};
-                                    validationErrors['descricao'] = 'Essa condição de pagamento já está cadastrada.';
+                                    validationErrors['numnf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['modelonf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['serienf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['fornecedor'] = 'Esta nota fiscal já está cadastrada.';
                                     formRef.current?.setErrors(validationErrors);
                                 }
                             }
@@ -290,47 +359,37 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
-                    if(isValid && isValidParcelas) {
+                    if(isValid) {
                         setIsLoading(true);
                         if (isDialog) {
-                            if (selectedId === 0) {
-                                controller.create({
-                                    ...dadosValidados,
-                                    listaparcelas
-                                })
+                            if (!selectedRow) {
+                                controller.create(dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
                                             toast.error(result.message)
                                         } else {
-                                            toast.success('Cadastrado com sucesso!');
-                                            reloadDataTableIfDialog?.();
+                                            toast.success('Cadastrado com sucesso!')
+                                            reloadDataTableIfDialog?.()
                                             toggleOpen?.();
                                         }
                                     });
                             } else {
-                                controller.update(Number(id), {
-                                    ...dadosValidados,
-                                    listaparcelas,
-                                    flsituacao: formRef.current?.getData().flsituacao
-                                })
-                                    .then((result) => {
-                                        setIsLoading(false);
-                                        if (result instanceof Error) {
-                                            toast.error(result.message);
-                                        } else {
-                                            toast.success('Alterado com sucesso!');
-                                            reloadDataTableIfDialog?.();
-                                            toggleOpen?.();
-                                        }
-                                    });
+                                controller.update(dadosValidados)
+                                .then((result) => {
+                                    setIsLoading(false);
+                                    if (result instanceof Error) {
+                                        toast.error(result.message);
+                                    } else {
+                                        toast.success('Alterado com sucesso!');
+                                        reloadDataTableIfDialog?.();
+                                        toggleOpen?.();
+                                    }
+                                });
                             }
                         } else {
                             if (id === 'novo') {
-                                controller.create({
-                                    ...dadosValidados,
-                                    listaparcelas
-                                })
+                                controller.create(dadosValidados)
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -338,44 +397,27 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
                                         } else {
                                             toast.success('Cadastrado com sucesso!')
                                             if (isSaveAndClose()) {
-                                                navigate('/condicoespagamento');
-                                            } else if (isSaveAndNew()) {
-                                                setIsValidating('');
-                                                setIsValid(false);
-                                                navigate('/condicoespagamento/cadastro/novo');
-                                                formRef.current?.setData({
-                                                    descricao: ''
-                                                });
-                                            } else {
-                                                setIsValidating(null);
-                                                navigate(`/condicoespagamento/cadastro/${result}`);
+                                                navigate('/compras');
                                             }
                                         }
                                     });
                             } else {
-                                controller.update(Number(id), {
-                                    ...dadosValidados,
-                                    listaparcelas,
-                                    flsituacao: formRef.current?.getData().flsituacao
-                                })
-                                    .then((result) => {
-                                        setIsLoading(false);
-                                        if (result instanceof Error) {
-                                            toast.error(result.message);
-                                        } else {
-                                            toast.success('Alterado com sucesso!');
-                                            if (isSaveAndClose()) {
-                                                navigate('/condicoespagamento')
-                                            } else {
-                                                setIsValidating(null);
-                                            }
+                                controller.update(dadosValidados)
+                                .then((result) => {
+                                    setIsLoading(false);
+                                    if (result instanceof Error) {
+                                        toast.error(result.message);
+                                    } else {
+                                        toast.success('Alterado com sucesso!');
+                                        if (isSaveAndClose()) {
+                                            navigate('/compras')
                                         }
-                                    });
+                                    }
+                                });
                             }
                         }
                     } else {
-                        if (!isValid) toast.error('Verifique os campos.');
-                        if (!isValidParcelas) toast.error('Verifique a porcentagem total das parcelas.')
+                        toast.error('Verifique os campos');
                     }
                 })
                 .catch((errors: yup.ValidationError) => {
@@ -387,7 +429,6 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
                         console.log('message', error.message);
                         validationErrors[error.path] = error.message;
                     });
-                    console.log(validationErrors);
                     formRef.current?.setErrors(validationErrors);
                 })
     };
@@ -395,13 +436,18 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            controller.delete(id)
+            controller.delete({
+                numnf: numnf,
+                serienf: serienf,
+                modelonf: modelonf,
+                idfornecedor: objFornecedor?.id
+            })
                 .then(result => {
                     if (result instanceof Error) {
                         toast.error(result.message);
-                    } else {         
+                    } else {      
                         toast.success('Apagado com sucesso!')
-                        navigate('/formasPagamento');
+                        navigate('/compras');
                     }
                 })
         }
@@ -410,78 +456,60 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Condição de Pagamento' : 'Editar Condição de Pagamento'}
+            titulo={id === 'novo' ? 'Cadastrar Compra' : 'Editar Compra'}
             barraDeFerramentas={
                 <DetailTools
+                    mostrarBotaoSalvar={false}
                     mostrarBotaoSalvarFechar
-                    mostrarBotaoSalvarNovo={id == 'novo' && !isDialog}
                     mostrarBotaoApagar={id !== 'novo' && !isDialog}
-                    mostrarBotaoNovo={id !== 'novo' && !isDialog}
-                    
+
                     disableButtons={isValidating}
 
-                    onClickSalvar={save}
-                    onClickSalvarNovo={saveAndNew}
                     onClickSalvarFechar={saveAndClose}
                     onClickApagar={() => handleDelete(Number(id))}
-                    onClickNovo={() => navigate('/condicoespagamento/cadastro/novo') }
                     onClickVoltar={() => {
                         if (isDialog) {
                             toggleOpen?.();
                         } else {
-                            navigate('/condicoespagamento');
+                            navigate('/compras');
                         }
                     }}
                 />
             }
         >
             <VForm ref={formRef} onSubmit={handleSave}>
-                <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
-                    <Grid item container xl={8} direction="column" padding={2} spacing={2} alignItems="left">
+                <Box margin={1} display="flex" flexDirection="column" component={Paper} alignItems="center">
+                    <Grid item container xs={12} sm={10} md={10} lg={10} xl={8} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
                                 <LinearProgress variant="indeterminate"/>
                             </Grid>
                         )}
-                        
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={10} lg={10} xl={8}>
-                                <Typography variant="h6">Dados Gerais</Typography>
-                            </Grid>
-                            { id != "novo" && (
-                                <Grid container item xs={12} sm={12} md={2} lg={2} xl={4} alignItems="center" justifyContent="right">
-                                    <Typography marginRight="4px" variant="subtitle1">Situação</Typography>
-                                    <VSelect
-                                        name="flsituacao"
-                                        size="small"
-                                    >
-                                        <MenuItem value="A">ATIVO</MenuItem>
-                                        <MenuItem value="I">INATIVO</MenuItem>
-                                    </VSelect>
-                                </Grid>
-                            ) }
+
+                        <Grid item>
+                            <Typography variant="h6">Dados da Nota Fiscal</Typography>
                         </Grid>
 
-
                         <Grid container item direction="row" spacing={2} justifyContent="center">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={4}>
                                 <VTextField
                                     size="small"
                                     required
                                     fullWidth
-                                    name="descricao"
-                                    label="Descrição"
-                                    disabled={isLoading}
+                                    name="numnf"
+                                    label="Número"
+                                    //disabled={isLoading || isValid}
                                     InputProps={{
+                                        readOnly: isValid,
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().descricao) && (
+                                                { (isValidating && formRef.current?.getData().numnf) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (isValid && formRef.current?.getData().descricao) && (
+                                                { (isValid && formRef.current?.getData().numnf) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -492,265 +520,305 @@ export const CadastroCompras: React.FC<ICadastroProps> = ({isDialog = false, tog
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
-                                        formRef.current?.setFieldError('descricao', '');
-                                        validate(e.target.value);
+                                        setNumNf(e.target.value);
+                                        formRef.current?.setFieldError('numnf', '');
                                     }}
                                 />
                             </Grid>
-                        </Grid>
 
-                        <Grid container item direction="row" spacing={2} justifyContent="center">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={4}>
                                 <VTextField
-                                    type="number"
-                                    inputMode="decimal"
                                     size="small"
                                     required
                                     fullWidth
-                                    name="txdesc"
-                                    label="Desconto"
-                                    disabled={isLoading}
+                                    name="serienf"
+                                    label="Série"
+                                    //disabled={isLoading || isValid}
                                     InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                        readOnly: isValid,
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                { (isValidating && formRef.current?.getData().serienf) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <CircularProgress size={24}/>
+                                                    </Box>
+                                                ) }
+                                                { (isValid && formRef.current?.getData().serienf) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <Icon color="success">done</Icon>
+                                                    </Box>
+                                                ) }
+                                            </InputAdornment>
+                                        )
+                                    }}
+                                    onChange={(e) => {
+                                        setIsValid(false);
+                                        setIsValidating(false);
+                                        setSerieNf(e.target.value);
+                                        formRef.current?.setFieldError('serienf', '');
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                <VTextField
-                                    type="number"
-                                    inputMode="decimal"
-                                    size="small"
-                                    required
-                                    fullWidth
-                                    name="txmulta"
-                                    label="Multa"
-                                    disabled={isLoading}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                <VTextField
-                                    type="number"
-                                    inputMode="decimal"
-                                    size="small"
-                                    required
-                                    fullWidth
-                                    name="txjuros"
-                                    label="Juros"
-                                    disabled={isLoading}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
 
-                        <Grid item>
-                            <Divider orientation="horizontal"/>
-                        </Grid>
-                        <Grid item>
-                            <Typography variant="h6">Dados da Parcela</Typography>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="start">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={4}>
                                 <VTextField
-                                    type="number"
                                     size="small"
                                     required
                                     fullWidth
-                                    name="parcela.dias"
-                                    label="Dias"
-                                    disabled={isLoading}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
-                                <VTextField
-                                    type="number"
-                                    inputMode="decimal"
-                                    size="small"
-                                    required
-                                    fullWidth
-                                    name="parcela.percentual"
-                                    label="Percentual"
-                                    disabled={isLoading}
+                                    name="modelonf"
+                                    label="Modelo"
+                                    //disabled={isLoading || isValid}
                                     InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                        readOnly: isValid,
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                { (isValidating && formRef.current?.getData().modelonf) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <CircularProgress size={24}/>
+                                                    </Box>
+                                                ) }
+                                                { (isValid && formRef.current?.getData().modelonf) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <Icon color="success">done</Icon>
+                                                    </Box>
+                                                ) }
+                                            </InputAdornment>
+                                        )
+                                    }}
+                                    onChange={(e) => {
+                                        setIsValid(false);
+                                        setIsValidating(false);
+                                        setModeloNf(e.target.value);
+                                        formRef.current?.setFieldError('modelonf', '');
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
+
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
                                     size="small"
                                     required
-                                    name="parcela.formapagamento"
-                                    label={["descricao"]}
-                                    TFLabel="Forma de Pagamento"
-                                    getAll={controllerFormasPagamento.getAll}
-                                    onClickSearch={() => {
-                                        toggleConsultaFormasPgtoDialogOpen();
+                                    name="fornecedor"
+                                    label={["razsocial"]}
+                                    TFLabel="Fornecedor"
+                                    //disabled={isLoading || isValid}
+                                    getAll={controllerFornecedores.getAll}
+                                    onChange={(value) => {
+                                        setObjFornecedor(value);
+                                        formRef.current?.setFieldError('fornecedor', '');
                                     }}
-                                    isDialogOpen={isConsultaFormasPgtoDialogOpen}
+                                    onInputchange={() => {
+                                        formRef.current?.setFieldError('fornecedor', '');
+                                    }}
+                                    onClickSearch={toggleConsultaFornecedoresDialogOpen}
+                                    isDialogOpen={isConsultaFornecedoresDialogOpen}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                <Button
-                                    variant="contained" 
-                                    color={ isEditingParcela ? "warning" : "success"} 
-                                    size="large"
-                                    onClick={e => {
-                                        if (!!formRef.current?.getData().parcela.dias && !!formRef.current?.getData().parcela.percentual && !!formRef.current?.getData().parcela.formapagamento) {
-                                            insertParcela();
-                                        } else {
-                                            const validationErrors: IVFormErrors = {};
-                                            if (!formRef.current?.getData().parcela.dias) validationErrors['parcela.dias'] = 'O campo é obrigatório';
-                                            if (!formRef.current?.getData().parcela.percentual) validationErrors['parcela.percentual'] = 'O campo é obrigatório';
-                                            if (!formRef.current?.getData().parcela.formapagamento) validationErrors['parcela.formapagamento'] = 'O campo é obrigatório';
-                                            formRef.current?.setErrors(validationErrors);                                                   
-                                        }
-                                    }}
-                                >
-                                    <Icon>{isEditingParcela ? "check" : "add"}</Icon>
-                                </Button>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2} justifyContent="left">
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <VDatePicker
+                                    //disabled={isLoading || !isValid}
+                                    name="dataemissao"
+                                    label="Data de Emissão"
+                                />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
-                                <Button
-                                    variant="contained" 
-                                    color="error"
-                                    size="large"
-                                    onClick={(e) => {
-                                        const validationErrors: IVFormErrors = {};
-                                        validationErrors['parcela.dias'] = '';
-                                        validationErrors['parcela.percentual'] = '';
-                                        formRef.current?.setErrors(validationErrors);
-                                        if (isEditingParcela) setIsEditingParcela(false);
-                                        formRef.current?.setFieldValue('parcela.dias', '');
-                                        formRef.current?.setFieldValue('parcela.percentual', '');
-                                        formRef.current?.setFieldValue('parcela.formapagamento', null);
-                                    }}
-                                >
-                                    <Icon>close</Icon>
-                                </Button>
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <VDatePicker
+                                    //disabled={isLoading || !isValid}
+                                    name="dataentrada"
+                                    label="Data de Entrada"
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2} justifyContent="left">
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <VTextField
+                                    //disabled={isLoading || !isValid}
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    name="vlfrete"
+                                    label="Valor do Frete"
+                                    defaultValue={0}
+                                />                                
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <VTextField
+                                    //disabled={isLoading || !isValid}
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    name="vlpedagio"
+                                    label="Valor do Pedágio"
+                                />                                
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <VTextField
+                                    //disabled={isLoading || !isValid}
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    name="vloutrasdespesas"
+                                    label="Outras Despesas"
+                                />                                
                             </Grid>
                         </Grid>
 
                         <Grid item>
-                            <Divider orientation="horizontal"/>
+                            <Typography variant="h6">Dados do Produto</Typography>
                         </Grid>
-                        <Grid container item direction="row" spacing={2} alignItems="baseline">
-                            <Grid item>
-                                <Typography variant="h6">Parcelas</Typography>
-                            </Grid>
-                        </Grid>
-                        <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
-                                <DataTable
-                                    headers={headers}
-                                    rowId="numero"
-                                    rows={listaparcelas}
+
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
+                                <VAutocompleteSearch
+                                    //disabled={isLoading || !isValid}
+                                    size="small"
+                                    name="produto"
+                                    label={["descricao"]}
+                                    TFLabel="Produto"
+                                    getAll={controllerProdutos.getAll}
+                                    onChange={(value) => {
+                                        setProduto(value);
+                                        formRef.current?.setFieldError('produto', '');
+                                    }}
+                                    onInputchange={() => {
+                                        formRef.current?.setFieldError('produto', '');
+                                    }}
+                                    onClickSearch={toggleConsultaProdutosDialogOpen}
+                                    isDialogOpen={isConsultaProdutosDialogOpen}
                                 />
-                                {/* <TableContainer component={Paper} variant="outlined" sx={{ m: 1, width: "auto" }}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>Número</TableCell>
-                                                <TableCell>Dias</TableCell>
-                                                <TableCell>Percentual</TableCell>
-                                                <TableCell>Forma de pagamento</TableCell>
-                                                <TableCell align="right">Ações</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {listaparcelas?.map(row => (
-                                                <TableRow key={row.numero}>
-                                                    <TableCell >{row.numero}</TableCell>
-                                                    <TableCell>{row.dias}</TableCell>
-                                                    <TableCell>{row.percentual+"%"}</TableCell>
-                                                    <TableCell>{row.formapagamento.descricao}</TableCell>
-                                                    <TableCell align="right">
-                                                        <IconButton
-                                                            disabled={isEditingParcela} 
-                                                            color="error" 
-                                                            size="small" 
-                                                            onClick={() => {
-                                                                if (window.confirm('Deseja excluir esta parcela?')) {
-                                                                    const mArray = listaparcelas.slice();
-                                                                    delete mArray[row.numero-1];
-                                                                    mArray.length = listaparcelas.length-1;
-                                                                    setListaParcelas(mArray);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Icon>delete</Icon>
-                                                        </IconButton>
-                                                        <IconButton
-                                                            disabled={isEditingParcela} 
-                                                            color="primary" 
-                                                            size="small"
-                                                            onClick={() => {
-                                                                setIsEditingParcela(true);
-                                                                setParcelaSelected(row);
-                                                            }}
-                                                        >
-                                                            <Icon>edit</Icon>
-                                                        </IconButton>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                        { listaparcelas.length === 0 && !isLoading && (
-                                            <caption>{Environment.LISTAGEM_VAZIA}</caption>
-                                        )}
-                                    </Table>
-                                </TableContainer>                                 */}
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                                <VTextField
+                                    //disabled={isLoading || !isValid}
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    name="qtd"
+                                    label="Qtd"
+                                    onChange={e => {
+                                        setQtd(Number(e.target.value));
+                                    }}
+                                />  
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                                <VTextField
+                                    //disabled={isLoading || !isValid}
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    name="valor"
+                                    label="Valor"
+                                    onChange={e => {
+                                        setVlUnitario(Number(e.target.value));
+                                    }}
+                                />  
+                            </Grid>
+
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                                <VTextField
+                                    //disabled={isLoading || !isValid}
+                                    inputProps={{
+                                        readOnly: true
+                                    }}
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    name="total"
+                                    label="Total"
+                                />  
+                            </Grid>
+
+                            <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
+                                <Button
+                                    //disabled={isLoading || !isValid}
+                                    variant="contained" 
+                                    color="success"
+                                    size="large"
+                                    onClick={e => {
+                                        if (produto && formRef.current?.getData().valor != "" && formRef.current?.getData().qtd != "") {
+                                            insertProduto();
+                                        } else {
+                                            const validationErrors: IVFormErrors = {};
+                                            if (!produto) {
+                                                validationErrors['produto'] = 'Selecione um produto.';
+                                            }
+                                            if (formRef.current?.getData().valor != "") {
+                                                validationErrors['valor'] = 'Informe o valor unitário.';
+                                            }
+                                            if (formRef.current?.getData().qtd != "") {
+                                                validationErrors['qtd'] = 'Informe a quantidade';
+                                            }
+                                            formRef.current?.setErrors(validationErrors);
+                                            toast.error('Preencha todos os campos do produto.');
+                                        }
+                                    }}
+                                >
+                                    <Icon>add</Icon>
+                                </Button>
                             </Grid>
                         </Grid>
 
-                        {(id != 'novo' || (selectedId && selectedId != 0)) && (
-                            <Grid container item direction="row" spacing={2}>
-                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
-                                    <VTextField
-                                        size="small"
-                                        required
-                                        fullWidth
-                                        name='datacad' 
-                                        label="Data Cad."
-                                        inputProps={{
-                                            readOnly: true,
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
-                                    <VTextField
-                                        size="small"
-                                        required
-                                        fullWidth
-                                        name='ultalt' 
-                                        label="Ult. Alt."
-                                        inputProps={{
-                                            readOnly: true,
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid>
-                        )}
+                        <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
+                            <DataTable
+                                rowCount={listaProdutosNF.length}
+                                headers={headers}
+                                rows={listaProdutosNF}
+                                rowId="id"
+                                footer
+                                footerValue={String(vlSubTotalNota)}
+                                footerLabel="Total"
+                            />
+                        </Grid>
+
                     </Grid>
+
                     <CustomDialog 
-                        onClose={toggleConsultaFormasPgtoDialogOpen}
-                        handleClose={toggleConsultaFormasPgtoDialogOpen} 
-                        open={isConsultaFormasPgtoDialogOpen} 
-                        title="Consultar Formas de Pagamento"
+                        onClose={toggleConsultaFornecedoresDialogOpen}
+                        handleClose={toggleConsultaFornecedoresDialogOpen} 
+                        open={isConsultaFornecedoresDialogOpen} 
+                        title="Consultar Fornecedores"
                         fullWidth
                         maxWidth="xl"
                     >
-                        <ConsultaFormasPagamento 
+                        <ConsultaFornecedores 
                             isDialog
-                            onSelectItem={(row) => formRef.current?.setFieldValue("parcela.formapagamento", row)}
-                            toggleDialogOpen={toggleConsultaFormasPgtoDialogOpen}
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldError('fornecedor', '');
+                                formRef.current?.setFieldValue('fornecedor', row);
+                                setObjFornecedor(row);
+                            }}
+                            toggleDialogOpen={toggleConsultaFornecedoresDialogOpen}
                         />
                     </CustomDialog>
+
+                    <CustomDialog 
+                        onClose={toggleConsultaProdutosDialogOpen}
+                        handleClose={toggleConsultaProdutosDialogOpen} 
+                        open={isConsultaProdutosDialogOpen} 
+                        title="Consultar Produtos"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaProdutos 
+                            isDialog
+                            onSelectItem={(row) => {
+                                console.log('teste');
+                                formRef.current?.setFieldError('produto', '');
+                                formRef.current?.setFieldValue('produto', row);
+                                setProduto(row);
+                            }}
+                            toggleDialogOpen={toggleConsultaProdutosDialogOpen}
+                        />
+                    </CustomDialog>
+
                 </Box>
             </VForm>
         </LayoutBase>

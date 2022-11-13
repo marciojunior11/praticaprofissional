@@ -35,7 +35,7 @@ export interface IValidator {
     numnf: string;
     serienf: string;
     modelonf: string;
-    fornecedor: IFornecedores | null;
+    idfornecedor: number | undefined;
 }
 
 export type TListaCompras = {

@@ -12,7 +12,7 @@ export interface IHeaderProps {
     render?: (row: any) => React.ReactNode | null;
     sortable?: boolean;
     order?: 'asc' | 'desc';
-    onClick?: () => void; 
+    onClick?: () => void;
 }
 
 interface IDataTableProps {
@@ -21,13 +21,16 @@ interface IDataTableProps {
     rowId: string;
     selectable?: boolean;
     onRowClick?: (row: any) => void;
-    rowCount?: number;
+    rowCount: number;
     isLoading?: boolean;
     page?: number;
     onPageChange?: (page: number) => void;
+    footer?: boolean;
+    footerLabel?: string;
+    footerValue?: string;
 }
 
-export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
+export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false, onRowClick, rowCount, isLoading, page, footer, footerLabel, footerValue, onPageChange } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
     return (
@@ -47,9 +50,9 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                 <TableBody>
                     { rows.map((row, index) => {
                         return (
-                            <TableRow 
+                            <TableRow
                                 hover={selectable} 
-                                key={row[rowId]}
+                                key={index}
                                 onDoubleClick={() => {
                                     selectable && (
                                         onRowClick?.(row)
@@ -71,6 +74,16 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                     <caption>{Environment.LISTAGEM_VAZIA}</caption>
                 )}
                 <TableFooter>
+                    {footer && rowCount != 0  && (
+                        <TableRow>
+                            <TableCell align="left">
+                                {footerLabel}
+                            </TableCell>
+                            <TableCell align="right">
+                                {footerValue}
+                            </TableCell>
+                        </TableRow>
+                    )}
                     {isLoading && (
                         <TableRow>
                             <TableCell colSpan={4}>
@@ -78,7 +91,7 @@ export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, se
                             </TableCell>
                         </TableRow>
                     )}
-                    {(rowCount && ((rowCount > 0) && (rowCount > Environment.LIMITE_DE_LINHAS))) && (
+                    {((rowCount > 0) && (rowCount > Environment.LIMITE_DE_LINHAS)) && (
                         <TableRow>
                             <TableCell colSpan={4}>
                                 <Pagination 

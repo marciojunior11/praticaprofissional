@@ -11,7 +11,7 @@ type TVTextFieldProps = TextFieldProps & {
 export const VTextField: React.FC<TVTextFieldProps> = ({ name, format, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
-    const [value, setValue] = useState(defaultValue || '');
+    const [value, setValue] = useState(rest.defaultValue || '');
 
     const validateFormat = (value: any): any => {
         return value = format?.test(String(value)) ? value : "";

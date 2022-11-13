@@ -22,7 +22,9 @@ export interface IProdutosNF {
     percicmssaida: number;
     percipi: number;
     cargatribut: number;
-    vlfrete: number;
+    //vlfrete: number;
+    //vlpedagio: number;
+    //vloutrasdespesas: number;
     qtdatual: number;
     qtdideal: number;
     qtdmin: number;

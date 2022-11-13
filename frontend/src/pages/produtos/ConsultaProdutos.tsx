@@ -15,6 +15,7 @@ import { DataTable, IHeaderProps } from "../../shared/components/data-table/Data
 import ControllerProdutos from "../../shared/controllers/ProdutosController"
 import { IConsultaProps } from "../../shared/interfaces/views/Consulta"
 import { CollapsedDataTable } from "../../shared/components/data-table/CollapsedDataTable";
+import { CadastroProdutos } from "./CadastroProdutos";
 // #endregion
 
 export const ConsultaProdutos: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
@@ -218,12 +219,12 @@ export const ConsultaProdutos: React.FC<IConsultaProps> = ({ isDialog = false, o
                 open={isCadastroProdutosDialogOpen}
                 title="Cadastrar Produto"
             >
-                {/* <CadastroProdutos
+                <CadastroProdutos
                     isDialog
                     toggleOpen={toggleCadastroProdutosDialogOpen}
                     selectedId={Number(selectedId)}
                     reloadDataTableIfDialog={reloadDataTable}
-                /> */}
+                />
             </CustomDialog>
         </LayoutBase>
     );

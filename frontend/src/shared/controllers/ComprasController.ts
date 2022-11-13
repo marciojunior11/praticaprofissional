@@ -1,5 +1,6 @@
 import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
+import { IControllerCompras } from '../interfaces/controllers/ControllerCompras';
 import { ICompras, IDetalhesCompras, TListaCompras } from '../interfaces/entities/Compras';
 import { IValidator } from '../interfaces/entities/Compras';
 import CentrosCusto from '../models/entities/CentrosCusto';
@@ -13,9 +14,8 @@ import Parcelas from '../models/entities/Parcelas';
 import Produtos from '../models/entities/Produtos';
 import ProdutosNF from '../models/entities/ProdutosNF';
 import Variacoes from '../models/entities/Variacoes';
-import { IController } from './../interfaces/controllers/Controller';
 
-class ControllerCompras implements IController {
+class ControllerCompras implements IControllerCompras {
 
     constructor() {
 
@@ -43,9 +43,10 @@ class ControllerCompras implements IController {
         }
     }
 
-    getOne = async (id: number): Promise<ICompras | Error> => {
+    getOne = async (dados: IValidator): Promise<ICompras | Error> => {
         try {
-            const { data } = await Api.get(`/api/compras/${id}`);
+            const urlRelativa = `api/compras/?numnf=${dados.numnf}_serienf=${dados.serienf}_modelonf=${dados.modelonf}_idfornecedor=${dados.idfornecedor}`
+            const { data } = await Api.get(urlRelativa);
             if (data) {
                 return data;
             }
@@ -145,7 +146,7 @@ class ControllerCompras implements IController {
         }  
     }
 
-    update = async (id: number, dados: IDetalhesCompras): Promise<void | Error> => {
+    update = async (dados: IDetalhesCompras): Promise<void | Error> => {
         var listaprodutos = new Array<Produtos>();
         var listaprodutosAux = dados.listaprodutos;
         listaprodutosAux.forEach((produto) => {
@@ -155,7 +156,7 @@ class ControllerCompras implements IController {
                 listavariacoes.push(mVariacao);
             });
             let itemNF = new ProdutosNF(
-                id,
+                produto.id,
                 produto.gtin,
                 produto.descricao,
                 produto.apelido,
@@ -202,7 +203,7 @@ class ControllerCompras implements IController {
             new Date()
         )
         try {
-            await Api.put(`/api/compras/${id}`, compra);
+            await Api.put(`/api/compras/api/compras/numnf=${dados.numnf}_serienf=${dados.serienf}_modelonf=${dados.modelonf}_idfornecedor=${dados.fornecedor.id}`, compra);
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao atualizar o registros.');
         }  
@@ -210,14 +211,14 @@ class ControllerCompras implements IController {
 
     delete = async (dados: IValidator): Promise<void | Error> => {
         try {
-            const url = `/api/compras/?_numnf=${dados.numnf}&_serienf=${dados.serienf}&_modelonf=${dados.modelonf}&_idfornecedor=${dados.fornecedor?.id}`
+            const url = `/api/compras/?_numnf=${dados.numnf}&_serienf=${dados.serienf}&_modelonf=${dados.modelonf}&_idfornecedor=${dados.idfornecedor}`
             await Api.delete(url);
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
         }           
     }
 
-    validate = async (dados: Omit<IValidator, 'id'>): Promise<boolean | Error> => {
+    validate = async (dados: IValidator): Promise<boolean | Error> => {
         try {
             const { data } = await Api.post(`/api/compras/validate`, dados);
             if (data != 0) {

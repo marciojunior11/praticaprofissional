@@ -662,6 +662,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='unidade' 
@@ -673,7 +674,8 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
+                                <VTextField
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='pesobruto' 
@@ -683,6 +685,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='pesoliq' 
@@ -722,6 +725,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='percicmssaida' 
@@ -731,6 +735,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='percipi' 
@@ -747,6 +752,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='qtdideal' 
@@ -756,6 +762,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VTextField 
+                                    type="number"
                                     size="small"
                                     fullWidth
                                     name='qtdmin' 
@@ -815,6 +822,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <InputLabel id="lblcaracteristica">Característica</InputLabel>
                                 <VSelect
+                                    defaultValue=" "
                                     name="caracteristica"
                                     labelId="lblcaracteristica"
                                     disabled={!idGrade}
@@ -893,6 +901,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
                             <DataTable
+                                rowCount={listaVariacoes.length}
                                 headers={headers}
                                 rows={listaVariacoes}
                                 rowId="id"

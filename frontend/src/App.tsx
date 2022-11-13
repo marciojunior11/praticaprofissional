@@ -1,4 +1,6 @@
 import { BrowserRouter } from "react-router-dom";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers'
 
 import './shared/forms/TraducoesYup';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,7 +12,7 @@ import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
-    <>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ToastContainer/>
       <AppThemeProvider>
         <DrawerProvider>
@@ -21,7 +23,7 @@ function App() {
           </BrowserRouter>
         </DrawerProvider>
       </AppThemeProvider>
-    </>
+    </LocalizationProvider>
   );
 }
 

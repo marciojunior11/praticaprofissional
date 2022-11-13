@@ -647,6 +647,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                         <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
                                 <DataTable
+                                    rowCount={listaparcelas.length}
                                     headers={headers}
                                     rowId="numero"
                                     rows={listaparcelas}

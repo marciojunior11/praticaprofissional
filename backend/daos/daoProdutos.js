@@ -305,7 +305,6 @@ async function buscarUm (id) {
 // @descricao SALVA UM REGISTRO
 // @route POST /api/produtos
 async function salvar (produto) {
-    console.log("produto", produto);
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -353,7 +352,7 @@ async function salvar (produto) {
                     if (shouldAbort(err)) return reject(err);
                     const response = await client.query('select * from produtos where id = (select max(id) from produtos)');
                     for (let i = 0; i < produto.listavariacoes.length; i++) {
-                        client.query('insert into produtos_variacoes values ($1, $2)', [response.id, produto.listavariacoes[i].id], async (err, res) => {
+                        client.query('insert into produtos_variacoes values ($1, $2)', [response.rows[0].id, produto.listavariacoes[i].id], async (err, res) => {
                             if (shouldAbort(err)) return reject(err);
                         })
                     }
@@ -363,7 +362,6 @@ async function salvar (produto) {
                             done();
                             return reject(err);
                         }
-                        const response = await client.query('select * from produtos where id = (select max(id) from produtos)');
                         done();
                         return resolve(response.rows[0]);
                     })

@@ -26,7 +26,7 @@ interface IDataTableProps {
     collapseRowId: string;
     selectable?: boolean;
     onRowClick?: (row: any) => void;
-    rowCount?: number;
+    rowCount: number;
     isLoading?: boolean;
     page?: number;
     onPageChange?: (page: number) => void;
@@ -35,14 +35,14 @@ interface IDataTableProps {
 export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, headers, collapseHeaders, rows, collapseRows, rowId, collapseRowId, selectable = false, onRowClick, rowCount, isLoading, page, onPageChange } ) => {
     const [selectedValue, setSelectedValue] = useState();
 
-    const Row = (props: { row: any }) => {
-        const { row } = props;
+    const Row = (props: { row: any, index?: number }) => {
+        const { row, index } = props;
         const [open, setOpen] = useState(false);
         return (
             <React.Fragment>
                 <TableRow 
                     hover={selectable} 
-                    key={row[rowId]}
+                    key={index}
                     onDoubleClick={() => {
                         selectable && (
                             onRowClick?.(row)
@@ -87,8 +87,8 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, 
                                     </TableHead>
                                     <TableBody>
                                         {collapseRows != "" ? (
-                                            row[collapseRows].map((item: any) => (
-                                                <TableRow key={item[collapseRowId]}>
+                                            row[collapseRows].map((item: any, index: number) => (
+                                                <TableRow key={index}>
                                                     { collapseHeaders.map((header) => {
                                                         return (
                                                             <TableCell align={header.align && header.align}>
@@ -99,7 +99,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, 
                                                 </TableRow>
                                             ))
                                         ) : (
-                                            <TableRow key={row[collapseRowId]}>
+                                            <TableRow key={index}>
                                                 { collapseHeaders.map((header) => {
                                                     return (
                                                         <TableCell align={header.align && header.align}>
@@ -140,6 +140,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, 
                             <Row 
                                 row={row}
                                 key={row[rowId]}
+                                index={index}
                             />
                         )
                     }) }
@@ -155,7 +156,7 @@ export const CollapsedDataTable: React.FC<IDataTableProps> = ( { collapseLabel, 
                             </TableCell>
                         </TableRow>
                     )}
-                    {(rowCount && ((rowCount > 0) && (rowCount > Environment.LIMITE_DE_LINHAS))) && (
+                    {((rowCount > 0) && (rowCount > Environment.LIMITE_DE_LINHAS)) && (
                         <TableRow>
                             <TableCell colSpan={4}>
                                 <Pagination 
