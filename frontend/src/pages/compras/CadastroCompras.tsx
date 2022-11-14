@@ -21,6 +21,7 @@ import ControllerProdutos from "../../shared/controllers/ProdutosController";
 import { ConsultaProdutos } from "../produtos/ConsultaProdutos";
 import { IProdutosNF } from "../../shared/interfaces/entities/ProdutosNF";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
+import { VNumberInput } from "../../shared/forms/VNumberInput";
 // #endregion
 
 // #region INTERFACES
@@ -219,13 +220,12 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             var vloutrasdespesas = Number(formRef.current?.getData().vloutrasdespesas);
             listaProdutos.map(produto => {
                 let percProduto = ((produto.vlcompra*100)/totalProdutosNota)/100;
-                console.log(percProduto);
                 let custo = (vlfrete + vlpedagio + vloutrasdespesas)*percProduto;
-                custo = custo + produto.vlcompra;
-                produto.vlcusto = custo;
+                custo = custo / produto.qtd;
+                produto.vlcusto = produto.vlcompra + custo;
                 produto.lucro = produto.vlcompra - custo;
-                produto.vltotal = produto.vlcompra * qtd + custo;
-                vlTotalNota = vlTotalNota + (produto.vltotal);
+                produto.vltotal = produto.vlcusto * produto.qtd;
+                vlTotalNota = vlTotalNota + produto.vltotal;
             })
             setVlSubTotalNota(vlTotalNota);
             setListaProdutosNF(listaProdutos);
@@ -635,7 +635,15 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                         <Grid container item direction="row" spacing={2} justifyContent="left">
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
-                                <VTextField
+                                <VNumberInput
+                                    //disabled={isLoading || !isValid}
+                                    size="small"
+                                    fullWidth
+                                    name="vlfrete"
+                                    label="Valor do Frete"
+                                    prefix="R$"
+                                />
+                                {/* <VTextField
                                     //disabled={isLoading || !isValid}
                                     type="number"
                                     size="small"
@@ -643,7 +651,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     name="vlfrete"
                                     label="Valor do Frete"
                                     defaultValue={0}
-                                />                                
+                                />                                 */}
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
