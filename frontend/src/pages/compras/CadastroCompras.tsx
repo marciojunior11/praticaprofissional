@@ -23,6 +23,11 @@ import { IProdutosNF } from "../../shared/interfaces/entities/ProdutosNF";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import { VMoneyInput } from "../../shared/forms/VMoneyInput";
 import { CurrencyBitcoin } from "@mui/icons-material";
+import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
+import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondicoesPagamento";
+import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento";
+import { IContasPagar } from "../../shared/interfaces/entities/ContasPagar";
+import { Dayjs } from "dayjs";
 // #endregion
 
 // #region INTERFACES
@@ -44,6 +49,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const controller = new ControllerCompras();
     const controllerFornecedores = new ControllerFornecedores();
     const controllerProdutos = new ControllerProdutos();
+    const controllerCondicoesPagamento = new ControllerCondicoesPagamento();
     // #endregion
    
     // #region HOOKS
@@ -60,7 +66,9 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     // #region STATES
     const [isConsultaFornecedoresDialogOpen, setIsConsultaFornecedoresDialogOpen] = useState(false);
     const [isConsultaProdutosDialogOpen, setIsConsultaProdutosDialogOpen] = useState(false);
+    const [isConsultaCondicoesPagamentoDialogOpen, setIsConsultaCondicoesPagamentoDialogOpen] = useState(false);
     const [listaProdutosNF, setListaProdutosNF] = useState<IProdutosNF[]>([]);
+    const [listaContasPagar, setListaContasPagar] = useState<IContasPagar[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<boolean>(false);
     const [isEditingProduto, setIsEditingProduto] = useState(false);
@@ -71,6 +79,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const [objFornecedor, setObjFornecedor] = useState<IFornecedores | null>(null);
     const [compraOriginal, setCompraOriginal] = useState<ICompras | null>(null);
     const [produto, setProduto] = useState<IProdutosNF | null>(null);
+    const [condicaopagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
     const [vlTotalProdutosNota, setVlTotalProdutosNota] = useState(0);
     const [vlSubTotalNota, setVlSubTotalNota] = useState(0);
     const [vlUnitario, setVlUnitario] = useState(0);
@@ -86,26 +95,35 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         setIsConsultaProdutosDialogOpen(oldValue => !oldValue);
     }
 
+    const toggleConsultaCondicoesPagamentoDialogOpen = () => {
+        setIsConsultaCondicoesPagamentoDialogOpen(oldValue => !oldValue);
+    }
+
     const headers: IHeaderProps[] = [
         {
             label: "ID",
-            name: "id",  
+            name: "id",
+            align: "right",  
         },
         {
             label: "Descrição",
             name: "descricao",
+            align: "left",
         },
         {
             label: "UND",
             name: "undmedida",
+            align: "center",
         },
         {
             label: "Quantidade",
             name: "qtd",  
+            align: "center",
         },
         {
             label: "Valor unitário",
             name: "vlcompra",
+            align: "center",
             render: (row: IProdutosNF) => {
                 return (
                     new Intl.NumberFormat('pt-BR', {
@@ -118,6 +136,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         {
             label: "Custo",
             name: "vlcusto",  
+            align: "center",
             render: (row: IProdutosNF) => {
                 return (
                     new Intl.NumberFormat('pt-BR', {
@@ -130,6 +149,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         {
             label: "Total",
             name: "vltotal", 
+            align: "center",
             render: (row: IProdutosNF) => {
                 return (
                     new Intl.NumberFormat('pt-BR', {
@@ -153,7 +173,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 if (window.confirm('Deseja excluir este produto?')) {
                                     const mArray = listaProdutosNF.slice();
                                     const index = mArray.findIndex(item => item.id == row.id);
-                                    insertProduto(true, index, row);
+                                    insertProduto(true, index);
                                 }
                             }}
                         >
@@ -188,9 +208,12 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const calcularFooterValue = (): string => {
         var total = vlTotalProdutosNota;
 
-        var vlfrete = Number(formRef.current?.getData().vlfrete);
-        var vlpedagio = Number(formRef.current?.getData().vlpedagio);
-        var vloutrasdespesas = Number(formRef.current?.getData().vloutrasdespesas);
+        var vlfrete = formRef.current?.getData().vlfrete;
+        var vlpedagio = formRef.current?.getData().vlpedagio;
+        var vloutrasdespesas = formRef.current?.getData().vloutrasdespesas;
+        vlfrete = !vlfrete ? 0 : vlfrete;
+        vlpedagio = !vlpedagio ? 0 : vlpedagio;
+        vloutrasdespesas = !vloutrasdespesas ? 0 : vloutrasdespesas;
 
         vlfrete = !vlfrete ? 0 : vlfrete;
         vlpedagio = !vlpedagio ? 0 : vlpedagio;
@@ -201,6 +224,69 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             style: 'currency',
             currency: 'BRL'
         }).format(total);
+    }
+
+    const gerarContasPagar = () => {
+        const listaParcelas = condicaopagamento?.listaparcelas;
+        const mArray: Array<IContasPagar> = [];
+        const dataEmissao: Dayjs = formRef.current?.getData().dataemissao;
+        const dtemissao = new Date(dataEmissao.toISOString());
+
+        var totalNota = vlTotalProdutosNota;
+        var totalContasPagar = 0;
+
+        var vlfrete = formRef.current?.getData().vlfrete;
+        var vlpedagio = formRef.current?.getData().vlpedagio;
+        var vloutrasdespesas = formRef.current?.getData().vloutrasdespesas;
+        vlfrete = !vlfrete ? 0 : vlfrete;
+        vlpedagio = !vlpedagio ? 0 : vlpedagio;
+        vloutrasdespesas = !vloutrasdespesas ? 0 : vloutrasdespesas;
+
+        totalNota = totalNota + vlfrete + vlpedagio + vloutrasdespesas;
+
+        listaParcelas?.forEach((item, index) => {
+            let dtvencimento = new Date();
+            dtvencimento.setDate(dtemissao.getDate() + item.dias);
+            let valor = totalNota * (item.percentual/100)
+            totalContasPagar = totalContasPagar + valor;
+            if (index + 1 == listaParcelas?.length) {
+                if (totalContasPagar < totalNota) {
+                    let diferenca = totalNota - totalContasPagar;
+                    totalContasPagar = totalContasPagar + (totalNota - totalContasPagar);
+                    valor = valor + diferenca;
+                } else {
+                    let diferenca = totalNota - totalContasPagar;
+                    totalContasPagar = totalContasPagar - (totalContasPagar - totalNota);
+                    valor = valor - diferenca;
+                }
+            }
+            let contapagar: IContasPagar = {
+                nrparcela: item.numero,
+                dtvencimento: dtvencimento,
+                valor: parseFloat(Number(valor).toFixed(2)),
+                txdesc: condicaopagamento!.txdesc,
+                txmulta: condicaopagamento!.txmulta,
+                txjuros: condicaopagamento!.txjuros,
+                fornecedor: objFornecedor!,
+                centrocusto: {
+                    id: 1,
+                    descricao: 'COMPRAS',
+                    datacad: new Date(),
+                    ultalt: new Date()
+                },
+                formapagamento: {
+                    ...item.formapagamento,
+                    datacad: new Date(),
+                    ultalt: new Date()
+                },
+                flsituacao: 'A',
+                datacad: new Date(),
+                ultalt: new Date()
+            }
+            mArray.push(contapagar);
+        });
+        console.log(mArray);
+        setListaContasPagar(mArray);
     }
 
     const insertProduto = (isDeleting: boolean = false, index?: number) => {
@@ -438,6 +524,16 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
+                    var errors = false;
+                    if (listaContasPagar.length == 0) {
+                        errors = true;
+                    }
+                    if (listaProdutosNF.length == 0) {
+                        errors = true;
+                    }
+                    if (errors) {
+                        setIsValid(false);
+                    }
                     if(isValid) {
                         setIsLoading(true);
                         if (isDialog) {
@@ -501,6 +597,16 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                 })
                 .catch((errors: yup.ValidationError) => {
                     const validationErrors: IVFormErrors = {}
+
+                    toast.error('Verifique os erros.');
+
+                    if (listaContasPagar.length == 0) {
+                        validationErrors['condicaopagamento'] = 'Por favor, gere as contas a pagar antes de salvar.'
+                    }
+
+                    if (listaProdutosNF.length == 0) {
+                        validationErrors['produto'] = 'Por favor, insira ao menos um produto.'
+                    }
 
                     errors.inner.forEach(error => {
                         if ( !error.path ) return;
@@ -578,7 +684,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     fullWidth
                                     name="numnf"
                                     label="Número"
-                                    //disabled={isLoading || isValid}
+                                    disabled={isLoading}
                                     InputProps={{
                                         readOnly: isValid,
                                         endAdornment: (
@@ -680,7 +786,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     name="fornecedor"
                                     label={["razsocial"]}
                                     TFLabel="Fornecedor"
-                                    //disabled={isLoading || isValid}
+                                    disabled={isLoading || isValid}
                                     getAll={controllerFornecedores.getAll}
                                     onChange={(value) => {
                                         setObjFornecedor(value);
@@ -698,14 +804,14 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         <Grid container item direction="row" spacing={2} justifyContent="left">
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VDatePicker
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     name="dataemissao"
                                     label="Data de Emissão"
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VDatePicker
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     name="dataentrada"
                                     label="Data de Entrada"
                                 />
@@ -715,7 +821,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         <Grid container item direction="row" spacing={2} justifyContent="left">
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VMoneyInput
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth
                                     name="vlfrete"
@@ -725,7 +831,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VMoneyInput
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth
                                     name="vlpedagio"
@@ -735,7 +841,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VMoneyInput
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth
                                     name="vloutrasdespesas"
@@ -751,8 +857,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
                                 <VAutocompleteSearch
-                                    //disabled={isLoading || !isValid}
-                                    disabled={isEditingProduto}
+                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0}
                                     size="small"
                                     name="produto"
                                     label={["descricao"]}
@@ -772,7 +877,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VNumberInput
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth
                                     name="qtd"
@@ -785,7 +890,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VMoneyInput
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth
                                     name="valor"
@@ -798,7 +903,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VMoneyInput
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid}
                                     inputProps={{
                                         readOnly: true
                                     }}
@@ -812,7 +917,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
                                 <Button
-                                    //disabled={isLoading || !isValid}
+                                    disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     variant="contained" 
                                     color={isEditingProduto ? "warning" : "success"}
                                     size="large"
@@ -841,6 +946,49 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     }}
                                 >
                                     <Icon>add</Icon>
+                                </Button>
+                            </Grid>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
+                                <VAutocompleteSearch
+                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0}
+                                    size="small"
+                                    name="condicaopagamento"
+                                    label={["descricao"]}
+                                    TFLabel="Condição de Pagamento"
+                                    getAll={controllerCondicoesPagamento.getAll}
+                                    onChange={(value) => {
+                                        setCondicaoPagamento(value);
+                                        formRef.current?.setFieldError('condicaopagamento', '');
+                                    }}
+                                    onInputchange={() => {
+                                        formRef.current?.setFieldError('condicaopagamento', '');
+                                    }}
+                                    onClickSearch={toggleConsultaCondicoesPagamentoDialogOpen}
+                                    isDialogOpen={isConsultaCondicoesPagamentoDialogOpen}
+                                />
+                            </Grid>
+
+                            <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
+                                <Button
+                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0}
+                                    variant="contained" 
+                                    color="primary"
+                                    size="large"
+                                    onClick={e => {
+                                        if (listaProdutosNF.length == 0) {
+                                            formRef.current?.setFieldError('produto', 'Insira ao menos um produto.');
+                                            toast.error('Insira ao menos um produto.')
+                                        } else {
+                                            if (window.confirm('Deseja gerar contas a pagar? Esta operação bloqueia os produtos e não pode ser revertida.')) {
+                                                gerarContasPagar();
+                                            }
+                                        }
+                                    }}
+                                >
+                                    GERAR
                                 </Button>
                             </Grid>
                         </Grid>
@@ -895,6 +1043,24 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 setProduto(row);
                             }}
                             toggleDialogOpen={toggleConsultaProdutosDialogOpen}
+                        />
+                    </CustomDialog>
+
+                    <CustomDialog 
+                        onClose={toggleConsultaCondicoesPagamentoDialogOpen}
+                        handleClose={toggleConsultaCondicoesPagamentoDialogOpen} 
+                        open={isConsultaCondicoesPagamentoDialogOpen} 
+                        title="Consultar Condições de Pagamento"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaCondicoesPagamento 
+                            isDialog
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldError('condicaopagamento', '');
+                                formRef.current?.setFieldValue('condicaopagamento', row);
+                            }}
+                            toggleDialogOpen={toggleConsultaCondicoesPagamentoDialogOpen}
                         />
                     </CustomDialog>
 
