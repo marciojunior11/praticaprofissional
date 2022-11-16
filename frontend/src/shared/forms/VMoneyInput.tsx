@@ -8,7 +8,7 @@ type TVNumberInputProps = TextFieldProps & {
     initialValue?: number;
 }
 
-const CustomNumberFormat = React.forwardRef<NumericFormatProps<InputAttributes>, TVNumberInputProps>((props: any, ref) => {
+const CustomMoneyFormat = React.forwardRef<NumericFormatProps<InputAttributes>, TVNumberInputProps>((props: any, ref) => {
     const { onChange, prefix, ...other } = props;
 
     return (
@@ -25,13 +25,14 @@ const CustomNumberFormat = React.forwardRef<NumericFormatProps<InputAttributes>,
             }}
             thousandSeparator="."
             decimalSeparator=","
+            prefix="R$"
             decimalScale={2}
-            allowLeadingZeros
+            fixedDecimalScale
         />
     )
 })
 
-export const VNumberInput: React.FC<TVNumberInputProps> = ({ name, initialValue, ...rest }) => {
+export const VMoneyInput: React.FC<TVNumberInputProps> = ({ name, prefix, initialValue, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
     const [value, setValue] = useState(defaultValue || initialValue);
@@ -53,7 +54,7 @@ export const VNumberInput: React.FC<TVNumberInputProps> = ({ name, initialValue,
             defaultValue={defaultValue}
 
             InputProps={{
-                inputComponent: CustomNumberFormat as any
+                inputComponent: CustomMoneyFormat as any
             }}
 
             value={value}

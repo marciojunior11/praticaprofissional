@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesCompras, ICompras, IValidator } from "../../shared/interfaces/entities/Compras";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker, VNumberInput } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerCompras from "../../shared/controllers/ComprasController";
 import { IFornecedores } from "../../shared/interfaces/entities/Fornecedores";
@@ -21,7 +21,8 @@ import ControllerProdutos from "../../shared/controllers/ProdutosController";
 import { ConsultaProdutos } from "../produtos/ConsultaProdutos";
 import { IProdutosNF } from "../../shared/interfaces/entities/ProdutosNF";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
-import { VNumberInput } from "../../shared/forms/VNumberInput";
+import { VMoneyInput } from "../../shared/forms/VMoneyInput";
+import { CurrencyBitcoin } from "@mui/icons-material";
 // #endregion
 
 // #region INTERFACES
@@ -62,6 +63,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const [listaProdutosNF, setListaProdutosNF] = useState<IProdutosNF[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<boolean>(false);
+    const [isEditingProduto, setIsEditingProduto] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [numnf, setNumNf] = useState("");
     const [serienf, setSerieNf] = useState("");
@@ -91,11 +93,11 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         },
         {
             label: "Descrição",
-            name: "descricao",  
+            name: "descricao",
         },
         {
             label: "UND",
-            name: "undmedida",  
+            name: "undmedida",
         },
         {
             label: "Quantidade",
@@ -103,15 +105,39 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         },
         {
             label: "Valor unitário",
-            name: "vlcompra",  
+            name: "vlcompra",
+            render: (row: IProdutosNF) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vlcompra)
+                )
+            }  
         },
         {
             label: "Custo",
             name: "vlcusto",  
+            render: (row: IProdutosNF) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vlcusto)
+                )
+            } 
         },
         {
             label: "Total",
-            name: "vltotal",  
+            name: "vltotal", 
+            render: (row: IProdutosNF) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vltotal)
+                )
+            }  
         },
         {
             label: "Ações",
@@ -127,13 +153,27 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 if (window.confirm('Deseja excluir este produto?')) {
                                     const mArray = listaProdutosNF.slice();
                                     const index = mArray.findIndex(item => item.id == row.id);
-                                    delete mArray[index];
-                                    mArray.length = listaProdutosNF.length-1;
-                                    setListaProdutosNF(mArray);
+                                    insertProduto(true, index, row);
                                 }
                             }}
                         >
                             <Icon>delete</Icon>
+                        </IconButton>
+                        <IconButton
+                            disabled={isEditingProduto} 
+                            color="primary" 
+                            size="small"
+                            onClick={() => {
+                                setIsEditingProduto(true);
+                                formRef.current?.setFieldValue('produto', row);
+                                formRef.current?.setFieldValue('valor', row.vlcompra);
+                                formRef.current?.setFieldValue('qtd', row.qtd);
+                                setProduto(row);
+                                setVlUnitario(row.vlcompra);
+                                setQtd(row.qtd);
+                            }}
+                        >
+                            <Icon>edit</Icon>
                         </IconButton>
                     </>
                 )
@@ -141,94 +181,133 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         }
     ];
 
-    // useEffect(() => {
-    //     console.log('aqui');
-    //     updateCustoProdutos(); 
-    // }, [listaProdutosNF])
-
     useEffect(() => {
-        formRef.current?.setFieldValue('total', String(vlUnitario * qtd));        
+        formRef.current?.setFieldValue('total', parseFloat((vlUnitario*qtd).toFixed(2)));        
     }, [vlUnitario, qtd])
 
-    // const updateCustoProdutos = () => {
-    //     console.log("update");
-    //     let mArray: IProdutosNF[] = [];
-    //     let listaProdutosNFAux = listaProdutosNF.slice();
-    //     let vlTotalNota = 0;
-    //     listaProdutosNFAux.forEach(item => {
-    //         let percProduto = ((item.vlcompra*100)/vlTotalProdutosNota)/100;
-    //         let custo = (item.vlfrete + item.vlpedagio + item.vloutrasdespesas)*percProduto;
-    //         custo = custo + item.vlcompra;
-    //         let mItem = {
-    //             ...item,
-    //             vlcusto: custo,
-    //             lucro: item.vlvenda - custo,
-    //             vltotal: custo * item.qtd
-    //         };
-    //         vlTotalNota += custo * item.qtd;
-    //         mArray.push(mItem);
-    //     })
-    //     setListaProdutosNF(mArray);
-    //     setVlSubTotalNota(vlTotalNota);
-    // }
+    const calcularFooterValue = (): string => {
+        var total = vlTotalProdutosNota;
 
-    const insertProduto = () => {
+        var vlfrete = Number(formRef.current?.getData().vlfrete);
+        var vlpedagio = Number(formRef.current?.getData().vlpedagio);
+        var vloutrasdespesas = Number(formRef.current?.getData().vloutrasdespesas);
+
+        vlfrete = !vlfrete ? 0 : vlfrete;
+        vlpedagio = !vlpedagio ? 0 : vlpedagio;
+        vloutrasdespesas = !vloutrasdespesas ? 0 : vloutrasdespesas;
+
+        total = total + vlfrete + vlpedagio + vloutrasdespesas;
+        return new Intl.NumberFormat('pr-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(total);
+    }
+
+    const insertProduto = (isDeleting: boolean = false, index?: number) => {
+        console.log('produto', produto);
+        var totalProdutosNota = vlTotalProdutosNota;
+        if (isEditingProduto) {
+            totalProdutosNota = totalProdutosNota - (produto!.vlcompra * produto!.qtd);
+            console.log(`EDITING totalProdutosNota1: ${totalProdutosNota}`);
+        }
+        totalProdutosNota = totalProdutosNota + (vlUnitario * qtd);
+        console.log(`totalProdutosNota: ${totalProdutosNota}`);
         var listaProdutos = listaProdutosNF.slice();
+        console.log('listaProdutos1', listaProdutos);
         var mProduto = listaProdutos.find(item => item.id == produto?.id);
-        if (mProduto) {
+        var item: IProdutosNF;
+        if (mProduto && !isDeleting && !isEditingProduto) {
             toast.error('Este produto já está na lista.')
             const validationErrors: IVFormErrors = {};
             validationErrors['produto'] = 'Este produto já está na lista.';
             formRef.current?.setErrors(validationErrors);
         } else {
-            let totalProdutosNota = vlTotalProdutosNota + vlUnitario;
-            setVlTotalProdutosNota(totalProdutosNota);
-            var item: IProdutosNF;
-            item = {
-                id: produto!.id,
-                gtin: produto!.gtin,
-                descricao: produto!.descricao,
-                apelido: produto!.apelido,
-                marca: produto!.marca,
-                undmedida: produto!.undmedida,
-                unidade: produto!.unidade,
-                vlcusto: 0,
-                vlcompra: vlUnitario,
-                vlvenda: produto!.vlvenda,
-                lucro: 0,
-                pesoliq: produto!.pesoliq,
-                pesobruto: produto!.pesobruto,
-                ncm: produto!.ncm,
-                cfop: produto!.cfop,
-                percicmssaida: produto!.percicmssaida,
-                percipi: produto!.percipi,
-                cargatribut: produto!.cargatribut,
-                qtdatual: produto!.qtdatual,
-                qtdideal: produto!.qtdideal,
-                qtdmin: produto!.qtdmin,
-                fornecedor: produto!.fornecedor,
-                listavariacoes: produto!.listavariacoes,
-                qtd: qtd,
-                vltotal: 0,
-                datacad: produto!.datacad,
-                ultalt: produto!.ultalt
+            if (isDeleting) {
+                let produto = listaProdutos[index!];
+                totalProdutosNota = totalProdutosNota - (produto.vlcompra * produto.qtd);
+                listaProdutos.splice(index!, 1);
+            } else {
+                item = {
+                    id: produto!.id,
+                    gtin: produto!.gtin,
+                    descricao: produto!.descricao,
+                    apelido: produto!.apelido,
+                    marca: produto!.marca,
+                    undmedida: produto!.undmedida,
+                    unidade: produto!.unidade,
+                    vlcusto: 0,
+                    vlcompra: vlUnitario,
+                    vlvenda: produto!.vlvenda,
+                    lucro: 0,
+                    pesoliq: produto!.pesoliq,
+                    pesobruto: produto!.pesobruto,
+                    ncm: produto!.ncm,
+                    cfop: produto!.cfop,
+                    percicmssaida: produto!.percicmssaida,
+                    percipi: produto!.percipi,
+                    cargatribut: produto!.cargatribut,
+                    qtdatual: produto!.qtdatual,
+                    qtdideal: produto!.qtdideal,
+                    qtdmin: produto!.qtdmin,
+                    fornecedor: produto!.fornecedor,
+                    listavariacoes: produto!.listavariacoes,
+                    qtd: qtd,
+                    vltotal: 0,
+                    datacad: produto!.datacad,
+                    ultalt: produto!.ultalt
+                }
+                if (isEditingProduto) {
+                    let index = listaProdutos.findIndex(item => item.id == produto?.id);
+                    listaProdutos.splice(index, 1, item);
+                } else {
+                    listaProdutos.push(item); 
+                }     
+                console.log('listaProdutos2', listaProdutos);       
             }
-            listaProdutos.push(item);
+            setVlTotalProdutosNota(totalProdutosNota);   
             var vlTotalNota = 0;
-            var vlfrete = Number(formRef.current?.getData().vlfrete);
-            var vlpedagio = Number(formRef.current?.getData().vlpedagio);
-            var vloutrasdespesas = Number(formRef.current?.getData().vloutrasdespesas);
-            listaProdutos.map(produto => {
-                let percProduto = ((produto.vlcompra*100)/totalProdutosNota)/100;
-                let custo = (vlfrete + vlpedagio + vloutrasdespesas)*percProduto;
-                custo = custo / produto.qtd;
-                produto.vlcusto = produto.vlcompra + custo;
-                produto.lucro = produto.vlcompra - custo;
-                produto.vltotal = produto.vlcusto * produto.qtd;
-                vlTotalNota = vlTotalNota + produto.vltotal;
+            var vlfrete = formRef.current?.getData().vlfrete;
+            var vlpedagio = formRef.current?.getData().vlpedagio;
+            var vloutrasdespesas = formRef.current?.getData().vloutrasdespesas;
+            vlfrete = !vlfrete ? 0 : vlfrete;
+            vlpedagio = !vlpedagio ? 0 : vlpedagio;
+            vloutrasdespesas = !vloutrasdespesas ? 0 : vloutrasdespesas;
+            var percTotal = 0;
+            listaProdutos.map((produto, index) => {
+                console.log("___________");
+                console.log('PRODUTO ', index+1);
+                let totaldespesas = vlfrete + vlpedagio + vloutrasdespesas;
+                console.log(`total despesas: ${totaldespesas}`);
+                let percProduto = parseFloat((produto.vlcompra * qtd * 100 / totalProdutosNota / 100).toFixed(2));
+                percTotal = percTotal + (percProduto * 100);
+                if ((index + 1 == listaProdutos.length) && percTotal < 100) {
+                    percProduto = percProduto + ((100 - percTotal)/100);
+                    percTotal = percTotal + (100 - percTotal);
+                }
+                console.log(`percproduto: ${percProduto}`);
+                console.log(`perctotal: ${percTotal}`);
+                let custo = parseFloat(((vlfrete + vlpedagio + vloutrasdespesas)*percProduto).toFixed(2));
+                console.log(`custo total: ${custo}`);
+                custo = parseFloat((custo / produto.qtd).toFixed(2));
+                console.log(`custo produto: ${custo}`);
+                produto.vlcusto = parseFloat((produto.vlcompra + custo).toFixed(2));
+                console.log(`vlcusto: ${produto.vlcusto}`);
+                produto.lucro = parseFloat((produto.vlvenda - produto.vlcompra).toFixed(2));
+                console.log(`lucro: ${produto.lucro}`);
+                produto.vltotal = parseFloat((produto.vlcusto * produto.qtd).toFixed(2));
+                console.log(`vltotal: ${produto.vltotal}`);
+                vlTotalNota = parseFloat((vlTotalNota + produto.vltotal).toFixed(2));
+                console.log(`vltotalnota: ${vlTotalNota}`);
             })
             setVlSubTotalNota(vlTotalNota);
             setListaProdutosNF(listaProdutos);
+            formRef.current?.setFieldValue('produto', null);
+            formRef.current?.setFieldValue('valor', '');
+            formRef.current?.setFieldValue('qtd', '');
+            formRef.current?.setFieldValue('total', 0);
+            setIsEditingProduto(false);
+            setVlUnitario(0);
+            setQtd(0);
         }
     }
 
@@ -635,45 +714,33 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                         <Grid container item direction="row" spacing={2} justifyContent="left">
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
-                                <VNumberInput
+                                <VMoneyInput
                                     //disabled={isLoading || !isValid}
                                     size="small"
                                     fullWidth
                                     name="vlfrete"
-                                    label="Valor do Frete"
-                                    prefix="R$"
+                                    label="Valor do frete"
                                 />
-                                {/* <VTextField
-                                    //disabled={isLoading || !isValid}
-                                    type="number"
-                                    size="small"
-                                    fullWidth
-                                    name="vlfrete"
-                                    label="Valor do Frete"
-                                    defaultValue={0}
-                                />                                 */}
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
-                                <VTextField
+                                <VMoneyInput
                                     //disabled={isLoading || !isValid}
-                                    type="number"
                                     size="small"
                                     fullWidth
                                     name="vlpedagio"
-                                    label="Valor do Pedágio"
-                                />                                
+                                    label="Valor do pedágio"
+                                />                              
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
-                                <VTextField
+                                <VMoneyInput
                                     //disabled={isLoading || !isValid}
-                                    type="number"
                                     size="small"
                                     fullWidth
                                     name="vloutrasdespesas"
-                                    label="Outras Despesas"
-                                />                                
+                                    label="Outras despesas"
+                                />                               
                             </Grid>
                         </Grid>
 
@@ -685,6 +752,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
                                 <VAutocompleteSearch
                                     //disabled={isLoading || !isValid}
+                                    disabled={isEditingProduto}
                                     size="small"
                                     name="produto"
                                     label={["descricao"]}
@@ -703,9 +771,8 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
-                                <VTextField
+                                <VNumberInput
                                     //disabled={isLoading || !isValid}
-                                    type="number"
                                     size="small"
                                     fullWidth
                                     name="qtd"
@@ -713,34 +780,33 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     onChange={e => {
                                         setQtd(Number(e.target.value));
                                     }}
-                                />  
+                                />
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
-                                <VTextField
+                                <VMoneyInput
                                     //disabled={isLoading || !isValid}
-                                    type="number"
                                     size="small"
                                     fullWidth
                                     name="valor"
-                                    label="Valor"
+                                    label="Valor Uni."
                                     onChange={e => {
-                                        setVlUnitario(Number(e.target.value));
+                                        setVlUnitario(parseFloat(Number(e.target.value).toFixed(2)));
                                     }}
                                 />  
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
-                                <VTextField
+                                <VMoneyInput
                                     //disabled={isLoading || !isValid}
                                     inputProps={{
                                         readOnly: true
                                     }}
-                                    type="number"
                                     size="small"
                                     fullWidth
                                     name="total"
-                                    label="Total"
+                                    label="Vl. Total"
+                                    initialValue={0}
                                 />  
                             </Grid>
 
@@ -748,20 +814,25 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 <Button
                                     //disabled={isLoading || !isValid}
                                     variant="contained" 
-                                    color="success"
+                                    color={isEditingProduto ? "warning" : "success"}
                                     size="large"
                                     onClick={e => {
-                                        if (produto && formRef.current?.getData().valor != "" && formRef.current?.getData().qtd != "") {
+                                        if (
+                                            produto && 
+                                            formRef.current?.getData().valor &&
+                                            formRef.current?.getData().qtd
+                                        ) {
                                             insertProduto();
                                         } else {
+                                            console.log(formRef.current?.getData());
                                             const validationErrors: IVFormErrors = {};
                                             if (!produto) {
                                                 validationErrors['produto'] = 'Selecione um produto.';
                                             }
-                                            if (formRef.current?.getData().valor != "") {
+                                            if (!formRef.current?.getData().valor) {
                                                 validationErrors['valor'] = 'Informe o valor unitário.';
                                             }
-                                            if (formRef.current?.getData().qtd != "") {
+                                            if (!formRef.current?.getData().qtd) {
                                                 validationErrors['qtd'] = 'Informe a quantidade';
                                             }
                                             formRef.current?.setErrors(validationErrors);
@@ -781,8 +852,8 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 rows={listaProdutosNF}
                                 rowId="id"
                                 footer
-                                footerValue={String(vlSubTotalNota)}
-                                footerLabel="Total"
+                                footerValue={<Typography variant="h6">{calcularFooterValue()}</Typography>}
+                                footerLabel={<Typography variant="h6">Total:</Typography>}
                             />
                         </Grid>
 

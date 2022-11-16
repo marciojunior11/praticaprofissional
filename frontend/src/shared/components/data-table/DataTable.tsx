@@ -1,4 +1,4 @@
-import { Icon, IconButton, LinearProgress, Pagination, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TableRowProps } from "@mui/material";
+import { Divider, Icon, IconButton, LinearProgress, Pagination, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TableRowProps } from "@mui/material";
 import { useState } from "react";
 import { render } from "react-dom";
 import { URLSearchParamsInit } from "react-router-dom";
@@ -26,8 +26,8 @@ interface IDataTableProps {
     page?: number;
     onPageChange?: (page: number) => void;
     footer?: boolean;
-    footerLabel?: string;
-    footerValue?: string;
+    footerLabel?: string | React.ReactNode;
+    footerValue?: string | React.ReactNode;
 }
 
 export const DataTable: React.FC<IDataTableProps> = ( { headers, rows, rowId, selectable = false, onRowClick, rowCount, isLoading, page, footer, footerLabel, footerValue, onPageChange } ) => {

@@ -230,7 +230,8 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                             ...item,
                             dias: formRef.current?.getData().parcela.dias,
                             percentual: formRef.current?.getData().parcela.percentual,
-                            formapagamento: formRef.current?.getData().parcela.formapagamento
+                            formapagamento: formRef.current?.getData().parcela.formapagamento,
+                            ultalt: new Date().toLocaleString()
                         }
                     }
                     return item;

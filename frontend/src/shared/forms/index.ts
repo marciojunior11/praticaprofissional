@@ -1,4 +1,6 @@
 export * from './VTextField';
+export * from './VMoneyInput';
+export * from './VNumberInput'
 export * from './VForm';
 export * from './VScope';
 export * from './useVForm';
