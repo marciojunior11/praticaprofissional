@@ -126,7 +126,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
     const collapsedHeaders: IHeaderProps[] = [
         {
             label: "Número",
-            name: "numero",  
+            name: "nrparcela",  
         },
         {
             label: "Dias",
