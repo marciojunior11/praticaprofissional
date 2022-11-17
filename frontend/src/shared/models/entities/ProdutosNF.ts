@@ -27,7 +27,6 @@ class ProdutosNF extends Produtos {
         percicmssaida: number = 0,
         percipi: number = 0,
         cargatribut: number = 0,
-        vlfrete: number = 0,
         qtdatual: number = 0,
         qtdideal: number = 0,
         qtdmin: number = 0,
@@ -57,7 +56,6 @@ class ProdutosNF extends Produtos {
         this.percicmssaida = percicmssaida;
         this.percipi = percipi;
         this.cargatribut = cargatribut;
-        this.vlfrete = vlfrete;
         this.qtdatual = qtdatual;
         this.qtdideal = qtdideal;
         this.qtdmin = qtdmin;

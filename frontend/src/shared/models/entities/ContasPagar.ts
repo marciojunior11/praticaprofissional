@@ -14,7 +14,7 @@ class ContasPagar extends PaiSemId {
     private txjuros: number;
     private fornecedor: Juridicas;
     private formapagamento: FormasPagamento;
-    private centrocusto: CentrosCusto;
+    private flcentrocusto: string;
     private flsituacao: string;
     // #endregion
 
@@ -28,7 +28,7 @@ class ContasPagar extends PaiSemId {
         txjuros: number = 0,
         fornecedor: Juridicas = new Juridicas(),
         formapagamento: FormasPagamento = new FormasPagamento(),
-        centrocusto: CentrosCusto = new CentrosCusto(),
+        flcentrocusto: string = "",
         flsituacao: string = "",
         datacad: string | Date = new Date(),
         ultalt: string | Date = new Date()
@@ -42,7 +42,7 @@ class ContasPagar extends PaiSemId {
         this.txjuros = txjuros;
         this.fornecedor = fornecedor;
         this.formapagamento = formapagamento;
-        this.centrocusto = centrocusto;
+        this.flcentrocusto = flcentrocusto;
         this.flsituacao = flsituacao;
         this.datacad = datacad;
         this.ultalt = ultalt;
@@ -83,7 +83,7 @@ class ContasPagar extends PaiSemId {
     }
 
     public get _centrocusto() {
-        return this.centrocusto;
+        return this.flcentrocusto;
     }
 
     public get _flsituacao() {
@@ -124,8 +124,8 @@ class ContasPagar extends PaiSemId {
         this.formapagamento = value;
     }
 
-    public set _centrocusto(value: CentrosCusto) {
-        this.centrocusto = value;
+    public set _centrocusto(value: string) {
+        this.flcentrocusto = value;
     }
 
     public set _flsituacao(value: string) {

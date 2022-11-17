@@ -61,7 +61,8 @@ class ControllerCompras implements IControllerCompras {
         var listaprodutos = new Array<Produtos>();
         var listacontaspagar = new Array<ContasPagar>();
         var listaprodutosAux = dados.listaprodutos;
-        var listaParcelasAux = dados.condicaopagamento.listaparcelas;
+        var listacontaspagarAux = dados.listacontaspagar;
+
         listaprodutosAux.forEach((produto) => {
             let listavariacoes = new Array<Variacoes>();
             produto.listavariacoes.forEach((variacao) => {
@@ -87,7 +88,6 @@ class ControllerCompras implements IControllerCompras {
                 produto.percicmssaida,
                 produto.percipi,
                 produto.cargatribut,
-                produto.vlfrete,
                 produto.qtdatual,
                 produto.qtdideal,
                 produto.qtdmin,
@@ -100,26 +100,25 @@ class ControllerCompras implements IControllerCompras {
             );
                 listaprodutos.push(itemNF);
         });
-        listaParcelasAux.forEach((parcela) => {
-            let dtvencimento = new Date(dados.dataemissao);
-            dtvencimento.setDate(dtvencimento.getDate() + parcela.dias);
-            let vlconta = (dados.vltotal/100)*parcela.percentual;
-            let conta = new ContasPagar(
-                parcela.numero,
-                dtvencimento,
-                vlconta,
-                dados.condicaopagamento.txdesc,
-                dados.condicaopagamento.txmulta,
-                dados.condicaopagamento.txjuros,
-                new Juridicas(dados.fornecedor.id),
-                new FormasPagamento(parcela.formapagamento.id),
-                new CentrosCusto(1),
+
+        listacontaspagarAux.forEach((conta) => {
+            let contapagar = new ContasPagar(
+                conta.nrparcela,
+                conta.dtvencimento,
+                conta.valor,
+                conta.txdesc,
+                conta.txmulta,
+                conta.txjuros,
+                new Juridicas(conta.fornecedor.id),
+                new FormasPagamento(conta.formapagamento.id),
+                'C',
                 'A',
-                new Date(),
-                new Date()
+                conta.datacad,
+                conta.ultalt
             );
-            listacontaspagar.push(conta);
+            listacontaspagar.push(contapagar);
         })
+
         var compra = new Compras(
             dados.numnf,
             dados.serienf,
@@ -174,7 +173,6 @@ class ControllerCompras implements IControllerCompras {
                 produto.percicmssaida,
                 produto.percipi,
                 produto.cargatribut,
-                produto.vlfrete,
                 produto.qtdatual,
                 produto.qtdideal,
                 produto.qtdmin,

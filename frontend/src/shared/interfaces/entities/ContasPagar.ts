@@ -10,7 +10,7 @@ export interface IContasPagar {
     txjuros: number;
     fornecedor: IFornecedores;
     formapagamento: IFormasPagamento;
-    centrocusto: ICentrosCusto;
+    flcentrocusto: string;
     flsituacao: string;
     datacad: string | Date;
     ultalt: string | Date;
@@ -25,7 +25,7 @@ export interface IDetalhesContasPagar {
     txjuros: number;
     fornecedor: IFornecedores;
     formapagamento: IFormasPagamento;
-    centrocusto: ICentrosCusto;
+    flcentrocusto: string;
     flsituacao: string;
 }
 

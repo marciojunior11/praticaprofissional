@@ -25,23 +25,24 @@ import { VMoneyInput } from "../../shared/forms/VMoneyInput";
 import { CurrencyBitcoin } from "@mui/icons-material";
 import ControllerCondicoesPagamento from "../../shared/controllers/CondicoesPagamentoController";
 import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondicoesPagamento";
-import { ICondicoesPagamento } from "../../shared/models/ModelCondicoesPagamento";
 import { IContasPagar } from "../../shared/interfaces/entities/ContasPagar";
 import { Dayjs } from "dayjs";
+import { IParcelas } from "../../shared/interfaces/entities/Parcelas";
+import { ICondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
 // #endregion
 
 // #region INTERFACES
 interface IFormData {
-    nmpais: string;
-    sigla: string;
-    ddi: string;
+    numnf: string;
+    serienf: string;
+    modelonf: string;
 }
 // #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    nmpais: yup.string().required(),
-    sigla: yup.string().required().min(2),
-    ddi: yup.string().required(),
+    numnf: yup.string().required(),
+    serienf: yup.string().required(),
+    modelonf: yup.string().required(),
 })
 
 export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = false, toggleOpen, selectedRow, reloadDataTableIfDialog}) => {
@@ -167,6 +168,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                 return (
                     <>
                         <IconButton
+                            disabled={isEditingProduto || listaContasPagar.length > 0} 
                             color="error" 
                             size="small" 
                             onClick={() => {
@@ -180,7 +182,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             <Icon>delete</Icon>
                         </IconButton>
                         <IconButton
-                            disabled={isEditingProduto} 
+                            disabled={isEditingProduto || listaContasPagar.length > 0} 
                             color="primary" 
                             size="small"
                             onClick={() => {
@@ -196,6 +198,42 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             <Icon>edit</Icon>
                         </IconButton>
                     </>
+                )
+            }
+        }
+    ];
+
+    const headersContasPagar: IHeaderProps[] = [
+        {
+            name: 'nrparcela',
+            label: 'Nr. Parcela',
+            align: 'right',
+        },
+        {
+            name: 'dtvencimento',
+            label: 'Vencimento',
+            align: 'left',
+            render: (row) => {
+                return (
+                    row.dtvencimento.toLocaleDateString()
+                )
+            }
+        },
+        {
+            name: 'formapagamento.descricao',
+            label: 'Forma de Pagamento',
+            align: 'center',
+        },
+        {
+            name: 'valor',
+            label: 'Valor',
+            align: 'center',
+            render: (row) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.valor)
                 )
             }
         }
@@ -220,6 +258,17 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         vloutrasdespesas = !vloutrasdespesas ? 0 : vloutrasdespesas;
 
         total = total + vlfrete + vlpedagio + vloutrasdespesas;
+        return new Intl.NumberFormat('pr-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(total);
+    }
+
+    const calcularFooterValorContasPagar = (): string => {
+        var total = 0;
+        listaContasPagar.forEach(item => {
+            total = total + item.valor
+        })
         return new Intl.NumberFormat('pr-BR', {
             style: 'currency',
             currency: 'BRL'
@@ -268,12 +317,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                 txmulta: condicaopagamento!.txmulta,
                 txjuros: condicaopagamento!.txjuros,
                 fornecedor: objFornecedor!,
-                centrocusto: {
-                    id: 1,
-                    descricao: 'COMPRAS',
-                    datacad: new Date(),
-                    ultalt: new Date()
-                },
+                flcentrocusto: 'C',
                 formapagamento: {
                     ...item.formapagamento,
                     datacad: new Date(),
@@ -521,24 +565,50 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }
 
     const handleSave = (dados: IFormData) => {
+        var errors = false;
+        if (listaContasPagar.length == 0) {
+            errors = true;
+        }
+        if (listaProdutosNF.length == 0) {
+            errors = true;
+        }
+        if (!formRef.current?.getData().dataemissao) {
+            errors = true;
+        }
+        if (!formRef.current?.getData().dataentrada) {
+            errors = true;
+        }
+        if (!objFornecedor) {
+            errors = true;
+        }
+        if (errors) {
+            setIsValid(false);
+        }
         formValidationSchema
             .validate(dados, { abortEarly: false })
                 .then((dadosValidados) => {
-                    var errors = false;
-                    if (listaContasPagar.length == 0) {
-                        errors = true;
-                    }
-                    if (listaProdutosNF.length == 0) {
-                        errors = true;
-                    }
-                    if (errors) {
-                        setIsValid(false);
-                    }
                     if(isValid) {
                         setIsLoading(true);
+                        let dtemissao: Dayjs = formRef.current?.getData().dataemissao;
+                        let dtentrada: Dayjs = formRef.current?.getData().dataentrada;
+                        let dataemissao = new Date(dtemissao.toISOString());
+                        let dataentrada = new Date(dtentrada.toISOString());
                         if (isDialog) {
                             if (!selectedRow) {
-                                controller.create(dadosValidados)
+                                controller.create({
+                                    numnf: dadosValidados.numnf,
+                                    serienf: dadosValidados.serienf,
+                                    modelonf: dadosValidados.modelonf,
+                                    fornecedor: objFornecedor!,
+                                    observacao: "",
+                                    condicaopagamento: condicaopagamento!,
+                                    listaprodutos: listaProdutosNF,
+                                    listacontaspagar: listaContasPagar,
+                                    vltotal: 0,
+                                    flsituacao: "A",
+                                    dataemissao: dataemissao,
+                                    dataentrada: dataentrada,
+                                })
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -550,21 +620,34 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                         }
                                     });
                             } else {
-                                controller.update(dadosValidados)
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        reloadDataTableIfDialog?.();
-                                        toggleOpen?.();
-                                    }
-                                });
+                                // controller.update(dadosValidados)
+                                // .then((result) => {
+                                //     setIsLoading(false);
+                                //     if (result instanceof Error) {
+                                //         toast.error(result.message);
+                                //     } else {
+                                //         toast.success('Alterado com sucesso!');
+                                //         reloadDataTableIfDialog?.();
+                                //         toggleOpen?.();
+                                //     }
+                                // });
                             }
                         } else {
                             if (id === 'novo') {
-                                controller.create(dadosValidados)
+                                controller.create({
+                                    numnf: dadosValidados.numnf,
+                                    serienf: dadosValidados.serienf,
+                                    modelonf: dadosValidados.modelonf,
+                                    fornecedor: objFornecedor!,
+                                    observacao: "",
+                                    condicaopagamento: condicaopagamento!,
+                                    listaprodutos: listaProdutosNF,
+                                    listacontaspagar: listaContasPagar,
+                                    vltotal: 0,
+                                    flsituacao: "A",
+                                    dataemissao: dataemissao,
+                                    dataentrada: dataentrada,
+                                })
                                     .then((result) => {
                                         setIsLoading(false);
                                         if (result instanceof Error) {
@@ -577,18 +660,18 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                         }
                                     });
                             } else {
-                                controller.update(dadosValidados)
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        if (isSaveAndClose()) {
-                                            navigate('/compras')
-                                        }
-                                    }
-                                });
+                                // controller.update(dadosValidados)
+                                // .then((result) => {
+                                //     setIsLoading(false);
+                                //     if (result instanceof Error) {
+                                //         toast.error(result.message);
+                                //     } else {
+                                //         toast.success('Alterado com sucesso!');
+                                //         if (isSaveAndClose()) {
+                                //             navigate('/compras')
+                                //         }
+                                //     }
+                                // });
                             }
                         }
                     } else {
@@ -606,6 +689,18 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                     if (listaProdutosNF.length == 0) {
                         validationErrors['produto'] = 'Por favor, insira ao menos um produto.'
+                    }
+
+                    if (!formRef.current?.getData().dataemissao) {
+                        validationErrors['dataemissao'] = 'Por favor, informe a data de emissäo.'
+                    }
+
+                    if (!formRef.current?.getData().dataemissao) {
+                        validationErrors['dataentrada'] = 'Por favor, informe a data de entrada da mercadoria.'
+                    }
+
+                    if (!objFornecedor) {
+                        validationErrors['fornecedor'] = 'Por favor, informe o fornecedor.'
                     }
 
                     errors.inner.forEach(error => {
@@ -971,18 +1066,19 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 />
                             </Grid>
 
-                            <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
+                            <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                 <Button
                                     disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0}
                                     variant="contained" 
                                     color="primary"
                                     size="large"
+                                    fullWidth
                                     onClick={e => {
                                         if (listaProdutosNF.length == 0) {
                                             formRef.current?.setFieldError('produto', 'Insira ao menos um produto.');
                                             toast.error('Insira ao menos um produto.')
                                         } else {
-                                            if (window.confirm('Deseja gerar contas a pagar? Esta operação bloqueia os produtos e não pode ser revertida.')) {
+                                            if (window.confirm('Deseja gerar contas a pagar? Esta operação bloqueia os produtos.')) {
                                                 gerarContasPagar();
                                             }
                                         }
@@ -991,6 +1087,22 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     GERAR
                                 </Button>
                             </Grid>
+
+                            { listaContasPagar.length > 0 && (
+                                <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
+                                    <Button
+                                        variant="contained" 
+                                        color="error"
+                                        size="large"
+                                        fullWidth
+                                        onClick={e => {
+                                            setListaContasPagar([]);
+                                        }}
+                                    >
+                                        <Icon>close</Icon>
+                                    </Button>
+                                </Grid>
+                            ) }
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
@@ -1001,6 +1113,22 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 rowId="id"
                                 footer
                                 footerValue={<Typography variant="h6">{calcularFooterValue()}</Typography>}
+                                footerLabel={<Typography variant="h6">Total:</Typography>}
+                            />
+                        </Grid>
+
+                        <Grid item>
+                            <Typography variant="h6">Contas a Pagar</Typography>
+                        </Grid>
+
+                        <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
+                            <DataTable
+                                rowCount={listaContasPagar.length}
+                                headers={headersContasPagar}
+                                rows={listaContasPagar}
+                                rowId="nrparcela"
+                                footer
+                                footerValue={<Typography variant="h6">{calcularFooterValorContasPagar()}</Typography>}
                                 footerLabel={<Typography variant="h6">Total:</Typography>}
                             />
                         </Grid>
