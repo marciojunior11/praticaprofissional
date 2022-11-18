@@ -9,15 +9,17 @@ function comprasRoutes(req, res) {
     } else if(req.method === 'GET') {
         if(req.url.includes('numnf') && req.url.includes('serienf') && req.url.includes('modelonf') && req.url.includes('idfornecedor')) {
             ctrlCompras.buscarUm(req, res);
-        } else if (req.url.includes('filter')) {
-            ctrlCompras.validate(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlCompras.buscarTodosSemPg(req, res)
         } else {
             ctrlCompras.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/compras' && req.method === 'POST') {
-        ctrlCompras.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url.includes('validate')) {
+            ctrlCompras.validate(req, res);
+        } else {
+            ctrlCompras.salvar(req, res);
+        }
     } else if(req.url.match(/\/api\/compras\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlCompras.alterar(req, res, id);

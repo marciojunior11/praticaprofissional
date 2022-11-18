@@ -49,6 +49,10 @@ export const VMoneyInput: React.FC<TVNumberInputProps> = ({ name, prefix, initia
         <TextField
             {...rest}
 
+            InputLabelProps={{
+                shrink: true
+            }}
+
             error={!!error}
             helperText={error}
             defaultValue={defaultValue}

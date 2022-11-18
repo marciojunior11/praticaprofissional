@@ -2,6 +2,7 @@ import PaiSemId from "./PaiSemId";
 import Juridicas from './Juridicas'
 import Produtos from "./Produtos";
 import ContasPagar from "./ContasPagar";
+import CondicoesPagamento from "./CondicoesPagamento";
 
 class Compras extends PaiSemId {
     // #region ATRIBUTOS
@@ -9,8 +10,12 @@ class Compras extends PaiSemId {
     private serienf: string;
     private modelonf: string;
     private fornecedor: Juridicas;
+    private condicaopagamento: CondicoesPagamento;
     private observacao: string;
     private vltotal: number;
+    private vlfrete: number;
+    private vlpedagio: number;
+    private vloutrasdespesas: number;
     private listaprodutos: Produtos[];
     private listacontaspagar: ContasPagar[];
     private flsituacao: string;
@@ -24,7 +29,11 @@ class Compras extends PaiSemId {
         serienf: string = "",
         modelonf: string = "",
         fornecedor: Juridicas = new Juridicas(),
+        condicaopagamento: CondicoesPagamento = new CondicoesPagamento(),
         observacao: string = "",
+        vlfrete: number = 0,
+        vlpedagio: number = 0,
+        vloutrasdespesas = 0,
         vltotal: number = 0,
         listaprodutos: Produtos[] = [],
         listacontaspagar: ContasPagar[] = [],
@@ -39,7 +48,11 @@ class Compras extends PaiSemId {
         this.serienf = serienf;
         this.modelonf = modelonf;
         this.fornecedor = fornecedor;
+        this.condicaopagamento = condicaopagamento;
         this.observacao = observacao;
+        this.vlfrete = vlfrete;
+        this.vlpedagio = vlpedagio;
+        this.vloutrasdespesas = vloutrasdespesas;
         this.vltotal = vltotal;
         this.listaprodutos = listaprodutos;
         this.listacontaspagar = listacontaspagar;
@@ -68,8 +81,24 @@ class Compras extends PaiSemId {
         return this.fornecedor;
     }
 
+    public get _condicaopagamento() {
+        return this.condicaopagamento;
+    }
+
     public get _observacao() {
         return this.observacao;
+    }
+
+    public get _vlfrete() {
+        return this.vlfrete;
+    }
+    
+    public get _vlpedagio() {
+        return this.vlpedagio;
+    }
+
+    public get _vloutrasdespesas() {
+        return this.vloutrasdespesas;
     }
 
     public get _vltotal() {
@@ -115,8 +144,24 @@ class Compras extends PaiSemId {
         this.fornecedor = value;
     }
 
+    public set _condicaopagamento(value: CondicoesPagamento) {
+        this.condicaopagamento = value;
+    }
+
     public set _observacao(value: string) {
         this.observacao = value;
+    }
+
+    public set _vlfrete(value: number) {
+        this.vlfrete = value;
+    }
+
+    public set _vlpegadio(value: number) {
+        this.vlpedagio = value;
+    }
+
+    public set _vloutrasdespesas(value: number) {
+        this.vloutrasdespesas = value;
     }
 
     public set _vltotal(value: number) {

@@ -48,6 +48,10 @@ export const VNumberInput: React.FC<TVNumberInputProps> = ({ name, initialValue,
         <TextField
             {...rest}
 
+            InputLabelProps={{
+                shrink: true
+            }}
+
             error={!!error}
             helperText={error}
             defaultValue={defaultValue}

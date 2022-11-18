@@ -5,6 +5,7 @@ import { ICompras, IDetalhesCompras, TListaCompras } from '../interfaces/entitie
 import { IValidator } from '../interfaces/entities/Compras';
 import CentrosCusto from '../models/entities/CentrosCusto';
 import Compras from '../models/entities/Compras';
+import CondicoesPagamento from '../models/entities/CondicoesPagamento';
 import ContasPagar from '../models/entities/ContasPagar';
 import Estados from '../models/entities/Estados';
 import FormasPagamento from '../models/entities/FormasPagamento';
@@ -58,6 +59,8 @@ class ControllerCompras implements IControllerCompras {
     }
 
     create = async (dados: IDetalhesCompras): Promise<number | undefined | Error> => {
+        console.log(dados);
+
         var listaprodutos = new Array<Produtos>();
         var listacontaspagar = new Array<ContasPagar>();
         var listaprodutosAux = dados.listaprodutos;
@@ -126,7 +129,11 @@ class ControllerCompras implements IControllerCompras {
             dados.serienf,
             dados.modelonf,
             new Juridicas(dados.fornecedor.id),
+            new CondicoesPagamento(dados.condicaopagamento.id),
             dados.observacao,
+            dados.vlfrete,
+            dados.vlpedagio,
+            dados.vloutrasdespesas,
             dados.vltotal,
             listaprodutos,
             listacontaspagar,
@@ -192,7 +199,11 @@ class ControllerCompras implements IControllerCompras {
             dados.serienf,
             dados.modelonf,
             new Juridicas(dados.fornecedor.id),
+            new CondicoesPagamento(dados.condicaopagamento.id),
             dados.observacao,
+            dados.vlfrete,
+            dados.vlpedagio,
+            dados.vloutrasdespesas,
             dados.vltotal,
             listaprodutos,
             new Array<ContasPagar>(),

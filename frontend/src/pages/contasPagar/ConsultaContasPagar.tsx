@@ -16,10 +16,10 @@ import ControllerCompras from "../../shared/controllers/ComprasController";
 import { IHeaderProps } from "../../shared/components/data-table/DataTable";
 import { IConsultaProps } from "../../shared/interfaces/views/Consulta";
 import { CollapsedDataTable } from "../../shared/components/data-table/CollapsedDataTable";
-import { CadastroCompras } from "./CadastroCompras";
+import { CadastroContasPagar } from "./CadastroContasPagar";
 // #endregion
 
-export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
+export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
     // #region CONTROLLERS
     const controller = new ControllerCompras();
     // #endregion
@@ -116,7 +116,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                                 });
                                 toggleCadastroComprasDialogOpen();
                             } else {
-                                navigate(`/compras/cadastro/numnf=${row.numnf}_serienf=${row.serienf}_modelonf=${row.modelonf}_idfornecedor=${row.fornecedor.id}`);
+                                navigate(`/compras/cadastro/nf=${row.numnf}_serie=${row.serienf}_modelo=${row.modelonf}_fornecedor=${row.fornecedor?.id}`);
                             }
                         }}>
                             <Icon>visibility</Icon>
@@ -309,7 +309,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                 open={isCadastroComprasDialogOpen}
                 title="Cadastrar Compra"
             >
-                <CadastroCompras
+                <CadastroContasPagar
                     isDialog
                     toggleOpen={toggleCadastroComprasDialogOpen}
                     selectedRow={selectedRow}

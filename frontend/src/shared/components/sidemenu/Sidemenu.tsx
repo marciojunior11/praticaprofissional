@@ -6,7 +6,7 @@ import { useAppThemeContext, useDrawerContext } from "../../contexts";
 
 interface IListItemLinkProps {
     to: string;
-    icon: string;
+    icon: string[];
     label: string;
     onClick: (() => void) | undefined;
 }
@@ -31,9 +31,13 @@ const ListItemLink: React.FC<IListItemLinkProps> = ({ to, icon, label, onClick }
     return (
         <ListItemButton selected={!!match} onClick={handleClick}>
             <ListItemIcon>
-                <Icon>
-                    {icon}
-                </Icon>
+                {icon.map((item) => {
+                    return (
+                        <Icon>
+                            {item}
+                        </Icon>
+                    )
+                })}
             </ListItemIcon>
             <ListItemText primary={label}/>                  
         </ListItemButton>        

@@ -29,7 +29,9 @@ import {
     ConsultaVariacoes,
     CadastroVariacoes,
     ConsultaCentrosCusto,
-    CadastroCentrosCusto
+    CadastroCentrosCusto,
+    ConsultaContasPagar,
+    CadastroContasPagar
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -39,27 +41,27 @@ export const AppRoutes = () => {
         setDrawerOptions([
             {
                 label: 'Página inicial',
-                icon: 'home',
+                icon: ['home'],
                 path: '/home',
             },
             {
                 label: 'Paises',
-                icon: 'public',
+                icon: ['public'],
                 path: '/paises',
             },
             {
                 label: 'Estados',
-                icon: 'location_on',
+                icon: ['location_on'],
                 path: '/estados',
             },
             {
                 label: 'Cidades',
-                icon: 'location_city',
+                icon: ['location_city'],
                 path: '/cidades',
             },
             {
                 label: 'Fornecedores',
-                icon: 'handshake',
+                icon: ['handshake'],
                 path: '/fornecedores',
             },
             // {
@@ -69,42 +71,47 @@ export const AppRoutes = () => {
             // },
             {
                 label: 'Produtos',
-                icon: 'shopping_cart',
+                icon: ['shopping_cart'],
                 path: '/produtos',
             },
             {
                 label: 'Formas de Pagamento',
-                icon: 'local_atm',
+                icon: ['local_atm'],
                 path: '/formaspagamento',
             },
             {
                 label: 'Condições de Pagamento',
-                icon: 'request_quote',
+                icon: ['request_quote'],
                 path: '/condicoespagamento',
             },
             {
                 label: 'Compras',
-                icon: 'paid',
+                icon: ['paid'],
                 path: '/compras',
             },
             {
+                label: 'Contas a Pagar',
+                icon: ['monetization_on_icon', 'arrow_forward'],
+                path: '/contaspagar',
+            },
+            {
                 label: 'Grades',
-                icon: 'grid_3x3',
+                icon: ['grid_3x3'],
                 path: '/grades',
             },
             {
                 label: 'Características',
-                icon: 'apps',
+                icon: ['apps'],
                 path: '/caracteristicas',
             },
             {
                 label: 'Variações',
-                icon: 'app_registration',
+                icon: ['app_registration'],
                 path: '/variacoes',
             },
             {
                 label: 'Centros de Custo',
-                icon: 'currency_exchange',
+                icon: ['currency_exchange'],
                 path: '/centroscusto',
             },
         ]);
@@ -140,6 +147,9 @@ export const AppRoutes = () => {
 
             <Route path="/compras" element={<ConsultaCompras/>}/>
             <Route path="/compras/cadastro/:id" element={<CadastroCompras/>}/>
+
+            <Route path="/contaspagar" element={<ConsultaContasPagar/>}/>
+            <Route path="/contaspagar/cadastro/:id" element={<CadastroContasPagar/>}/>
 
             <Route path="/grades" element={<ConsultaGrades/>}/>
             <Route path="/grades/cadastro/:id" element={<CadastroGrades/>}/>

@@ -12,6 +12,9 @@ export interface ICompras {
     condicaopagamento: ICondicoesPagamento;
     listaprodutos: IProdutosNF[];
     listacontaspagar: IContasPagar[];
+    vlfrete: number;
+    vlpedagio: number;
+    vloutrasdespesas: number;
     vltotal: number;
     dataemissao: string | Date;
     dataentrada: string | Date;
@@ -28,6 +31,9 @@ export interface IDetalhesCompras {
     condicaopagamento: ICondicoesPagamento;
     listaprodutos: IProdutosNF[];
     listacontaspagar: IContasPagar[];
+    vlfrete: number;
+    vlpedagio: number;
+    vloutrasdespesas: number;
     vltotal: number;
     flsituacao: string;
     dataemissao: string | Date;

@@ -62,7 +62,11 @@ async function salvar(req, res) {
                 serienf,
                 modelonf,
                 fornecedor,
+                condicaopagamento,
                 observacao,
+                vlfrete,
+                vlpedagio,
+                vloutrasdespesas,
                 vltotal,
                 listaprodutos,
                 listacontaspagar,
@@ -77,7 +81,11 @@ async function salvar(req, res) {
                 serienf,
                 modelonf,
                 fornecedor,
+                condicaopagamento,
                 observacao,
+                vlfrete,
+                vlpedagio,
+                vloutrasdespesas,
                 vltotal,
                 listaprodutos,
                 listacontaspagar,
@@ -153,6 +161,7 @@ async function deletar(req, res) {
 };
 
 async function validate(req, res) {
+    console.log('aqui');
     try {
         let body = '';
 
@@ -161,12 +170,12 @@ async function validate(req, res) {
         })
 
         req.on('end', async () => {
-            const { numnf, serienf, modelonf, fornecedor } = JSON.parse(body);
+            const { numnf, serienf, modelonf, idfornecedor } = JSON.parse(body);
             const mCompra = {
                 numnf,
                 serienf,
                 modelonf,
-                fornecedor
+                idfornecedor
             };
             const response = await daoCompras.validate(mCompra);
             res.writeHead(201, { 'Content-Type': 'application/json'});

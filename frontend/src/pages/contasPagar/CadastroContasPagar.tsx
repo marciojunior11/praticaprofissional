@@ -45,7 +45,7 @@ const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
     modelonf: yup.string().required(),
 })
 
-export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = false, toggleOpen, selectedRow, reloadDataTableIfDialog}) => {
+export const CadastroContasPagar: React.FC<ICadastroComprasProps> = ({isDialog = false, toggleOpen, selectedRow, reloadDataTableIfDialog}) => {
     // #region CONTROLLERS
     const controller = new ControllerCompras();
     const controllerFornecedores = new ControllerFornecedores();
@@ -54,7 +54,11 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     // #endregion
    
     // #region HOOKS
-    const { id = 'novo' } = useParams<'id'>();
+    const { nf = ''} = useParams<'nf'>();
+    const { serie = ''} = useParams<'serie'>();
+    const { modelo = ''} = useParams<'modelo'>();
+    const { fornecedor = ''} = useParams<'fornecedor'>();
+    const id = (nf != '' && serie != '' && modelo != '' && fornecedor != '') ? `nf=${nf}_serie=${serie}_modelo=${modelo}_fornecedor=${fornecedor}` : 'novo';
     const navigate = useNavigate();
     const { formRef, save, saveAndNew, saveAndClose, isSaveAndNew, isSaveAndClose } = useVForm();
     const { debounce } = useDebounce();
@@ -69,7 +73,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<boolean>(false);
     const [isEditingProduto, setIsEditingProduto] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [numnf, setNumNf] = useState("");
     const [serienf, setSerieNf] = useState("");
@@ -210,11 +213,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             name: 'percparcela',
             label: 'Perc. Parcela',
             align: 'left',
-            render: (row) => {
-                return (
-                    `${row.percparcela}%`
-                )
-            }
         },
         {
             name: 'dtvencimento',
@@ -222,7 +220,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             align: 'left',
             render: (row) => {
                 return (
-                    new Date(row.dtvencimento).toLocaleDateString()
+                    row.dtvencimento.toLocaleDateString()
                 )
             }
         },
@@ -482,22 +480,13 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
         } else {
             if (id !== 'novo') {
                 setIsLoading(true);
-                let nf = id.split('=')[1];
-                let serie = id.split('=')[2];
-                let modelo = id.split('=')[3];
-                let fornecedor: number | string = id.split('=')[4];
-                nf = nf.replace(/[^0-9]/g, '');
-                serie = serie.replace(/[^0-9]/g, '');
-                modelo = modelo.replace(/[^0-9]/g, '');
-                fornecedor = Number(fornecedor.replace(/[^0-9]/g, ''));
                 controller.getOne({
                     numnf: nf,
                     serienf: serie,
                     modelonf: modelo,
-                    idfornecedor: fornecedor
+                    idfornecedor: Number(fornecedor)
                 })
                 .then((result) => {
-                    console.log(result);
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
@@ -506,9 +495,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         result.datacad = new Date(result.datacad).toLocaleString();
                         result.ultalt = new Date(result.ultalt).toLocaleString();
                         formRef.current?.setData(result);
-                        setIsEditing(true);
-                        setListaProdutosNF(result.listaprodutos);
-                        setListaContasPagar(result.listacontaspagar);
                         setIsValid(true);
                         setNumNf(result.numnf);
                         setSerieNf(result.serienf);
@@ -543,34 +529,52 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }, [numnf, serienf, modelonf, objFornecedor]);
 
     const validate = (dados: IValidator) => {
-        console.log(dados);
         debounce(() => {
-            setIsValidating(true);
-            debounce(() => {
-                controller.validate(dados)
-                    .then((result) => {
-                        setIsValidating(false);
-                        if (result instanceof Error) {
-                            toast.error(result.message);
-                        } else {
-                            setIsValid(result);
-                            if (result === false) {
-                                const validationErrors: IVFormErrors = {};
-                                toast.error('Verifique os campos chave da nota fiscal.')
-                                validationErrors['numnf'] = 'Esta nota fiscal já está cadastrada.';
-                                validationErrors['modelonf'] = 'Esta nota fiscal já está cadastrada.';
-                                validationErrors['serienf'] = 'Esta nota fiscal já está cadastrada.';
-                                validationErrors['fornecedor'] = 'Esta nota fiscal já está cadastrada.';
-                                formRef.current?.setErrors(validationErrors);
-                            }
-                        }
+            if (
+                numnf != "" &&
+                serienf != "" &&
+                modelonf != "" &&
+                objFornecedor &&
+                (
+                    dados.numnf != numnf &&
+                    dados.serienf != serienf &&
+                    dados.modelonf != modelonf &&
+                    dados.idfornecedor != objFornecedor.id
+                )
+            ) {
+                setIsValidating(true);
+                debounce(() => {
+                    controller.validate({
+                        numnf: numnf,
+                        serienf: serienf,
+                        modelonf: modelonf,
+                        idfornecedor: objFornecedor.id
                     })
-            });        
+                        .then((result) => {
+                            setIsValidating(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message);
+                            } else {
+                                setIsValid(result);
+                                if (result === false) {
+                                    const validationErrors: IVFormErrors = {};
+                                    toast.error('Verifique os campos chave da nota fiscal.')
+                                    validationErrors['numnf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['modelonf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['serienf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['fornecedor'] = 'Esta nota fiscal já está cadastrada.';
+                                    formRef.current?.setErrors(validationErrors);
+                                }
+                            }
+                        })
+                });        
+            } else {
+                setIsValid(true);
+            }
         })
     }
 
     const handleSave = (dados: IFormData) => {
-        console.log(condicaopagamento);
         var errors = false;
         if (listaContasPagar.length == 0) {
             errors = true;
@@ -614,9 +618,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     condicaopagamento: condicaopagamento!,
                                     listaprodutos: listaProdutosNF,
                                     listacontaspagar: listaContasPagar,
-                                    vlfrete: vlfrete,
-                                    vlpedagio: vlpedagio,
-                                    vloutrasdespesas: vloutrasdespesas,
                                     vltotal: vltotal,
                                     flsituacao: "A",
                                     dataemissao: dataemissao,
@@ -657,9 +658,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     listaprodutos: listaProdutosNF,
                                     listacontaspagar: listaContasPagar,
                                     vltotal: vltotal,
-                                    vlfrete: vlfrete,
-                                    vlpedagio: vlpedagio,
-                                    vloutrasdespesas: vloutrasdespesas,
                                     flsituacao: "A",
                                     dataemissao: dataemissao,
                                     dataentrada: dataentrada,
@@ -756,9 +754,8 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvar={false}
-                    mostrarBotaoNovo={false}
-                    mostrarBotaoSalvarFechar={!isEditing}
-                    mostrarBotaoApagar={false}
+                    mostrarBotaoSalvarFechar
+                    mostrarBotaoApagar={id !== 'novo' && !isDialog}
 
                     disableButtons={isValidating}
 
@@ -819,9 +816,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                         setIsValidating(false);
                                         setNumNf(e.target.value);
                                         formRef.current?.setFieldError('numnf', '');
-                                        formRef.current?.setFieldError('serienf', '');
-                                        formRef.current?.setFieldError('modelonf', '');
-                                        formRef.current?.setFieldError('fornecedor', '');
                                     }}
                                 />
                             </Grid>
@@ -1108,7 +1102,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 </Button>
                             </Grid>
 
-                            { listaContasPagar.length > 0 || !isEditing && (
+                            { listaContasPagar.length > 0 && (
                                 <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                     <Button
                                         variant="contained" 
@@ -1153,37 +1147,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             />
                         </Grid>
 
-                        {(id != 'novo') && (
-                            <Grid container item direction="row" spacing={2}>
-                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
-                                    <VTextField
-                                        size="small"
-                                        required
-                                        fullWidth
-                                        name='datacad' 
-                                        label="Data Cad."
-                                        inputProps={{
-                                            readOnly: true,
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
-                                    <VTextField
-                                        size="small"
-                                        required
-                                        fullWidth
-                                        name='ultalt' 
-                                        label="Ult. Alt."
-                                        inputProps={{
-                                            readOnly: true,
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid>
-                        )}
-
                     </Grid>
-
 
                     <CustomDialog 
                         onClose={toggleConsultaFornecedoresDialogOpen}
