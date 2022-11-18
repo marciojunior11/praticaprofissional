@@ -181,6 +181,9 @@ async function buscarTodosComPg (url) {
                             condicaoPagamento: mCondicaoPagamento,
                             listaprodutos: mListaProdutosNF,
                             listacontaspagar: contaspagar,
+                            vlfrete: res.rows[i].vlfrete,
+                            vlpedagio: res.rows[i].vlpedagio,
+                            vloutrasdespesas: res.rows[i].vloutrasdespesas,
                             vltotal: res.rows[i].vltotal,
                             flsituacao: res.rows[i].flsituacao,
                             dataemissao: res.rows[i].dataemissao,
@@ -209,31 +212,79 @@ async function buscarUm (url) {
     modelonf = modelonf.replace(/[^0-9]/g, '');
     idfornecedor = idfornecedor.replace(/[^0-9]/g, '');
 
-    console.log(numnf, serienf, modelonf, idfornecedor);
-
     return new Promise((resolve, reject) => {
-        pool.query('select * from compras where numnf = $1 and serienf = $2 and modelonf = $3 and fk_idfornecedor = $4', [numnf.toString(), serienf.toString(), modelonf.toString(), idfornecedor], async (err, res) => {
-            if (err) {
-                return reject(err);
-            }
+        pool.query(`
+            select * from compras where
+                numnf = $1 and
+                serienf = $2 and
+                modelonf = $3 and
+                fk_idfornecedor = $4
+        `, [numnf, serienf, modelonf, idfornecedor], async (err, res) => {
+            if (err) return reject(err)
             if (res.rowCount != 0) {
-                let mFornecedor = await daoFornecedores.buscarUm(res.rows[0].fk_idfornecedor);
-                let mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[0].fk_idcondpgto);
-                const mCompra = {
-                    numnf: res.rows[0].numnf,
-                    serienf: res.rows[0].serienf,
-                    modelonf: res.rows[0].modelonf,
-                    fornecedor: mFornecedor,
-                    condicaoPagamento: mCondicaoPagamento,
-                    datacad: res.rows[0].datacad,
-                    ultalt: res.rows[0].ultalt,
-                    dataemissao: res.rows[0].dataemissao,
-                    dataentrada: res.rows[0].dataentrada
-                }
-                return resolve(mCompra);
+                const mListaContasPagar = [];
+                const mFornecedor = await daoFornecedores.buscarUm(idfornecedor);
+                const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[0].fk_idcondpgto);
+                const mListaProdutosNF = await daoProdutos.buscarProdutosNfComPg(
+                    numnf,
+                    serienf,
+                    modelonf,
+                    idfornecedor
+                );
+                pool.query(`
+                select * from contaspagar where
+                    fk_numnf = $1 and
+                    fk_serienf = $2 and
+                    fk_modelonf = $3 and
+                    fk_idfornecedor = $4
+                order by nrparcela                    
+                `, [numnf, serienf, modelonf, idfornecedor], async (err, resp) => {
+                    if (err) return reject(err);
+                    for (let i = 0; i < resp.rows.length; i++) {
+                        let conta = resp.rows[i];
+                        const mFormaPagamento = await daoFormasPagamento.buscarUm(conta.fk_idformapgto);
+                        mListaContasPagar.push({
+                            nrparcela: conta.nrparcela,
+                            percparcela: conta.percparcela,
+                            dtvencimento: conta.dtvencimento,
+                            vltotal: conta.vltotal,
+                            txdesc: conta.txdesc,
+                            txmulta: conta.txmulta,
+                            txjuros: conta.txjuros,
+                            observacao: conta.observacao,
+                            fornecedor: mFornecedor,
+                            formapagamento: mFormaPagamento,
+                            flcentrocusto: conta.flcentrocusto,
+                            flsituacao: conta.flsituacao,
+                            datacad: conta.datacad,
+                            ultalt: conta.ultalt                           
+                        })
+                    }
+                    console.log(mListaContasPagar);
+                    const mCompra = {
+                        numnf: numnf,
+                        serienf: serienf,
+                        modelonf: modelonf,
+                        fornecedor: mFornecedor,
+                        observacao: res.rows[0].observacao,
+                        condicaopagamento: mCondicaoPagamento,
+                        listaprodutos: mListaProdutosNF,
+                        listacontaspagar: mListaContasPagar,
+                        vlfrete: res.rows[0].vlfrete,
+                        vlpedagio: res.rows[0].vlpedagio,
+                        vloutrasdespesas: res.rows[0].vloutrasdespesas,
+                        vltotal: res.rows[0].vltotal,
+                        flsituacao: res.rows[0].flsituacao,
+                        dataemissao: res.rows[0].dataemissao,
+                        dataentrada: res.rows[0].dataentrada,
+                        datacad: res.rows[0].datacad,
+                        ultalt: res.rows[0].ultalt,                   
+                    }
+                    return resolve(mCompra);
+                });
             }
-            return resolve(null);
-        })
+            return null;
+        });
     })
 };
 
@@ -259,7 +310,7 @@ async function salvar (compra) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into compras values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [
+                client.query('insert into compras values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)', [
                     compra.numnf,
                     compra.serienf,
                     compra.modelonf,
@@ -270,7 +321,11 @@ async function salvar (compra) {
                     compra.vltotal,
                     compra.dataemissao,
                     compra.dataentrada,
-                    compra.flsituacao
+                    compra.flsituacao,
+                    compra.vlfrete,
+                    compra.vlpedagio,
+                    compra.vloutrasdespesas,
+                    compra.condicaopagamento.id,
                 ], async (err, res) => {
                         if (shouldAbort(err)) return reject(err);
                         const response = await client.query('select * from compras where numnf = $1 and serienf = $2 and modelonf = $3 and fk_idfornecedor = $4', [compra.numnf.toString(), compra.serienf.toString(), compra.modelonf.toString(), compra.fornecedor.id]);
@@ -432,7 +487,7 @@ async function validate(compra) {
             compra.numnf, 
             compra.serienf, 
             compra.modelonf,
-             compra.fornecedor.id
+            compra.idfornecedor
         ], (err, res) => {
             if (err) {
                 return reject(err);
