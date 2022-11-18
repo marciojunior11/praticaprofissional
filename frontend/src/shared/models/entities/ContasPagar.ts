@@ -7,11 +7,13 @@ import PaiSemId from "./PaiSemId";
 class ContasPagar extends PaiSemId {
     // #region ATRIBUTOS
     private nrparcela: number;
+    private percparcela: number;
     private dtvencimento: string | Date;
-    private valor: number;
+    private vltotal: number;
     private txdesc: number;
     private txmulta: number;
     private txjuros: number;
+    private observacao: string;
     private fornecedor: Juridicas;
     private formapagamento: FormasPagamento;
     private flcentrocusto: string;
@@ -21,11 +23,13 @@ class ContasPagar extends PaiSemId {
     // #region CONSTRUCTOR
     constructor(
         nrparcela: number = 0,
+        percparcela: number = 0,
         dtvencimento: string | Date = new Date(),
-        valor: number = 0,
+        vltotal: number = 0,
         txdesc: number = 0,
         txmulta: number = 0,
         txjuros: number = 0,
+        observacao: string = "",
         fornecedor: Juridicas = new Juridicas(),
         formapagamento: FormasPagamento = new FormasPagamento(),
         flcentrocusto: string = "",
@@ -35,11 +39,13 @@ class ContasPagar extends PaiSemId {
     ) {
         super();
         this.nrparcela = nrparcela;
+        this.percparcela = percparcela;
         this.dtvencimento = dtvencimento;
-        this.valor = valor;
+        this.vltotal = vltotal;
         this.txdesc = txdesc;
         this.txmulta = txmulta;
         this.txjuros = txjuros;
+        this.observacao = observacao;
         this.fornecedor = fornecedor;
         this.formapagamento = formapagamento;
         this.flcentrocusto = flcentrocusto;
@@ -54,12 +60,16 @@ class ContasPagar extends PaiSemId {
         return this.nrparcela;
     }
 
+    public get _percparcela() {
+        return this.percparcela;
+    }
+
     public get _dtvencimento() {
         return this.dtvencimento;
     }
 
-    public get _valor() {
-        return this.valor;
+    public get _vltotal() {
+        return this.vltotal;
     }
 
     public get _txdesc() {
@@ -72,6 +82,10 @@ class ContasPagar extends PaiSemId {
 
     public get _juros() {
         return this.txjuros;
+    }
+
+    public get _observacao() {
+        return this.observacao;
     }
 
     public get _fornecedor() {
@@ -96,24 +110,32 @@ class ContasPagar extends PaiSemId {
         this.nrparcela = value;
     }
 
+    public set _percparcela(value: number) {
+        this.percparcela = value;
+    }
+
     public set _dtvencimento(value: string | Date) {
         this.dtvencimento = value;
     }
 
-    public set _valor(value: number) {
-        this.valor = value;
+    public set _vltotal(value: number) {
+        this.vltotal = value;
     }
 
     public set _txdesc(value: number) {
         this.txdesc = value;
     }
 
-    public set _multa(value: number) {
-        this._multa = value;
+    public set _txmulta(value: number) {
+        this.txmulta = value;
     }
 
-    public set _juros(value: number) {
-        this._juros = value;
+    public set _txjuros(value: number) {
+        this.txjuros = value;
+    }
+
+    public set _observacao(value: string) {
+        this.observacao = value;
     }
 
     public set _fornecedor(value: Juridicas) {

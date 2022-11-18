@@ -88,7 +88,7 @@ class ControllerCompras implements IControllerCompras {
                 produto.percicmssaida,
                 produto.percipi,
                 produto.cargatribut,
-                produto.qtdatual,
+                produto.qtdatual + produto.qtd,
                 produto.qtdideal,
                 produto.qtdmin,
                 new Juridicas(produto.fornecedor.id),
@@ -96,7 +96,7 @@ class ControllerCompras implements IControllerCompras {
                 produto.qtd,
                 produto.vltotal,
                 produto.datacad,
-                produto.ultalt
+                new Date()
             );
                 listaprodutos.push(itemNF);
         });
@@ -104,11 +104,13 @@ class ControllerCompras implements IControllerCompras {
         listacontaspagarAux.forEach((conta) => {
             let contapagar = new ContasPagar(
                 conta.nrparcela,
+                conta.percparcela,
                 conta.dtvencimento,
-                conta.valor,
+                conta.vltotal,
                 conta.txdesc,
                 conta.txmulta,
                 conta.txjuros,
+                conta.observacao,
                 new Juridicas(conta.fornecedor.id),
                 new FormasPagamento(conta.formapagamento.id),
                 'C',

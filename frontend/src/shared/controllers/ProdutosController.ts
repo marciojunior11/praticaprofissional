@@ -172,7 +172,7 @@ class ControllerProdutos implements IController {
 
     validate = async (dados: IValidator): Promise<boolean | Error> => {
         try {
-            const { data } = await Api.post(`/api/condicoespagamento/validate`, dados);
+            const { data } = await Api.post(`/api/produtos/validate`, dados);
             if (data != 0) {
                 return false;
             } else {

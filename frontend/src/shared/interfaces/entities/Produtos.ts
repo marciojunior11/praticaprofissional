@@ -59,7 +59,7 @@ export interface IDetalhesProdutos {
 }
 
 export interface IValidator {
-    descricao: string;
+    gtin: string;
 }
 
 export type TListaProdutos = {

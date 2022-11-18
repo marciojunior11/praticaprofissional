@@ -53,20 +53,32 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
 
     const headers: IHeaderProps[] = [
         {
-            label: "NF",
-            name: "numnf",  
-        },
-        {
-            label: "Série",
-            name: "serienf",  
-        },        
-        {
-            label: "Modelo",
-            name: "modelonf",  
+            label: "NF / Série / Modelo",
+            name: " ",
+            align: "center",
+            render: (row) => {
+                return (
+                    `${row.numnf} ${row.serienf} ${row.modelonf}`
+                )
+            }  
         },
         {
             label: "Fornecedor",
-            name: "fornecedor.razsocial",  
+            name: "fornecedor.razsocial", 
+            align: "center", 
+        },
+        {
+            label: "Vl. Total",
+            name: "vltotal", 
+            align: "center", 
+            render: (row) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vltotal)
+                )
+            }
         },
         {
             label: "Situação",
@@ -75,11 +87,11 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
             render: (row) => {
                 return (
                     <>
-                        {row.flsituacao == 'A' ? (
+                        {row.flsituacao == 'F' ? (
                             <Chip label="FINALIZADA" color="success"/>
-                        ) : (
+                        ) : row.flsituacao == 'C' ? (
                             <Chip label="CANCELADA" color="error"/>
-                        )}                        
+                        ) : null}                        
                     </>
                 )
             } 
@@ -92,7 +104,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                 return (
                     <>
                         <IconButton color="error" size="small" onClick={() => handleDelete(row)}>
-                            <Icon>delete</Icon>
+                            <Icon>block</Icon>
                         </IconButton>
                         <IconButton color="primary" size="small" onClick={() => {
                             if (isDialog) {
@@ -107,7 +119,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                                 navigate(`/compras/cadastro/nf=${row.numnf}_serie=${row.serienf}_modelo=${row.modelonf}_fornecedor=${row.fornecedor?.id}`);
                             }
                         }}>
-                            <Icon>edit</Icon>
+                            <Icon>visibility</Icon>
                         </IconButton>
                         {isDialog && (
                             <IconButton color="success" size="small" onClick={() => {
@@ -125,21 +137,59 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
 
     const collapsedHeaders: IHeaderProps[] = [
         {
-            label: "Número",
-            name: "nrparcela",  
+            label: "ID",
+            name: "id",
+            align: "right",  
         },
         {
-            label: "Dias",
-            name: "dias",  
+            label: "Descrição",
+            name: "descricao",  
+            align: "left",
         },        
         {
-            label: "Percentual",
-            name: "percentual",  
+            label: "QTD",
+            name: "qtd",
+            align: "center", 
+        },
+        {   
+            name: "vlcompra",
+            label: "Vl. Unitário",
+            align: "center",
+            render: (row) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vlcompra)
+                )
+            }
         },
         {
-            label: "Forma de Pagamento",
-            name: "formapagamento.descricao",  
+            name: "vlcusto",
+            label: "Custo Uni.",
+            align: "center",
+            render: (row) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vlcusto)
+                )
+            }
         },
+        {
+            name: "vltotal",
+            label: "Total",
+            align: "center",
+            render: (row) => {
+                return (
+                    new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(row.vltotal)
+                )
+            }
+        }
     ]
     
     const reloadDataTable = () => {
@@ -230,10 +280,10 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
             }
         >
             <CollapsedDataTable
-                collapseLabel="Contas à Pagar"
+                collapseLabel="Produtos"
                 collapseHeaders={collapsedHeaders}
-                collapseRowId="nrparcela"
-                collapseRows="listacontaspagar"
+                collapseRowId="id"
+                collapseRows="listaprodutos"
                 headers={headers}
                 rows={rows}
                 rowId="id"

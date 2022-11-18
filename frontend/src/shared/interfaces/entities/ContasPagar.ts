@@ -3,11 +3,13 @@ import { IDetalhesFormasPagamento, IFormasPagamento } from './FormasPagamento';
 import { IFornecedores } from './Fornecedores';
 export interface IContasPagar {
     nrparcela: number;
+    percparcela: number;
     dtvencimento: string | Date;
-    valor: number;
+    vltotal: number;
     txdesc: number;
     txmulta: number;
     txjuros: number;
+    observacao: string;
     fornecedor: IFornecedores;
     formapagamento: IFormasPagamento;
     flcentrocusto: string;
@@ -18,11 +20,13 @@ export interface IContasPagar {
 
 export interface IDetalhesContasPagar {
     nrparcela: number;
+    percparcela: number;
     dtvencimento: string | Date;
-    valor: number;
+    vltotal: number;
     txdesc: number;
     txmulta: number;
     txjuros: number;
+    observacao: string;
     fornecedor: IFornecedores;
     formapagamento: IFormasPagamento;
     flcentrocusto: string;

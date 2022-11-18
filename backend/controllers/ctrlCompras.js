@@ -57,17 +57,31 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const { numnf, serienf, modelonf, fornecedor, condicaopagamento, centrocusto, listaprodutos, observacao, vltotal, dataemissao, dataentrada, datacad, ultalt } = JSON.parse(body);
+            const { 
+                numnf,
+                serienf,
+                modelonf,
+                fornecedor,
+                observacao,
+                vltotal,
+                listaprodutos,
+                listacontaspagar,
+                flsituacao,
+                dataemissao,
+                dataentrada,
+                datacad,
+                ultalt
+            } = JSON.parse(body);
             const mCompra = {
                 numnf,
                 serienf,
                 modelonf,
                 fornecedor,
-                condicaopagamento,
-                centrocusto,
-                listaprodutos,
                 observacao,
                 vltotal,
+                listaprodutos,
+                listacontaspagar,
+                flsituacao,
                 dataemissao,
                 dataentrada,
                 datacad,

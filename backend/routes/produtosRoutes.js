@@ -8,15 +8,17 @@ function produtosRoutes(req, res) {
         if(req.url.match(/\/api\/produtos\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlProdutos.buscarUm(req, res, id);
-        } else if (req.url.includes('filter')) {
-            ctrlProdutos.validate(req, res);
         } else if (req.url.includes('page=all')) {
             ctrlProdutos.buscarTodosSemPg(req, res)
         } else {
             ctrlProdutos.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/produtos' && req.method === 'POST') {
-        ctrlProdutos.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url.includes('validate')) {
+            ctrlProdutos.validate(req, res);
+        } else {
+            ctrlProdutos.salvar(req, res);
+        }
     } else if(req.url.match(/\/api\/produtos\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlProdutos.alterar(req, res, id);

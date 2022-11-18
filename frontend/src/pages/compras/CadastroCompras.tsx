@@ -210,6 +210,11 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             align: 'right',
         },
         {
+            name: 'percparcela',
+            label: 'Perc. Parcela',
+            align: 'left',
+        },
+        {
             name: 'dtvencimento',
             label: 'Vencimento',
             align: 'left',
@@ -225,7 +230,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             align: 'center',
         },
         {
-            name: 'valor',
+            name: 'vltotal',
             label: 'Valor',
             align: 'center',
             render: (row) => {
@@ -233,7 +238,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                     new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL'
-                    }).format(row.valor)
+                    }).format(row.vltotal)
                 )
             }
         }
@@ -267,7 +272,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const calcularFooterValorContasPagar = (): string => {
         var total = 0;
         listaContasPagar.forEach(item => {
-            total = total + item.valor
+            total = total + item.vltotal
         })
         return new Intl.NumberFormat('pr-BR', {
             style: 'currency',
@@ -311,11 +316,13 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
             }
             let contapagar: IContasPagar = {
                 nrparcela: item.numero,
+                percparcela: item.percentual,
                 dtvencimento: dtvencimento,
-                valor: parseFloat(Number(valor).toFixed(2)),
+                vltotal: parseFloat(Number(valor).toFixed(2)),
                 txdesc: condicaopagamento!.txdesc,
                 txmulta: condicaopagamento!.txmulta,
                 txjuros: condicaopagamento!.txjuros,
+                observacao: `Conta a Pagar Parcela ${item.numero} de ${index + 1} referente ao mês ${dtvencimento.getMonth()}/${dtvencimento.getFullYear()}`,
                 fornecedor: objFornecedor!,
                 flcentrocusto: 'C',
                 formapagamento: {
@@ -386,6 +393,8 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                     datacad: produto!.datacad,
                     ultalt: produto!.ultalt
                 }
+                console.log('___________');
+                console.log('item', item);
                 if (isEditingProduto) {
                     let index = listaProdutos.findIndex(item => item.id == produto?.id);
                     listaProdutos.splice(index, 1, item);
@@ -549,6 +558,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 setIsValid(result);
                                 if (result === false) {
                                     const validationErrors: IVFormErrors = {};
+                                    toast.error('Verifique os campos chave da nota fiscal.')
                                     validationErrors['numnf'] = 'Esta nota fiscal já está cadastrada.';
                                     validationErrors['modelonf'] = 'Esta nota fiscal já está cadastrada.';
                                     validationErrors['serienf'] = 'Esta nota fiscal já está cadastrada.';
@@ -589,6 +599,10 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
+                        let vlfrete = formRef.current?.getData().vlfrete;
+                        let vlpedagio = formRef.current?.getData().vlpedagio;
+                        let vloutrasdespesas = formRef.current?.getData().vloutrasdespesas;
+                        let vltotal = vlTotalProdutosNota + vlfrete + vlpedagio + vloutrasdespesas;
                         let dtemissao: Dayjs = formRef.current?.getData().dataemissao;
                         let dtentrada: Dayjs = formRef.current?.getData().dataentrada;
                         let dataemissao = new Date(dtemissao.toISOString());
@@ -604,7 +618,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     condicaopagamento: condicaopagamento!,
                                     listaprodutos: listaProdutosNF,
                                     listacontaspagar: listaContasPagar,
-                                    vltotal: 0,
+                                    vltotal: vltotal,
                                     flsituacao: "A",
                                     dataemissao: dataemissao,
                                     dataentrada: dataentrada,
@@ -643,7 +657,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     condicaopagamento: condicaopagamento!,
                                     listaprodutos: listaProdutosNF,
                                     listacontaspagar: listaContasPagar,
-                                    vltotal: 0,
+                                    vltotal: vltotal,
                                     flsituacao: "A",
                                     dataemissao: dataemissao,
                                     dataentrada: dataentrada,
@@ -655,7 +669,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                         } else {
                                             toast.success('Cadastrado com sucesso!')
                                             if (isSaveAndClose()) {
-                                                navigate('/compras');
+                                                //navigate('/compras');
                                             }
                                         }
                                     });

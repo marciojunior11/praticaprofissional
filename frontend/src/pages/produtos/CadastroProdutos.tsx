@@ -90,7 +90,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
     const [isValid, setIsValid] = useState(false);
-    const [descricao, setDescricao] = useState("");
+    const [gtin, setGtin] = useState("");
     const [produtoOriginal, setProdutoOriginal] = useState<IDetalhesProdutos | null>(null);
     const [listaVariacoes, setListaVariacoes] = useState<IVariacoes[]>([]);
     const [fornecedor, setFornecedor] = useState<IFornecedores | null>(null);
@@ -203,7 +203,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             setListaVariacoes(result.listavariacoes);
                             formRef.current?.setData(result);
                             setIsValid(true);
-                            setDescricao(result.descricao);
+                            setGtin(result.descricao);
                             setProdutoOriginal(result);
                         }
                     });
@@ -227,7 +227,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);
                             setIsValid(true);
-                            setDescricao(result.descricao);
+                            setGtin(result.descricao);
                             setProdutoOriginal(result);
                         }
                     });
@@ -240,16 +240,16 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
     }, [id]);
 
     useEffect(() => {
-        if (descricao != "") validate(descricao);
-    }, [descricao]);
+        if (gtin != "") validate(gtin);
+    }, [gtin]);
 
     const validate = (filter: string) => {
         debounce(() => {
-            if (!isValid && filter != "" && (filter.toUpperCase() != produtoOriginal?.descricao)) {
+            if (!isValid && filter != "" && (filter.toUpperCase() != produtoOriginal?.gtin)) {
                 setIsValidating(true);
                 debounce(() => {
                     controller.validate({
-                        descricao: filter
+                        gtin: filter
                     })
                         .then((result) => {
                             setIsValidating(false);
@@ -259,7 +259,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 setIsValid(result);
                                 if (result === false) {
                                     const validationErrors: IVFormErrors = {};
-                                    validationErrors['descricao'] = 'Esse produto já está cadastrado.';
+                                    validationErrors['gtin'] = 'Jã existe um produto com este cõdigo de barras cadastrado.';
                                     formRef.current?.setErrors(validationErrors);
                                 }
                             }
@@ -562,29 +562,16 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                     fullWidth
                                     name='gtin' 
                                     label="GTIN"
-                                    disabled={isLoading}                             
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    size="small"
-                                    required
-                                    fullWidth
-                                    name='descricao' 
-                                    label="Descrição"
-                                    disabled={isLoading}                             
+                                    disabled={isLoading}
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().descricao) && (
+                                                { (isValidating && formRef.current?.getData().gtin) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (isValid && formRef.current?.getData().descricao) && (
+                                                { (isValid && formRef.current?.getData().gtin) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -600,7 +587,20 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                         setIsValidating(false);
                                         formRef.current?.setFieldError('descricao', '');
                                         validate(e.target.value);
-                                    }}
+                                    }}                           
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
+                                <VTextField 
+                                    size="small"
+                                    required
+                                    fullWidth
+                                    name='descricao' 
+                                    label="Descrição"
+                                    disabled={isLoading}                             
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>

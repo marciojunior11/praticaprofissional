@@ -174,9 +174,9 @@ async function validate(req, res) {
         })
 
         req.on('end', async () => {
-            const { descricao } = JSON.parse(body);
+            const { gtin } = JSON.parse(body);
             const mProduto = {
-                descricao
+                gtin
             };
             const response = await daoProdutos.validate(mProduto);
             res.writeHead(201, { 'Content-Type': 'application/json'});

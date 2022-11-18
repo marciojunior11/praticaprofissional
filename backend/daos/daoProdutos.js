@@ -244,6 +244,68 @@ async function buscarTodosComPg (url) {
     })
 };
 
+async function buscarProdutosNfComPg(numnf, serienf, modelonf, idfornecedor) {
+    return new Promise((resolve, reject) => {
+        var listaprodutos = [];
+        pool.query(`
+        select * from produtos as p
+            inner join produtos_compra as pc on p.id = pc.fk_idproduto
+            inner join compras as c on 
+                c.numnf = pc.fk_numnf and
+                c.serienf = pc.fk_serienf and
+                c.modelonf = pc.fk_modelonf and
+                c.fk_idfornecedor = pc.fk_idfornecedor where
+                    c.numnf = $1 and
+                    c.serienf = $2 and
+                    c.modelonf = $3 and
+                    c.fk_idfornecedor = $4
+        `, [
+            numnf,
+            serienf,
+            modelonf,
+            idfornecedor
+        ], (err, res) => {
+            if (err) return reject(err);
+            if (res.rowCount != 0) {
+                res.rows.forEach(row => {
+                    let produto = {
+                        id: row.id,
+                        gtin: row.gtin,
+                        descricao: row.descricao,
+                        apelido: row.apelido,
+                        marca: row.marca,
+                        undmedida: row.undmedida,
+                        unidade: row.unidade,
+                        vlcusto: row.vlcusto,
+                        vlcompra: row.vlcompra,
+                        vlvenda: row.vlvenda,
+                        lucro: row.lucro,
+                        pesoliq: row.pesoliq,
+                        pesobruto: row.pesobruto,
+                        ncm: row.ncm,
+                        cfop: row.cfop,
+                        percicmssaida: row.percicmssaida,
+                        percipi: row.percipi,
+                        cargatribut: row.cargatribut,
+                        qtdatual: row.qtdatual,
+                        qtdideal: row.qtdideal,
+                        qtdmin: row.qtdmin,
+                        fornecedor: null,
+                        listavariacoes: [],
+                        qtd: row.qtd,
+                        vltotal: row.vltotal,
+                        datacad: row.datacad,
+                        ultalt: row.ultalt,
+                    };
+                    listaprodutos.push(produto);
+                })
+                return resolve(listaprodutos);
+            }
+            return resolve([]);
+        })
+    });
+}
+
 // @descricao BUSCA UM REGISTRO
 // @route GET /api/produtos
 async function buscarUm (id) {
@@ -375,6 +437,7 @@ async function salvar (produto) {
 // @descricao ALTERA UM REGISTRO
 // @route PUT /api/produtos/:id
 async function alterar (id, produto) {
+    console.log('dao', produto);
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -488,7 +551,7 @@ async function deletar (id) {
 
 async function validate(produto) {
     return new Promise( async (resolve, reject) => {
-        pool.query(`select * from produtos where descricao like '${produto.descricao.toUpperCase()}'`, (err, res) => {
+        pool.query(`select * from produtos where gtin like '${produto.gtin}'`, (err, res) => {
             if (err) {
                 return reject(err);
             }
@@ -501,6 +564,7 @@ module.exports = {
     getQtd,
     buscarTodosSemPg,
     buscarTodosComPg,
+    buscarProdutosNfComPg,
     buscarUm,
     salvar,
     alterar,
