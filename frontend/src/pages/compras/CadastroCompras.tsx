@@ -506,6 +506,9 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         result.datacad = new Date(result.datacad).toLocaleString();
                         result.ultalt = new Date(result.ultalt).toLocaleString();
                         formRef.current?.setData(result);
+                        setListaContasPagar(result.listacontaspagar);
+                        setListaProdutosNF(result.listaprodutos);
+                        setIsEditing(true);
                     }
                 });
             } else {
@@ -663,7 +666,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                         } else {
                                             toast.success('Cadastrado com sucesso!')
                                             if (isSaveAndClose()) {
-                                                //navigate('/compras');
+                                                navigate('/compras');
                                             }
                                         }
                                     });
@@ -782,30 +785,28 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                         <Grid container item direction="row" spacing={2} justifyContent="center">
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={4}>
-                                <VTextField
+                                <VNumberTextField
+                                    readOnly={isValid || isEditing}
+                                    inputProps={(
+                                        <InputAdornment position="end">
+                                            { (isValidating && formRef.current?.getData().serienf) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <CircularProgress size={24}/>
+                                                </Box>
+                                            ) }
+                                            { (isValid && formRef.current?.getData().serienf) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <Icon color="success">done</Icon>
+                                                </Box>
+                                            ) }
+                                        </InputAdornment>
+                                    )}
                                     size="small"
                                     required
                                     fullWidth
                                     name="numnf"
                                     label="Número"
                                     disabled={isLoading}
-                                    InputProps={{
-                                        readOnly: isValid,
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().numnf) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <CircularProgress size={24}/>
-                                                    </Box>
-                                                ) }
-                                                { (isValid && formRef.current?.getData().numnf) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <Icon color="success">done</Icon>
-                                                    </Box>
-                                                ) }
-                                            </InputAdornment>
-                                        )
-                                    }}
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
@@ -819,30 +820,28 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={4}>
-                                <VTextField
+                                <VNumberTextField
+                                    inputProps={(
+                                        <InputAdornment position="end">
+                                            { (isValidating && formRef.current?.getData().serienf) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <CircularProgress size={24}/>
+                                                </Box>
+                                            ) }
+                                            { (isValid && formRef.current?.getData().serienf) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <Icon color="success">done</Icon>
+                                                </Box>
+                                            ) }
+                                        </InputAdornment>
+                                    )}
                                     size="small"
                                     required
                                     fullWidth
                                     name="serienf"
                                     label="Série"
-                                    //disabled={isLoading || isValid}
-                                    InputProps={{
-                                        readOnly: isValid,
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().serienf) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <CircularProgress size={24}/>
-                                                    </Box>
-                                                ) }
-                                                { (isValid && formRef.current?.getData().serienf) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <Icon color="success">done</Icon>
-                                                    </Box>
-                                                ) }
-                                            </InputAdornment>
-                                        )
-                                    }}
+                                    disabled={isLoading}
+                                    readOnly={isValid || isEditing}
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
@@ -853,30 +852,28 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={4}>
-                                <VTextField
+                                <VNumberTextField
+                                    readOnly={isValid || isEditing}
                                     size="small"
                                     required
                                     fullWidth
                                     name="modelonf"
                                     label="Modelo"
                                     //disabled={isLoading || isValid}
-                                    InputProps={{
-                                        readOnly: isValid,
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().modelonf) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <CircularProgress size={24}/>
-                                                    </Box>
-                                                ) }
-                                                { (isValid && formRef.current?.getData().modelonf) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <Icon color="success">done</Icon>
-                                                    </Box>
-                                                ) }
-                                            </InputAdornment>
-                                        )
-                                    }}
+                                    inputProps={(
+                                        <InputAdornment position="end">
+                                            { (isValidating && formRef.current?.getData().serienf) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <CircularProgress size={24}/>
+                                                </Box>
+                                            ) }
+                                            { (isValid && formRef.current?.getData().serienf) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <Icon color="success">done</Icon>
+                                                </Box>
+                                            ) }
+                                        </InputAdornment>
+                                    )}
                                     onChange={(e) => {
                                         setIsValid(false);
                                         setIsValidating(false);
@@ -893,7 +890,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     name="fornecedor"
                                     label={["razsocial"]}
                                     TFLabel="Fornecedor"
-                                    disabled={isLoading || isValid}
+                                    disabled={isLoading || isValid || isEditing}
                                     getAll={controllerFornecedores.getAll}
                                     onChange={(value) => {
                                         setObjFornecedor(value);
@@ -1060,7 +1057,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
                                 <VAutocompleteSearch
-                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0}
+                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0 || listaProdutosNF.length == 0}
                                     size="small"
                                     name="condicaopagamento"
                                     label={["descricao"]}
@@ -1080,7 +1077,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                 <Button
-                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0}
+                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0 || listaProdutosNF.length == 0}
                                     variant="contained" 
                                     color="primary"
                                     size="large"
@@ -1100,9 +1097,10 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 </Button>
                             </Grid>
 
-                            { listaContasPagar.length > 0 || !isEditing && (
+                            { listaContasPagar.length > 0 && (
                                 <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                     <Button
+                                        disabled={isEditing || isLoading || isEditingProduto}
                                         variant="contained" 
                                         color="error"
                                         size="large"

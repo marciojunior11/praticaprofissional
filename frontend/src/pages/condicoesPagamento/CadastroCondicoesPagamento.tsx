@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberInput } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import { IDetalhesParcelas, IParcelas, TListaParcelas } from "../../shared/interfaces/entities/Parcelas";
 import { Environment } from "../../shared/environment";
@@ -502,48 +502,33 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
 
                         <Grid container item direction="row" spacing={2} justifyContent="center">
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                <VTextField
-                                    type="number"
-                                    inputMode="decimal"
+                                <VNumberInput
                                     size="small"
                                     required
                                     fullWidth
                                     name="txdesc"
-                                    label="Desconto"
+                                    label="Desconto %"
                                     disabled={isLoading}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                <VTextField
-                                    type="number"
-                                    inputMode="decimal"
+                                <VNumberInput
                                     size="small"
                                     required
                                     fullWidth
                                     name="txmulta"
-                                    label="Multa"
+                                    label="Multa %"
                                     disabled={isLoading}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                <VTextField
-                                    type="number"
-                                    inputMode="decimal"
+                                <VNumberInput
                                     size="small"
                                     required
                                     fullWidth
                                     name="txjuros"
-                                    label="Juros"
+                                    label="Juros %"
                                     disabled={isLoading}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                    }}
                                 />
                             </Grid>
                         </Grid>

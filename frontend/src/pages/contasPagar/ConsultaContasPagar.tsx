@@ -219,7 +219,7 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
 
     return (
         <LayoutBase 
-            titulo="Consultar Compras"
+            titulo="Consultar Contas a Pagar"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca

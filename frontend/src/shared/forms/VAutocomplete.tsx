@@ -15,7 +15,8 @@ type TGenericList = {
 type TVAutocompleteProps = {
     size?: 'medium' | 'small',
     name: string,
-    getAll: (
+    rows?: any[],
+    getAll?: (
         page?: number,
         filter?: string
     ) => Promise<TGenericList | Error>
@@ -25,10 +26,11 @@ type TVAutocompleteProps = {
     onChange?: (newValue: any) => void,
     onInputchange?: () => void,
     required?: boolean,
-    disabled?: boolean
+    disabled?: boolean,
+    reload?: boolean
 }
 
-export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, disabled, ...rest}) => {
+export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, rows, getAll, label, TFLabel, isExternalLoading = false, disabled, reload, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -52,23 +54,28 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll
     }, [registerField, fieldName, selectedOption])
 
     const reloadData = () => {
-        setIsLoading(true);
-        debounce(() => {
-            getAll(0, busca)
-                .then(result => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setOptions(result.data);
-                    }
-                })
-        })
+        if (rows) {
+            setIsLoading(false);
+            setOptions(rows);
+        } else {
+            setIsLoading(true);
+            debounce(() => {
+                getAll?.(0, busca)
+                    .then(result => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            setOptions(result.data);
+                        }
+                    })
+            })
+        }
     }
 
     useEffect(() =>{
         reloadData();
-    }, [])
+    }, [reload])
 
     // useEffect(() => {
     //     const option = options.find(item => JSON.stringify(item) === JSON.stringify(selectedOption))

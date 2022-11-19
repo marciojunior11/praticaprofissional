@@ -199,55 +199,114 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                 .then((dadosValidados) => {
                     if(isValid) {
                         setIsLoading(true);
-                        if (id === 'novo') {
-                            controller.create({
-                                ...dadosValidados,
-                                condicaopagamento: formRef.current?.getData().condicaopagamento,
-                            })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message)
-                                    } else {
-                                        toast.success('Cadastrado com sucesso!')
-                                        if (isSaveAndClose()) {
-                                            navigate('/fornecedores');
-                                        } else if (isSaveAndNew()) {
-                                            setIsValid(false);
-                                            navigate('/fornecedores/cadastro/novo');
-                                            formRef.current?.setData({
-                                                razSocial: '',
-                                                nomeFantasia: '',
-                                                cnpj: '',
-                                                telefone: '',
-                                                endereco: '',
-                                                numero: '',
-                                                bairro: '',
-                                                cidade: null
-                                            });
+                        if (isDialog) {
+                            if (selectedId == 0) {
+                                controller.create({
+                                    ...dadosValidados,
+                                    condicaopagamento: formRef.current?.getData().condicaopagamento,
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
                                         } else {
-                                            navigate(`/fornecedores/cadastro/${result}`);
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                if (isDialog) {
+                                                    reloadDataTableIfDialog?.();
+                                                    toggleOpen?.();
+                                                }
+                                                else {
+                                                    navigate('/fornecedores')
+                                                } 
+                                            } else if (isSaveAndNew()) {
+                                                setIsValid(false);
+                                                navigate('/fornecedores/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    razSocial: '',
+                                                    nomeFantasia: '',
+                                                    cnpj: '',
+                                                    telefone: '',
+                                                    endereco: '',
+                                                    numero: '',
+                                                    bairro: '',
+                                                    cidade: null
+                                                });
+                                            } else {
+                                                navigate(`/fornecedores/cadastro/${result}`);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                            } else {
+                                controller.update(Number(id), {
+                                    ...dadosValidados,
+                                    condicaopagamento: formRef.current?.getData().condicaopagamento,
+                                    flsituacao: formRef.current?.getData().flsituacao
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message);
+                                        } else {
+                                            toast.success('Alterado com sucesso!');
+                                            if (isSaveAndClose()) {
+                                                navigate('/fornecedores')
+                                            } else {
+                                            }
+                                        }
+                                    });
+                            }
                         } else {
-                            controller.update(Number(id), {
-                                ...dadosValidados,
-                                condicaopagamento: formRef.current?.getData().condicaopagamento,
-                                flsituacao: formRef.current?.getData().flsituacao
-                            })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        if (isSaveAndClose()) {
-                                            navigate('/fornecedores')
+                            if (id === 'novo') {
+                                controller.create({
+                                    ...dadosValidados,
+                                    condicaopagamento: formRef.current?.getData().condicaopagamento,
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message)
                                         } else {
+                                            toast.success('Cadastrado com sucesso!')
+                                            if (isSaveAndClose()) {
+                                                navigate('/fornecedores');
+                                            } else if (isSaveAndNew()) {
+                                                setIsValid(false);
+                                                navigate('/fornecedores/cadastro/novo');
+                                                formRef.current?.setData({
+                                                    razSocial: '',
+                                                    nomeFantasia: '',
+                                                    cnpj: '',
+                                                    telefone: '',
+                                                    endereco: '',
+                                                    numero: '',
+                                                    bairro: '',
+                                                    cidade: null
+                                                });
+                                            } else {
+                                                navigate(`/fornecedores/cadastro/${result}`);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                            } else {
+                                controller.update(Number(id), {
+                                    ...dadosValidados,
+                                    condicaopagamento: formRef.current?.getData().condicaopagamento,
+                                    flsituacao: formRef.current?.getData().flsituacao
+                                })
+                                    .then((result) => {
+                                        setIsLoading(false);
+                                        if (result instanceof Error) {
+                                            toast.error(result.message);
+                                        } else {
+                                            toast.success('Alterado com sucesso!');
+                                            if (isSaveAndClose()) {
+                                                navigate('/fornecedores')
+                                            } else {
+                                            }
+                                        }
+                                    });
+                            }
                         }
                     } else {
                         toast.error('Verifique os campos');

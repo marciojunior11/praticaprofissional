@@ -15,3 +15,4 @@ export * from './VNumberTextField';
 export * from './VCEPInput';
 export * from './VTelefoneMask';
 export * from './VCelularMask';
+export * from './VIntegerNumberInput';

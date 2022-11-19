@@ -15,7 +15,8 @@ type TGenericList = {
 type TVAutocompleteProps = {
     size?: 'medium' | 'small',
     name: string,
-    getAll: (
+    rows?: any[],
+    getAll?: (
         page?: number,
         filter?: string
     ) => Promise<TGenericList | Error>
@@ -30,7 +31,7 @@ type TVAutocompleteProps = {
     disabled?: boolean
 }
 
-export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, disabled, ...rest}) => {
+export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, rows, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, disabled, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -54,18 +55,23 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen
     }, [registerField, fieldName, selectedOption])
 
     const reloadData = () => {
-        setIsLoading(true);
-        debounce(() => {
-            getAll(0, busca)
-                .then(result => {
-                    setIsLoading(false);
-                    if (result instanceof Error) {
-                        toast.error(result.message);
-                    } else {
-                        setOptions(result.data);
-                    }
-                })
-        })
+        if (rows) {
+            console.log(rows);
+            setOptions(rows);
+        } else {
+            setIsLoading(true);
+            debounce(() => {
+                getAll?.(0, busca)
+                    .then(result => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            setOptions(result.data);
+                        }
+                    })
+            })
+        }
     }
 
     useEffect(() =>{

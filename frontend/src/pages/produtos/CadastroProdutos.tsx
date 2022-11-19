@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesProdutos, IProdutos } from "../../shared/interfaces/entities/Produtos";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberTextField, VMoneyInput, VNumberInput } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberTextField, VMoneyInput, VNumberInput, VAutocomplete } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerProdutos from "../../shared/controllers/ProdutosController";
 import { IVariacoes } from "../../shared/interfaces/entities/Variacoes";
@@ -87,6 +87,8 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
     // #endregion
 
     // #region STATES
+    const [reloadCaracteristicas, setReloadCaracteristicas] = useState(false);
+    const [reloadVariacoes, setReloadVariacoes] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState<any>(null);
     const [isValid, setIsValid] = useState(false);
@@ -165,10 +167,15 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                         var listaAux = result.data;
                         var listacaracteristicas = listaAux.filter(item => item.grade.id == idGrade);
                         setSelectCaracteristicas(listacaracteristicas);
+                        setReloadCaracteristicas(true);
                     }
                 })
         }
     }, [idGrade]);
+
+    useEffect(() => {
+        setReloadCaracteristicas(false);
+    }, [reloadCaracteristicas])
 
     useEffect(() => {
         if (idCaracteristica) {
@@ -181,11 +188,16 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                     } else {
                         var listaAux = result.data;
                         var listavariacoes = listaAux.filter(item => item.caracteristica.id == idCaracteristica);
-                        setSelectVariacoes(listavariacoes);
+                        setSelectVariacoes(listaAux);
+                        setReloadVariacoes(true);
                     }
                 })
         }
     }, [idCaracteristica]);
+
+    useEffect(() => {
+        setReloadVariacoes(false);
+    }, [reloadVariacoes])
 
     useEffect(() => {
         if (isDialog) {
@@ -311,9 +323,6 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                 .then((dadosValidados) => {
                     var errors = false;
                     if (!formRef.current?.getData().fornecedor) {
-                        errors = true;
-                    }
-                    if (listaVariacoes.length == 0) {
                         errors = true;
                     }
                     if (errors) {
@@ -480,16 +489,6 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                     if (!formRef.current?.getData().fornecedor) {
                         validationErrors['fornecedor'] = 'O campo é obrigatório'
-                    }
-                    if (listaVariacoes.length == 0) {
-                        if (!idGrade) {
-                            validationErrors['grade'] = 'Selecione uma grade.'
-                        } else if (!idCaracteristica) {
-                            validationErrors['caracteristica'] = 'Selecione uma característica.'
-                        } else if (!idVariacao) {
-                            validationErrors['variacao'] = 'Selecione uma variação.'
-                        }
-                        toast.error("Selecione pelo menos uma variação para o produto.");
                     }
 
                     formRef.current?.setErrors(validationErrors);
@@ -856,55 +855,59 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <InputLabel id="lblcaracteristica">Característica</InputLabel>
-                                <VSelect
-                                    defaultValue=" "
-                                    name="caracteristica"
-                                    labelId="lblcaracteristica"
+                                <VAutocomplete
+                                    reload={reloadCaracteristicas}
                                     disabled={!idGrade}
                                     size="small"
-                                    fullWidth
-                                    onChange={(e) => {
+                                    required
+                                    name="caracteristica"
+                                    label={["descricao"]}
+                                    TFLabel="Característica"
+                                    rows={selectCaracteristicas}
+                                    onInputchange={() => {
+                                        formRef.current?.setFieldError('caracteristica', '');
                                         formRef.current?.setFieldError('variacao', '');
-                                        if (!e.target.value) {
-                                            formRef.current?.setFieldValue('grade', null);
-                                            formRef.current?.setFieldValue('caracteristica', '');
-                                            formRef.current?.setFieldValue('variacao', '');
+                                    }}
+                                    onChange={(value) => {
+                                        formRef.current?.setFieldError('variacao', '');
+                                        if (!value) {
+                                            formRef.current?.setFieldValue('caracteristica', null);
+                                            formRef.current?.setFieldValue('variacao', null);
+                                            setIdCaracteristica(undefined);
+                                            setIdVariacao(undefined);
                                         } else {
-                                            setIdCaracteristica(Number(e.target.value))
+                                            setIdCaracteristica(value.id)
                                         }
                                     }}
-                                >
-                                    {selectCaracteristicas.map(item => {
-                                        return (
-                                            <MenuItem value={item.id}>{item.descricao}</MenuItem>
-                                        )
-                                    })}
-                                </VSelect>
+                                />
                             </Grid>
                         </Grid>
 
                         <Grid container item direction="row" spacing={2} alignItems="end">
                             <Grid item xs={10} sm={10} md={6} lg={6} xl={6}>
-                                <InputLabel id="lblvariacao">Variação</InputLabel>
-                                <VSelect
-                                    name="variacao"
-                                    labelId="lblvariacao"
+                                <VAutocomplete
+                                    reload={reloadVariacoes}
                                     disabled={!idCaracteristica}
-                                    placeholder="Variação"
                                     size="small"
-                                    fullWidth
-                                    onChange={(e) => {
-                                        setIdVariacao(Number(e.target.value));
+                                    required
+                                    name="variacao"
+                                    label={["descricao"]}
+                                    TFLabel="Variação"
+                                    rows={selectVariacoes}
+                                    onInputchange={() => {
+                                        console.log(selectVariacoes);
+                                        formRef.current?.setFieldError('variacao', '');
                                     }}
-                                    label="Variação"
-                                >
-                                    {selectVariacoes.map(item => {
-                                        return (
-                                            <MenuItem value={item.id}>{item.descricao}</MenuItem>
-                                        )
-                                    })}
-                                </VSelect>                            
+                                    onChange={(value) => {
+                                        formRef.current?.setFieldError('variacao', '');
+                                        if (!value) {
+                                            formRef.current?.setFieldValue('variacao', null);
+                                            setIdVariacao(undefined);
+                                        } else {
+                                            setIdVariacao(value.id)
+                                        }
+                                    }}
+                                />                           
                             </Grid>
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
                                 <Button

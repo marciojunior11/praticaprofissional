@@ -5,7 +5,7 @@ import { InputAttributes, NumberFormatBaseProps, NumericFormat, NumericFormatPro
 
 type TVNumberInputProps = TextFieldProps & {
     name: string;
-    inputProps?: React.ReactNode;
+    initialValue?: number;
     readOnly?: boolean;
 }
 
@@ -20,18 +20,20 @@ const CustomNumberFormat = React.forwardRef<NumericFormatProps<InputAttributes>,
                 onChange({
                     target: {
                         name: props.name,
-                        value: String(values.value)
+                        value: parseFloat(Number(values.value).toFixed(2))
                     },
                 });
             }}
+            allowNegative={false}
+            allowedDecimalSeparators={false}
         />
     )
 })
 
-export const VNumberTextField: React.FC<TVNumberInputProps> = ({ name, inputProps, readOnly, ...rest }) => {
+export const VIntegerNumberInput: React.FC<TVNumberInputProps> = ({ name, initialValue, readOnly, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
-    const [value, setValue] = useState(defaultValue || '');
+    const [value, setValue] = useState(defaultValue || initialValue);
 
     useEffect(() => {
         registerField({
@@ -54,17 +56,14 @@ export const VNumberTextField: React.FC<TVNumberInputProps> = ({ name, inputProp
             defaultValue={defaultValue}
 
             InputProps={{
-                readOnly: readOnly,
-                endAdornment: (
-                    inputProps
-                ),
                 inputComponent: CustomNumberFormat as any,
+                readOnly: readOnly
             }}
 
             value={value}
             onChange={e => { 
                 rest.onChange?.(e); 
-                setValue(String(e.target.value));
+                setValue(Number(e.target.value));
             }}
 
             onKeyDown={(e) => {
