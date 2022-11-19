@@ -5,6 +5,7 @@ import { InputAttributes, NumberFormatBaseProps, NumericFormat, NumericFormatPro
 
 type TVNumberInputProps = TextFieldProps & {
     name: string;
+    inputProps?: React.ReactNode;
 }
 
 const CustomNumberFormat = React.forwardRef<NumericFormatProps<InputAttributes>, TVNumberInputProps>((props: any, ref) => {
@@ -26,7 +27,7 @@ const CustomNumberFormat = React.forwardRef<NumericFormatProps<InputAttributes>,
     )
 })
 
-export const VNumberTextField: React.FC<TVNumberInputProps> = ({ name, ...rest }) => {
+export const VNumberTextField: React.FC<TVNumberInputProps> = ({ name, inputProps, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
     const [value, setValue] = useState(defaultValue || '');
@@ -52,6 +53,9 @@ export const VNumberTextField: React.FC<TVNumberInputProps> = ({ name, ...rest }
             defaultValue={defaultValue}
 
             InputProps={{
+                endAdornment: (
+                    inputProps
+                ),
                 inputComponent: CustomNumberFormat as any,
             }}
 

@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesCompras, ICompras, IValidator } from "../../shared/interfaces/entities/Compras";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker, VNumberTextField } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker, VNumberTextField, VNumberInput } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerCompras from "../../shared/controllers/ComprasController";
 import { IFornecedores } from "../../shared/interfaces/entities/Fornecedores";
@@ -983,7 +983,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
-                                <VNumberTextField
+                                <VNumberInput
                                     disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth

@@ -28,6 +28,7 @@ const CustomNumberFormat = React.forwardRef<NumericFormatProps<InputAttributes>,
             decimalSeparator=","
             decimalScale={2}
             allowLeadingZeros
+            allowNegative={false}
         />
     )
 })

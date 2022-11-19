@@ -29,6 +29,7 @@ const CustomMoneyFormat = React.forwardRef<NumericFormatProps<InputAttributes>, 
             prefix="R$"
             decimalScale={2}
             fixedDecimalScale
+            allowNegative={false}
         />
     )
 })

@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesProdutos, IProdutos } from "../../shared/interfaces/entities/Produtos";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberTextField, VMoneyInput } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberTextField, VMoneyInput, VNumberInput } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerProdutos from "../../shared/controllers/ProdutosController";
 import { IVariacoes } from "../../shared/interfaces/entities/Variacoes";
@@ -556,29 +556,27 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
+                                <VNumberTextField 
+                                    inputProps={(
+                                        <InputAdornment position="end">
+                                            { (isValidating && formRef.current?.getData().gtin) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <CircularProgress size={24}/>
+                                                </Box>
+                                            ) }
+                                            { (isValid && formRef.current?.getData().gtin) && (
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <Icon color="success">done</Icon>
+                                                </Box>
+                                            ) }
+                                        </InputAdornment>
+                                    )}
                                     size="small"
                                     required
                                     fullWidth
                                     name='gtin' 
                                     label="GTIN"
                                     disabled={isLoading}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().gtin) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <CircularProgress size={24}/>
-                                                    </Box>
-                                                ) }
-                                                { (isValid && formRef.current?.getData().gtin) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <Icon color="success">done</Icon>
-                                                    </Box>
-                                                ) }
-                                            </InputAdornment>
-                                        )
-                                    }}
                                     onBlur={e => {
                                         setIsValidating(false);
                                     }}
@@ -661,8 +659,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    type="number"
+                                <VNumberInput 
                                     size="small"
                                     fullWidth
                                     name='unidade' 
@@ -674,8 +671,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField
-                                    type="number"
+                                <VNumberInput
                                     size="small"
                                     fullWidth
                                     name='pesobruto' 
@@ -684,8 +680,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    type="number"
+                                <VNumberInput
                                     size="small"
                                     fullWidth
                                     name='pesoliq' 
@@ -724,8 +719,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    type="number"
+                                <VNumberInput
                                     size="small"
                                     fullWidth
                                     name='percicmssaida' 
@@ -734,8 +728,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    type="number"
+                                <VNumberInput 
                                     size="small"
                                     fullWidth
                                     name='percipi' 
@@ -751,7 +744,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VNumberTextField 
+                                <VNumberInput 
                                     size="small"
                                     fullWidth
                                     name='qtdideal' 
@@ -760,7 +753,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VNumberTextField 
+                                <VNumberInput 
                                     size="small"
                                     fullWidth
                                     name='qtdmin' 
