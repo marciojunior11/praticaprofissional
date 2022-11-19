@@ -1,10 +1,11 @@
 import { Label, SettingsVoiceTwoTone } from "@mui/icons-material"
-import { Autocomplete, CircularProgress, TextField } from "@mui/material"
+import { Autocomplete, Button, CircularProgress, Grid, Icon, TextField } from "@mui/material"
 import { useField } from "@unform/core"
 import { LoDashStatic } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import { toast } from "react-toastify"
 import { useDebounce } from "../hooks"
+import { getNestedObjectPropValue } from "../utils/objects"
 
 type TGenericList = {
     data: Array<any>,
@@ -18,17 +19,16 @@ type TVAutocompleteProps = {
         page?: number,
         filter?: string
     ) => Promise<TGenericList | Error>
-    label: string,
-    secLabel?: string[],
-    tercLabel?: string[],
+    label: string[],
     TFLabel: string,
     isExternalLoading?: boolean,
     onChange?: (newValue: any) => void,
     onInputchange?: () => void,
-    required?: boolean
+    required?: boolean,
+    disabled?: boolean
 }
 
-export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, ...rest}) => {
+export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll, label, TFLabel, isExternalLoading = false, disabled, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -37,11 +37,10 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll
     //STATES
     const [busca, setBusca] = useState('');
     const [options, setOptions] = useState<any[]>([]);
-    const [selectedOption, setSelectedOption] = useState<any | undefined>(defaultValue);
+    const [selectedOption, setSelectedOption] = useState<any | null>(defaultValue);
     const [isLoading, setIsLoading] = useState(false);
 
-    //EFFECTS
-
+    //ACTIONS
     useEffect(() => {
         
         registerField({
@@ -52,10 +51,8 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll
 
     }, [registerField, fieldName, selectedOption])
 
-    useEffect(() =>{
-
+    const reloadData = () => {
         setIsLoading(true);
-
         debounce(() => {
             getAll(0, busca)
                 .then(result => {
@@ -67,10 +64,22 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll
                     }
                 })
         })
+    }
+
+    useEffect(() =>{
+        reloadData();
     }, [])
 
-    //MEMOS
+    // useEffect(() => {
+    //     const option = options.find(item => JSON.stringify(item) === JSON.stringify(selectedOption))
+    //     console.log(option);
+    //     if (!option) {
+    //         reloadData();
+    //     }
+    // }, [selectedOption])
+
     const autoCompleteSelectedOption = useMemo(() => {
+
         if (!selectedOption) return null;
 
         const mSelectedOption = options.find(option => option.id === selectedOption.id);
@@ -81,52 +90,67 @@ export const VAutocomplete: React.FC<TVAutocompleteProps> = ({size, name, getAll
     }, [selectedOption, options])
 
     return (
-        <Autocomplete
-            //REQUIRED PARAMS
-            size={size}
-            options={options}
-            renderInput={params => (
-                <TextField
-                    {...params}
-                    label={TFLabel} 
-                    error={!!error}
-                    helperText={error}
-                    required={rest.required}
+        <Grid container direction="row" spacing={0} alignItems="start">
+            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                <Autocomplete
+                    //REQUIRED PARAMS
+                    readOnly={disabled}
+                    disabledItemsFocusable={disabled}
+                    disableClearable={disabled}
+                    disableListWrap={disabled}
+                    size={size}
+                    options={options}
+                    renderInput={params => (
+                        <TextField
+                            {...params}
+                            label={TFLabel} 
+                            error={!!error}
+                            helperText={error}
+                            required={rest.required}
+                            disabled={isLoading || disabled}
+                        />
+                    )}
+
+                    //REST PARAMS
+                    disablePortal
+                    getOptionLabel={option => {
+                        var value: string = "";
+                        label.forEach(item => {
+                            value += getNestedObjectPropValue(option, item) + " "
+                        })
+                        return value;
+                    }}
+
+                    autoComplete
+                    blurOnSelect={true}
+
+                    //LOADING PARAMS
+                    loading={isLoading}
+                    disabled={isExternalLoading}
+                    value={autoCompleteSelectedOption}
+                    //onBlur={() => {rest.onBlur?.()}}
+
+                    //ONCHANGE PARAMS
+                    onInputChange={(_, newValue) => {setBusca(newValue); rest.onInputchange?.()}}
+                    onChange={(_: any, newValue: any) => {
+                        setSelectedOption(newValue); 
+                        setBusca(''); 
+                        clearError(); 
+                        rest.onChange?.(newValue);
+                    }}
+
+
+
+                    //POPUP ICON
+                    popupIcon={(isExternalLoading || isLoading) ? <CircularProgress size={28}/> : undefined}
+
+                    //TRADUCOES
+                    openText='Abrir'
+                    closeText='Fechar'
+                    noOptionsText='Sem opções'
+                    loadingText='Carregando...'
                 />
-            )}
-
-            //REST PARAMS
-            disablePortal
-            getOptionLabel={option => (rest.tercLabel && rest.secLabel) ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] + ' - ' + option[rest.tercLabel[0]][rest.tercLabel[1]][rest.tercLabel[2]] : rest.secLabel ? option[label] + ' - ' + option[rest.secLabel[0]][rest.secLabel[1]] : option[label]}
-            autoComplete
-            blurOnSelect={true}
-
-                
-
-            //LOADING PARAMS
-            loading={isLoading}
-            disabled={isExternalLoading}
-            value={autoCompleteSelectedOption}
-            //onBlur={() => {rest.onBlur?.()}}
-
-            //ONCHANGE PARAMS
-            onInputChange={(_, newValue) => {setBusca(newValue); rest.onInputchange?.()}}
-            onChange={(_: any, newValue: any) => {
-                console.log(selectedOption)
-                setSelectedOption(newValue); 
-                setBusca(''); 
-                clearError(); 
-                rest.onChange?.(newValue);
-            }}
-
-            //POPUP ICON
-            popupIcon={(isExternalLoading || isLoading) ? <CircularProgress size={28}/> : undefined}
-
-            //TRADUCOES
-            openText='Abrir'
-            closeText='Fechar'
-            noOptionsText='Sem opções'
-            loadingText='Carregando...'
-        />
+            </Grid>
+        </Grid>
     )
 }

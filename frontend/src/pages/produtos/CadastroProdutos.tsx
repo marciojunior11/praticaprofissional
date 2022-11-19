@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesProdutos, IProdutos } from "../../shared/interfaces/entities/Produtos";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberInput, VMoneyInput } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberTextField, VMoneyInput } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerProdutos from "../../shared/controllers/ProdutosController";
 import { IVariacoes } from "../../shared/interfaces/entities/Variacoes";
@@ -751,7 +751,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VNumberInput 
+                                <VNumberTextField 
                                     size="small"
                                     fullWidth
                                     name='qtdideal' 
@@ -760,7 +760,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VNumberInput 
+                                <VNumberTextField 
                                     size="small"
                                     fullWidth
                                     name='qtdmin' 

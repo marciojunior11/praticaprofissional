@@ -120,12 +120,12 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
             render: (row) => {
                 return (
                     <>
-                        <IconButton color="success" size="small" onClick={() => handlePay(row)}>
+                        <IconButton disabled={row.flsituacao != 'A'} color="success" size="small" onClick={() => handlePay(row)}>
                             <Icon>paid</Icon>
                             <Icon>check</Icon>
                         </IconButton>
                         <IconButton color="primary" size="small" onClick={() => {
-                            navigate(`/compras/cadastro/nf=${row.numnf}_serie=${row.serienf}_modelo=${row.modelonf}_fornecedor=${row.fornecedor?.id}`);
+                            navigate(`/contaspagar/cadastro/nrparcela=${row.nrparcela}_nf=${row.numnf}_serie=${row.serienf}_modelo=${row.modelonf}_fornecedor=${row.fornecedor?.id}`);
                         }}>
                             <Icon>visibility</Icon>
                         </IconButton>

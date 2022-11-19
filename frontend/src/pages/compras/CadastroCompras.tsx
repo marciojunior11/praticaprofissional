@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesCompras, ICompras, IValidator } from "../../shared/interfaces/entities/Compras";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker, VNumberInput } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VDatePicker, VNumberTextField } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerCompras from "../../shared/controllers/ComprasController";
 import { IFornecedores } from "../../shared/interfaces/entities/Fornecedores";
@@ -506,15 +506,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         result.datacad = new Date(result.datacad).toLocaleString();
                         result.ultalt = new Date(result.ultalt).toLocaleString();
                         formRef.current?.setData(result);
-                        setIsEditing(true);
-                        setListaProdutosNF(result.listaprodutos);
-                        setListaContasPagar(result.listacontaspagar);
-                        setIsValid(true);
-                        setNumNf(result.numnf);
-                        setSerieNf(result.serienf);
-                        setModeloNf(result.modelonf);
-                        setObjFornecedor(result.fornecedor);
-                        setCompraOriginal(result);
                     }
                 });
             } else {
@@ -543,30 +534,31 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }, [numnf, serienf, modelonf, objFornecedor]);
 
     const validate = (dados: IValidator) => {
-        console.log(dados);
-        debounce(() => {
-            setIsValidating(true);
+        if (!isEditing) {
             debounce(() => {
-                controller.validate(dados)
-                    .then((result) => {
-                        setIsValidating(false);
-                        if (result instanceof Error) {
-                            toast.error(result.message);
-                        } else {
-                            setIsValid(result);
-                            if (result === false) {
-                                const validationErrors: IVFormErrors = {};
-                                toast.error('Verifique os campos chave da nota fiscal.')
-                                validationErrors['numnf'] = 'Esta nota fiscal já está cadastrada.';
-                                validationErrors['modelonf'] = 'Esta nota fiscal já está cadastrada.';
-                                validationErrors['serienf'] = 'Esta nota fiscal já está cadastrada.';
-                                validationErrors['fornecedor'] = 'Esta nota fiscal já está cadastrada.';
-                                formRef.current?.setErrors(validationErrors);
+                setIsValidating(true);
+                debounce(() => {
+                    controller.validate(dados)
+                        .then((result) => {
+                            setIsValidating(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message);
+                            } else {
+                                setIsValid(result);
+                                if (result === false) {
+                                    const validationErrors: IVFormErrors = {};
+                                    toast.error('Verifique os campos chave da nota fiscal.')
+                                    validationErrors['numnf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['modelonf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['serienf'] = 'Esta nota fiscal já está cadastrada.';
+                                    validationErrors['fornecedor'] = 'Esta nota fiscal já está cadastrada.';
+                                    formRef.current?.setErrors(validationErrors);
+                                }
                             }
-                        }
-                    })
-            });        
-        })
+                        })
+                });        
+            })
+        }
     }
 
     const handleSave = (dados: IFormData) => {
@@ -752,7 +744,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
     return (
         <LayoutBase 
-            titulo={id === 'novo' ? 'Cadastrar Compra' : 'Editar Compra'}
+            titulo={id === 'novo' ? 'Cadastrar Compra' : 'Visualizar Compra'}
             barraDeFerramentas={
                 <DetailTools
                     mostrarBotaoSalvar={false}
@@ -991,7 +983,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
-                                <VNumberInput
+                                <VNumberTextField
                                     disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
                                     fullWidth

@@ -6,6 +6,7 @@ import { InputAttributes, NumberFormatBaseProps, NumericFormat, NumericFormatPro
 type TVNumberInputProps = TextFieldProps & {
     name: string;
     initialValue?: number;
+    readOnly?: boolean;
 }
 
 const CustomMoneyFormat = React.forwardRef<NumericFormatProps<InputAttributes>, TVNumberInputProps>((props: any, ref) => {
@@ -32,7 +33,7 @@ const CustomMoneyFormat = React.forwardRef<NumericFormatProps<InputAttributes>, 
     )
 })
 
-export const VMoneyInput: React.FC<TVNumberInputProps> = ({ name, prefix, initialValue, ...rest }) => {
+export const VMoneyInput: React.FC<TVNumberInputProps> = ({ name, prefix, initialValue, readOnly, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
     const [value, setValue] = useState(defaultValue || initialValue);
@@ -58,7 +59,8 @@ export const VMoneyInput: React.FC<TVNumberInputProps> = ({ name, prefix, initia
             defaultValue={defaultValue}
 
             InputProps={{
-                inputComponent: CustomMoneyFormat as any
+                inputComponent: CustomMoneyFormat as any,
+                readOnly: readOnly
             }}
 
             value={value}

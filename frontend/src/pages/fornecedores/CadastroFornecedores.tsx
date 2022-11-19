@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 // #region INTERNAL IMPORTS
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect } from "../../shared/forms";
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VCNPJMask, VNumberTextField, VCEPMask, VTelefoneMask, VCelularMask } from "../../shared/forms";
 import { ICidades } from "../../shared/interfaces/entities/Cidades";
 import { useDebounce } from "../../shared/hooks";
 import { number } from "../../shared/utils/validations";
@@ -367,33 +367,32 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
-                                    <VTextField
+                                    <VCNPJMask
+                                        inputProps={
+                                            <InputAdornment position="end">
+                                                { (isValidating && formRef.current?.getData().cnpj) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <CircularProgress size={24}/>
+                                                    </Box>
+                                                ) }
+                                                { (isValid && formRef.current?.getData().cnpj) && (
+                                                    <Box sx={{ display: 'flex' }}>
+                                                        <Icon color="success">done</Icon>
+                                                    </Box>
+                                                ) }
+                                            </InputAdornment>
+                                        }
                                         size="small"
                                         required
                                         fullWidth
                                         name='cnpj' 
                                         label="CNPJ"
                                         disabled={isLoading}  
-                                        InputProps={{
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    { (isValidating && formRef.current?.getData().cnpj) && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    ) }
-                                                    { (isValid && formRef.current?.getData().cnpj) && (
-                                                        <Box sx={{ display: 'flex' }}>
-                                                            <Icon color="success">done</Icon>
-                                                        </Box>
-                                                    ) }
-                                                </InputAdornment>
-                                            )
-                                        }}
                                         onBlur={e => {
                                             setIsValidating(false);
                                         }}
                                         onChange={(e) => {
+                                            console.log(e.target.value);
                                             setIsValid(false);
                                             setIsValidating(false);
                                             formRef.current?.setFieldError('condicaopagamento', '');
@@ -439,7 +438,7 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
 
                             <Grid container item direction="row" spacing={2}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={3}>
-                                    <VTextField
+                                    <VCEPMask
                                         size="small"
                                         required
                                         fullWidth
@@ -459,7 +458,7 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={3}>
-                                    <VTextField
+                                    <VNumberTextField
                                         size="small"
                                         required
                                         fullWidth
@@ -501,7 +500,7 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
 
                             <Grid container item direction="row" spacing={2}>
                                     <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
-                                        <VTextField
+                                        <VTelefoneMask
                                             size="small"
                                             required
                                             fullWidth
@@ -511,7 +510,7 @@ export const CadastroFornecedores: React.FC<ICadastroProps> = ({isDialog = false
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
-                                        <VTextField
+                                        <VCelularMask
                                             size="small"
                                             required
                                             fullWidth
