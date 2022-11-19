@@ -20,9 +20,13 @@ function comprasRoutes(req, res) {
         } else {
             ctrlCompras.salvar(req, res);
         }
-    } else if(req.url.match(/\/api\/compras\/([0-9+])/) && req.method === 'PUT') {
-        const id = req.url.split('/')[3];
-        ctrlCompras.alterar(req, res, id);
+    } else if(req.method === 'PUT') {
+        if (req.url.match(/\/api\/compras\/([0-9+])/)) {
+            const id = req.url.split('/')[3];
+            ctrlCompras.alterar(req, res, id);
+        } else if (req.url.includes('pagarconta')) {
+            ctrlCompras.pagarConta(req, res);
+        }
     } else if(req.url.includes('numnf') && req.url.includes('serienf') && req.url.includes('modelonf') && req.url.includes('idfornecedor') && req.method === 'DELETE') {
         ctrlCompras.deletar(req, res);
     } else {

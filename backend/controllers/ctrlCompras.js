@@ -143,6 +143,31 @@ async function alterar(req, res, id) {
     }
 };
 
+async function pagarConta(req, res) {
+    try {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+        req.on('end', async () => {
+            const { nrparcela, numnf, serienf, modelonf, fornecedor, vltotal } = JSON.parse(body);
+            const mConta = {
+                nrparcela,
+                numnf,
+                serienf,
+                modelonf,
+                fornecedor,
+                vltotal
+            };
+            const contaPaga = await daoCompras.pagarConta(mConta);
+            res.writeHead(201, { 'Content-Type': 'application/json'});
+            res.end(JSON.stringify(contaPaga));
+        })        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 // @descricao DELETA UM REGISTROS
 // @route GET /api/paises/:id
 async function deletar(req, res) {
@@ -192,6 +217,7 @@ module.exports = {
     buscarUm,
     salvar,
     alterar,
+    pagarConta,
     deletar,
     validate
 }

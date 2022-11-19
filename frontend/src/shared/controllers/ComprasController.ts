@@ -3,6 +3,7 @@ import { Environment } from '../environment';
 import { IControllerCompras } from '../interfaces/controllers/ControllerCompras';
 import { ICompras, IDetalhesCompras, TListaCompras } from '../interfaces/entities/Compras';
 import { IValidator } from '../interfaces/entities/Compras';
+import { IContasPagar } from '../interfaces/entities/ContasPagar';
 import CentrosCusto from '../models/entities/CentrosCusto';
 import Compras from '../models/entities/Compras';
 import CondicoesPagamento from '../models/entities/CondicoesPagamento';
@@ -227,6 +228,17 @@ class ControllerCompras implements IControllerCompras {
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
         }           
+    }
+
+    pagarConta = async (dados: IContasPagar): Promise<void | Error> => {
+        try {
+            const { data } = await Api.put('/api/compras/pagarconta', dados);
+            if (data) {
+                return data;
+            }
+        } catch (error) {
+            return new Error((error as {message:string}).message || 'Erro ao pagar a conta.');
+        }
     }
 
     validate = async (dados: IValidator): Promise<boolean | Error> => {

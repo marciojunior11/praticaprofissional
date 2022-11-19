@@ -168,6 +168,7 @@ async function buscarTodosComPg (url) {
                                 fornecedor: mFornecedor,
                                 formapagamento: mFormaPagamento,
                                 flcentrocusto: conta.rows[i].flcentrocusto,
+                                flsituacao: conta.rows[i].flsituacao,
                                 datacad: conta.rows[i].datacad,
                                 ultalt: conta.rows[i].ultalt
                             })
@@ -435,6 +436,69 @@ async function alterar (compra) {
     })
 };
 
+async function pagarConta(conta) {
+
+    return new Promise((resolve, reject) => {
+
+        pool.connect((err, client, done) => {
+
+            const shouldAbort = err => {
+                if (err) {
+                    console.error('Erro na transação', err.stack);
+                    client.query('ROLLBACK', err => {
+                        if (err) {
+                            console.error('Erro durante o rollback', err.stack);
+                        }
+                        done();
+                    })
+                }
+                return !!err;
+            }
+
+            client.query('BEGIN', err => {
+                if (shouldAbort(err)) return reject(err);
+                client.query(`
+                    update contaspagar set flsituacao = $1 where
+                        nrparcela = $2 and
+                        fk_numnf = $3 and
+                        fk_serienf = $4 and
+                        fk_modelonf = $5 and
+                        fk_idfornecedor = $6
+                `, [
+                    'P',
+                    conta.nrparcela,
+                    conta.numnf,
+                    conta.serienf,
+                    conta.modelonf,
+                    conta.fornecedor.id
+                ], (err, res) => {
+                    if (shouldAbort(err)) return reject(err);
+                    client.query(`
+                        select * from caixa
+                    `, (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        const saldo = res.rows[0].totalcaixa - conta.vltotal;
+                        client.query(`
+                            update caixa set totalcaixa = $1
+                        `, [saldo], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                        })
+                    })
+                    client.query('COMMIT', err => {
+                        if (err) {
+                            console.error('Erro durante o commit da transação', err.stack);
+                            done();
+                            return reject(err);
+                        }
+                        done();
+                        return resolve(res);
+                    })
+                })
+            })
+        })
+    })
+}
+
 // @descricao DELETA UM REGISTRO
 // @route GET /api/compras/:id
 async function deletar (url) {
@@ -504,6 +568,7 @@ module.exports = {
     buscarUm,
     salvar,
     alterar,
+    pagarConta,
     deletar,
     validate
 }

@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesProdutos, IProdutos } from "../../shared/interfaces/entities/Produtos";
-import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect } from "../../shared/forms"
+import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VSelect, VNumberInput, VMoneyInput } from "../../shared/forms"
 import { useDebounce } from "../../shared/hooks";
 import ControllerProdutos from "../../shared/controllers/ProdutosController";
 import { IVariacoes } from "../../shared/interfaces/entities/Variacoes";
@@ -751,8 +751,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    type="number"
+                                <VNumberInput 
                                     size="small"
                                     fullWidth
                                     name='qtdideal' 
@@ -761,12 +760,56 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
-                                <VTextField 
-                                    type="number"
+                                <VNumberInput 
                                     size="small"
                                     fullWidth
                                     name='qtdmin' 
                                     label="Qtd. Mínima"
+                                    disabled={isLoading}                             
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <Grid item>
+                            <Typography variant="h6">Valores</Typography>
+                        </Grid>
+
+                        <Grid container item direction="row" spacing={2}>
+                            { id != 'novo' && (
+                                <>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                        <VMoneyInput 
+                                            inputProps={{
+                                                readOnly: true
+                                            }} 
+                                            size="small"
+                                            fullWidth
+                                            name='vlcompra' 
+                                            label="Vl. Compra"
+                                            disabled={isLoading}                             
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                        <VMoneyInput
+                                            inputProps={{
+                                                readOnly: true
+                                            }} 
+                                            size="small"
+                                            fullWidth
+                                            name='vlcusto' 
+                                            label="vl. Custo"
+                                            disabled={isLoading}                             
+                                        />
+                                    </Grid> 
+                                </>    
+                            ) }
+
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <VMoneyInput 
+                                    size="small"
+                                    fullWidth
+                                    name='vlvenda' 
+                                    label="Vl. Venda"
                                     disabled={isLoading}                             
                                 />
                             </Grid>
