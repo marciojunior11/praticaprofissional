@@ -79,7 +79,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const [produto, setProduto] = useState<IProdutosNF | null>(null);
     const [condicaopagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
     const [vlTotalProdutosNota, setVlTotalProdutosNota] = useState(0);
-    const [vlSubTotalNota, setVlSubTotalNota] = useState(0);
+    const [vlTotalNota, setVlTotalNota] = useState(0);
     const [vlUnitario, setVlUnitario] = useState(0);
     const [qtd, setQtd] = useState(0);
     // #endregion
@@ -251,6 +251,14 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }, [vlUnitario, qtd])
 
     const calcularFooterValue = (): string => {
+        if (id != 'novo') {
+            var total = vlTotalNota;
+            return new Intl.NumberFormat('pr-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(total);           
+        }
+
         var total = vlTotalProdutosNota;
 
         var vlfrete = formRef.current?.getData().vlfrete;
@@ -440,7 +448,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                 vlTotalNota = parseFloat((vlTotalNota + produto.vltotal).toFixed(2));
                 console.log(`vltotalnota: ${vlTotalNota}`);
             })
-            setVlSubTotalNota(vlTotalNota);
+            setVlTotalNota(vlTotalNota);
             setListaProdutosNF(listaProdutos);
             formRef.current?.setFieldValue('produto', null);
             formRef.current?.setFieldValue('valor', '');
@@ -503,6 +511,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         toast.error(result.message);
                         navigate('/compras');
                     } else {
+                        setVlTotalNota(result.vltotal);
                         result.datacad = new Date(result.datacad).toLocaleString();
                         result.ultalt = new Date(result.ultalt).toLocaleString();
                         formRef.current?.setData(result);
