@@ -21,7 +21,7 @@ import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondic
 import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 import { ICondicoesPagamento } from "../../shared/interfaces/entities/CondicoesPagamento";
 import { IDetalhesClientes } from "../../shared/interfaces/entities/Clientes";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 // #endregion
 
 // #region INTERFACES
@@ -133,9 +133,13 @@ export const CadastroClientes: React.FC<ICadastroProps> = ({isDialog = false, to
                             toast.error(result.message);
                             navigate('/clientes');
                         } else {
+                            console.log(result);
+                            let dtnasc = new Date(result.datanasc);
+                            let datanasc = dayjs(dtnasc);
                             result.datacad = new Date(result.datacad).toLocaleString();
                             result.ultalt = new Date(result.ultalt).toLocaleString();
                             formRef.current?.setData(result);
+                            formRef.current?.setFieldValue('datanasc', datanasc);
                             setIsValid(true);
                         }
                     });
@@ -456,12 +460,12 @@ export const CadastroClientes: React.FC<ICadastroProps> = ({isDialog = false, to
                                     <VCPFMask
                                         inputProps={
                                             <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().cnpj) && (
+                                                { (isValidating && formRef.current?.getData().cpf) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <CircularProgress size={24}/>
                                                     </Box>
                                                 ) }
-                                                { (isValid && formRef.current?.getData().cnpj) && (
+                                                { (isValid && formRef.current?.getData().cpf) && (
                                                     <Box sx={{ display: 'flex' }}>
                                                         <Icon color="success">done</Icon>
                                                     </Box>
@@ -487,20 +491,6 @@ export const CadastroClientes: React.FC<ICadastroProps> = ({isDialog = false, to
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
                                     <VRGMask
-                                        inputProps={
-                                            <InputAdornment position="end">
-                                                { (isValidating && formRef.current?.getData().cnpj) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <CircularProgress size={24}/>
-                                                    </Box>
-                                                ) }
-                                                { (isValid && formRef.current?.getData().cnpj) && (
-                                                    <Box sx={{ display: 'flex' }}>
-                                                        <Icon color="success">done</Icon>
-                                                    </Box>
-                                                ) }
-                                            </InputAdornment>
-                                        }
                                         size="small"
                                         required
                                         fullWidth

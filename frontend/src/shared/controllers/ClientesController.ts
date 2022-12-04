@@ -162,7 +162,7 @@ class ControllerClientes implements IController {
             dados.condicaopagamento.datacad,
             dados.condicaopagamento.ultalt
         );
-        let fornecedor = new Fisicas(
+        let cliente = new Fisicas(
             id,
             dados.nmcliente,
             dados.sexo,
@@ -183,8 +183,9 @@ class ControllerClientes implements IController {
             new Date(),
             new Date()
         );
+        console.log(cliente);
         try {
-            await Api.put(`/api/clientes/${id}`, fornecedor);
+            await Api.put(`/api/clientes/${id}`, cliente);
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao atualizar o registros.');
         }  

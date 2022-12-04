@@ -188,7 +188,7 @@ async function buscarUm (id) {
             }
             if (res.rowCount != 0) {
                 const mCidade = await daoCidades.buscarUm(res.rows[0].fk_idcidade);
-                let mCondicaoPagamento = daoCondicoesPagamento.buscarUm(res.rows[0].fk_idcondpgto);
+                const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[0].fk_idcondpgto);
                 const mCliente = {
                     id: res.rows[0].id,
                     nmcliente : res.rows[0].nmcliente,

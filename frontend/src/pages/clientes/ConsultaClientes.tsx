@@ -137,7 +137,7 @@ export const ConsultaClientes: React.FC<IConsultaProps> = ({ isDialog = false, o
             label: "Endereço",
             name: ' ',
             render: (row) => {
-                return `${row.endereco}, ${row.numend}, Bairro ${row.bairro}`
+                return `${row.endereco}, ${row.numend}, BAIRRO ${row.bairro}`
             }
         },
         {
