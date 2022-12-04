@@ -110,7 +110,12 @@ export const ConsultaVariacoes: React.FC<IConsultaProps> = ({ isDialog = false, 
         },        
         {
             label: "Característica",
-            name: "caracteristica.descricao",  
+            name: "caracteristica.descricao",
+            render: (row) => {
+                return (
+                    `${row.caracteristica.descricao} DE ${row.caracteristica.grade.descricao}`
+                )
+            } 
         },
         {
             label: "Ações",

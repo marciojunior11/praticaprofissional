@@ -1,6 +1,6 @@
 // #region EXTERNAL IMPORTS
 import React, { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography, Chip } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography, Chip, Divider, Grid } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Box } from "@mui/system";
@@ -91,7 +91,9 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
             align: "center", 
             render: (row) => {
                 return (
-                    new Date(row.dtvencimento).toLocaleDateString()
+                    <Typography sx={{
+                        color: (new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "A") ? '#ed6c02' : (new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString()) && (row.flSituacao == "A") ? '#d32f2f' : '#000000de',
+                    }}>{new Date(row.dtvencimento).toLocaleDateString()}</Typography>
                 )
             }
         },
@@ -102,13 +104,22 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
             render: (row) => {
                 return (
                     <>
-                        {row.flsituacao == 'A' ? (
-                            <Chip label="ABERTA" color="info"/>
-                        ) : row.flsituacao == 'P' ? (
-                            <Chip label="PAGA" color="success"/>
-                        ) : row.flsituacao == 'V' ? (
-                            <Chip label="VENCIDA" color="error"/>
-                        ) : `SEM SITUAÇÃO`}                        
+                        <Grid item container spacing={2} justifyContent="center">
+                            <Grid item>
+                                {row.flsituacao == 'A' ? (
+                                    <Chip label="ABERTA" color="info"/>
+                                ) : row.flsituacao == 'P' ? (
+                                    <Chip label="PAGA" color="success"/>
+                                ) : `SEM SITUAÇÃO`}
+                            </Grid>
+                            <Grid item>
+                                {(new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "A") ? (
+                                    <Chip label="VENCE HOJE" color="warning"/>
+                                ) : (new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString()) && (row.flSituacao == "A") ? (
+                                    <Chip label="VENCIDA" color="error"/>
+                                ) : null} 
+                            </Grid>
+                        </Grid>                     
                     </>
                 )
             } 

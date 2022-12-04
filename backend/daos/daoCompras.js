@@ -292,7 +292,6 @@ async function buscarUm (url) {
 // @descricao SALVA UM REGISTRO
 // @route POST /api/compras
 async function salvar (compra) {
-    console.log(compra);
     return new Promise((resolve, reject) => {
 
         pool.connect((err, client, done) => {
@@ -341,6 +340,7 @@ async function salvar (compra) {
                                 compra.listaprodutos[i].vlcusto,
                                 compra.listaprodutos[i].vlcompra
                             ], async (err, res) => {
+                                console.log('AQUI DAO 1');
                                 if (shouldAbort(err)) return reject(err);
                             })
                         }
@@ -366,9 +366,12 @@ async function salvar (compra) {
                                 conta.flcentrocusto
                             ], (err, res) => {
                                 if (shouldAbort(err)) return reject(err);
+                                console.log('AQUI DAO 2');
                             });
                         }
 
+                        //const produtosFornecedor = await client.query('select * from fornecedores_produtos where fk_idfornecedor = $1');
+                        
 
                         for (let i = 0; i < compra.listaprodutos.length; i++) {
                             var produto = compra.listaprodutos[i];
@@ -473,17 +476,7 @@ async function pagarConta(conta) {
                     conta.fornecedor.id
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
-                    client.query(`
-                        select * from caixa
-                    `, (err, res) => {
-                        if (shouldAbort(err)) return reject(err);
-                        const saldo = res.rows[0].totalcaixa - conta.vltotal;
-                        client.query(`
-                            update caixa set totalcaixa = $1
-                        `, [saldo], (err, res) => {
-                            if (shouldAbort(err)) return reject(err);
-                        })
-                    })
+
                     client.query('COMMIT', err => {
                         if (err) {
                             console.error('Erro durante o commit da transação', err.stack);

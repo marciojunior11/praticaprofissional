@@ -80,22 +80,22 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                 )
             }
         },
-        {
-            label: "Situação",
-            name: "flsituacao",
-            align: "center",
-            render: (row) => {
-                return (
-                    <>
-                        {row.flsituacao == 'F' ? (
-                            <Chip label="FINALIZADA" color="success"/>
-                        ) : row.flsituacao == 'C' ? (
-                            <Chip label="CANCELADA" color="error"/>
-                        ) : null}                        
-                    </>
-                )
-            } 
-        },
+        // {
+        //     label: "Situação",
+        //     name: "flsituacao",
+        //     align: "center",
+        //     render: (row) => {
+        //         return (
+        //             <>
+        //                 {row.flsituacao == 'F' ? (
+        //                     <Chip label="FINALIZADA" color="success"/>
+        //                 ) : row.flsituacao == 'C' ? (
+        //                     <Chip label="CANCELADA" color="error"/>
+        //                 ) : null}                        
+        //             </>
+        //         )
+        //     } 
+        // },
         {
             label: "Ações",
             name: ' ',

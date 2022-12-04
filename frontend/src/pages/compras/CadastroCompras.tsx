@@ -908,6 +908,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                         <Grid container item direction="row" spacing={2} justifyContent="left">
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VDatePicker
+                                    disableFuture
                                     disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     name="dataemissao"
                                     label="Data de Emissão"
@@ -915,6 +916,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VDatePicker
+                                    disableFuture
                                     disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     name="dataentrada"
                                     label="Data de Entrada"

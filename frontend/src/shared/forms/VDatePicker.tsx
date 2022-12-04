@@ -11,9 +11,10 @@ type TVDatePickerProps = {
     label: string;
     onChange?: (e: Dayjs | null) => void;
     disabled?: boolean;
+    disableFuture?: boolean;
 }
 
-export const VDatePicker: React.FC<TVDatePickerProps> = ({ name, label, onChange, disabled, ...rest }) => {
+export const VDatePicker: React.FC<TVDatePickerProps> = ({ name, label, onChange, disabled, disableFuture, ...rest }) => {
     const { fieldName, registerField, defaultValue, error, clearError } = useField(name);
 
     const [value, setValue] = useState<Dayjs | null>(dayjs(new Date().toLocaleString()));
@@ -29,6 +30,7 @@ export const VDatePicker: React.FC<TVDatePickerProps> = ({ name, label, onChange
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DesktopDatePicker
+                disableFuture={disableFuture}
                 disabled={disabled}
                 label={label}
                 inputFormat="DD/MM/YYYY"
