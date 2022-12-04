@@ -11,6 +11,7 @@ export * from './VSelect';
 export * from './VDatePicker';
 export * from './VCNPJMask';
 export * from './VCPFMask';
+export * from './VRGMask';
 export * from './VNumberTextField';
 export * from './VCEPInput';
 export * from './VTelefoneMask';

@@ -58,18 +58,28 @@ async function salvar(req, res) {
         })
 
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const data = JSON.parse(body);
             const mCliente = {
-                nome: response.nome,
-                cpf: response.cpf,
-                rg: response.rg,
-                telefone: response.telefone,
-                endereco: response.endereco,
-                numEnd: response.numEnd,
-                bairro: response.bairro,
-                cidade: response.cidade,
-                associado: response.associado
+                nmcliente: data.nmcliente,
+                sexo: data.sexo,
+                cpf: data.cpf,
+                rg: data.rg,
+                datanasc: data.datanasc,
+                email: data.email,
+                telefone: data.telefone,
+                celular: data.celular,
+                cep: data.cep,
+                endereco: data.endereco,
+                numend: data.numend,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                condicaopagamento: data.condicaopagamento,
+                flsituacao: data.flsituacao,
+                flassociado: data.flassociado,
+                datacad: data.datacad,
+                ultalt: data.ultalt,
             };
+            console.log(mCliente);
             const novoCliente = await daoClientes.salvar(mCliente);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(novoCliente));
@@ -93,18 +103,27 @@ async function alterar(req, res, id) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const data = JSON.parse(body);
             const mCliente = {
-                id: response.id,
-                nome: response.nome,
-                cpf: response.cpf,
-                rg: response.rg,
-                telefone: response.telefone,
-                endereco: response.endereco,
-                numEnd: response.numEnd,
-                bairro: response.bairro,
-                cidade: response.cidade,
-                associado: response.associado
+                id: data.id,
+                nmcliente: data.nmcliente,
+                sexo: data.sexo,
+                cpf: data.cpf,
+                rg: data.rg,
+                datanasc: data.datanasc,
+                email: data.email,
+                telefone: data.telefone,
+                celuar: data.celular,
+                cep: data.cep,
+                endereco: data.endereco,
+                numEnd: data.numEnd,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                condicaopagamento: data.condicaopagamento,
+                flsituacao: data.flsituacao,
+                flassociado: data.flassociado,
+                datacad: data.datacad,
+                ultalt: data.ultalt,
             };
             const novoCliente = await daoClientes.alterar(id, mCliente)
             res.writeHead(201, { 'Content-Type': 'application/json'});
@@ -141,17 +160,9 @@ async function validate(req, res) {
         })
 
         req.on('end', async () => {
-            const response = JSON.parse(body);
+            const data = JSON.parse(body);
             const mCliente = {
-                nome: response.nome,
-                cpf: response.cpf,
-                rg: response.rg,
-                telefone: response.telefone,
-                endereco: response.endereco,
-                numEnd: response.numEnd,
-                bairro: response.bairro,
-                cidade: response.cidade,
-                associado: response.associado
+                cpf: data.cpf
             };
             const resp = await daoClientes.validate(mCliente);
             res.writeHead(201, { 'Content-Type': 'application/json'});

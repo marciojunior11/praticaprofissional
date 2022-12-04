@@ -3,10 +3,12 @@ import { ICondicoesPagamento } from "./CondicoesPagamento";
 
 export interface IClientes {
     id: number;
-    nome: string;
+    nmcliente: string;
+    sexo: string;
+    datanasc: string | Date;
     cpf: string;
     rg: string;
-    email: string | undefined;
+    email: string;
     telefone: string;
     celular: string;
     cep: string;
@@ -22,13 +24,14 @@ export interface IClientes {
 }
 
 export interface IDetalhesClientes {
-    id: number;
-    nome: string;
+    nmcliente: string;
+    sexo: string;
+    datanasc: string | Date;
     cpf: string;
-    rg: string;
+    rg: string | undefined;
     email: string | undefined;
-    telefone: string;
-    celular: string;
+    telefone: string | undefined;
+    celular: string | undefined;
     cep: string;
     endereco: string;
     numend: string;
@@ -40,7 +43,7 @@ export interface IDetalhesClientes {
 }
 
 export interface IValidator {
-    cnpj: string;
+    cpf: string;
 }
 
 export type TListaClientes = {

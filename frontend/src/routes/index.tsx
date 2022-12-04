@@ -12,8 +12,8 @@ import {
     CadastroCidades,
     ConsultaFornecedores,
     CadastroFornecedores,
-    // ConsultaClientes,
-    // CadastroClientes,
+    ConsultaClientes,
+    CadastroClientes,
     ConsultaProdutos,
     CadastroProdutos,
     ConsultaCondicoesPagamento,
@@ -64,11 +64,11 @@ export const AppRoutes = () => {
                 icon: ['handshake'],
                 path: '/fornecedores',
             },
-            // {
-            //     label: 'Clientes',
-            //     icon: 'person',
-            //     path: '/clientes',
-            // },
+            {
+                label: 'Clientes',
+                icon: ['person'],
+                path: '/clientes',
+            },
             {
                 label: 'Produtos',
                 icon: ['shopping_cart'],
@@ -133,8 +133,8 @@ export const AppRoutes = () => {
             <Route path="/fornecedores" element={<ConsultaFornecedores/>}/>
             <Route path="/fornecedores/cadastro/:id" element={<CadastroFornecedores/>}/>
 
-            {/* <Route path="/clientes" element={<ConsultaClientes/>}/>
-            <Route path="/clientes/cadastro/:id" element={<CadastroClientes/>}/> */}
+            <Route path="/clientes" element={<ConsultaClientes/>}/>
+            <Route path="/clientes/cadastro/:id" element={<CadastroClientes/>}/>
 
             <Route path="/formaspagamento" element={<ConsultaFormasPagamento/>}/>
             <Route path="/formaspagamento/cadastro/:id" element={<CadastroFormasPagamento/>}/>
