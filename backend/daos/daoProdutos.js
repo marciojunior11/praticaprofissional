@@ -244,6 +244,65 @@ async function buscarTodosComPg (url) {
     })
 };
 
+async function buscarProdutosVendaComPg(numnf, serienf, idcliente) {
+    return new Promise((resolve, reject) => {
+        var listaprodutos = [];
+        pool.query(`
+        select * from produtos as p
+            inner join produtos_venda as pv on p.id = pv.fk_idproduto
+            inner join vendas as v on 
+                v.numnf = pv.fk_numnf and
+                v.serienf = pv.fk_serienf and
+                v.fk_idcliente = pv.fk_idcliente where
+                    v.numnf = $1 and
+                    v.serienf = $2 and
+                    v.fk_idcliente = $3
+        `, [
+            numnf,
+            serienf,
+            idcliente
+        ], (err, res) => {
+            if (err) return reject(err);
+            if (res.rowCount != 0) {
+                res.rows.forEach(row => {
+                    let produto = {
+                        id: row.id,
+                        gtin: row.gtin,
+                        descricao: row.descricao,
+                        apelido: row.apelido,
+                        marca: row.marca,
+                        undmedida: row.undmedida,
+                        unidade: row.unidade,
+                        vlcusto: row.vlcusto,
+                        vlcompra: row.vlcompra,
+                        vlvenda: row.vlvenda,
+                        lucro: row.lucro,
+                        pesoliq: row.pesoliq,
+                        pesobruto: row.pesobruto,
+                        ncm: row.ncm,
+                        cfop: row.cfop,
+                        percicmssaida: row.percicmssaida,
+                        percipi: row.percipi,
+                        cargatribut: row.cargatribut,
+                        qtdatual: row.qtdatual,
+                        qtdideal: row.qtdideal,
+                        qtdmin: row.qtdmin,
+                        fornecedor: null,
+                        listavariacoes: [],
+                        qtd: row.qtd,
+                        vltotal: row.vltotal,
+                        datacad: row.datacad,
+                        ultalt: row.ultalt,
+                    };
+                    listaprodutos.push(produto);
+                })
+                return resolve(listaprodutos);
+            }
+            return resolve([]);
+        })
+    });
+}
+
 async function buscarProdutosNfComPg(numnf, serienf, modelonf, idfornecedor) {
     return new Promise((resolve, reject) => {
         var listaprodutos = [];
@@ -564,6 +623,7 @@ module.exports = {
     getQtd,
     buscarTodosSemPg,
     buscarTodosComPg,
+    buscarProdutosVendaComPg,
     buscarProdutosNfComPg,
     buscarUm,
     salvar,
