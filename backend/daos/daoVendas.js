@@ -190,38 +190,23 @@ async function buscarTodosComPg (url) {
 
 // @descricao BUSCA UM REGISTRO
 // @route GET /api/vendas
-async function buscarUm (url) {
-    let numnf = url.split('=')[1];
-    let serienf = url.split('=')[2];
-    let idcliente = url.split('=')[3];
-    numnf = numnf.replace(/[^0-9]/g, '');
-    serienf = serienf.replace(/[^0-9]/g, '');
-    idcliente = idcliente.replace(/[^0-9]/g, '');
-
+async function buscarUm (id) {
     return new Promise((resolve, reject) => {
         pool.query(`
             select * from vendas where
-                numnf = $1 and
-                serienf = $2 and
-                fk_idcliente = $3
-        `, [numnf, serienf, idcliente], async (err, res) => {
+                id = $1
+        `, [id], async (err, res) => {
             if (err) return reject(err)
             if (res.rowCount != 0) {
                 const mListaContasReceber = [];
-                const mCliente = await daoClientes.buscarUm(idcliente);
+                const mCliente = await daoClientes.buscarUm(res.rows[0].fk_idcliente);
                 const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[0].fk_idcondpgto);
-                const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(
-                    numnf,
-                    serienf,
-                    idcliente
-                );
+                const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(id);
                 pool.query(`
                 select * from contasreceber where
-                    fk_numnf = $1 and
-                    fk_serienf = $2 and
-                    fk_idcliente = $3
+                    fk_idvenda = $1
                 order by nrparcela                    
-                `, [numnf, serienf, idcliente], async (err, resp) => {
+                `, [id], async (err, resp) => {
                     if (err) return reject(err);
                     for (let i = 0; i < resp.rows.length; i++) {
                         let conta = resp.rows[i];
@@ -237,28 +222,26 @@ async function buscarUm (url) {
                             observacao: conta.observacao,
                             cliente: mCliente,
                             formapagamento: mFormaPagamento,
-                            flcentrocusto: conta.flcentrocusto,
+                            florigem: conta.florigem,
                             flsituacao: conta.flsituacao,
                             datacad: conta.datacad,
                             ultalt: conta.ultalt                           
                         })
                     }
-                    const mCompra = {
-                        numnf: numnf,
-                        serienf: serienf,
-                        modelonf: modelonf,
+                    const mVenda = {
+                        id: id,
                         cliente: mCliente,
                         observacao: res.rows[0].observacao,
                         condicaopagamento: mCondicaoPagamento,
+                        vltotal: res.rows[0].vltotal,
                         listaprodutos: mListaProdutosNF,
                         listacontasreceber: mListaContasReceber,
-                        vltotal: res.rows[0].vltotal,
                         flsituacao: res.rows[0].flsituacao,
                         dataemissao: res.rows[0].dataemissao,
                         datacad: res.rows[0].datacad,
                         ultalt: res.rows[0].ultalt,                   
                     }
-                    return resolve(mCompra);
+                    return resolve(mVenda);
                 });
             }
             return null;

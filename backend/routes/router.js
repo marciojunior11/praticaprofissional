@@ -11,6 +11,7 @@ const { variacoesRoutes } = require('./variacoesRoutes');
 const { centrosCustoRoutes } = require('./centrosCustoRoutes');
 const { produtosRoutes } = require('./produtosRoutes');
 const { comprasRoutes } = require('./comprasRoutes');
+const { vendasRoutes } = require('./vendasRoutes');
 
 function router(req, res) {
     if (req.url.includes('/paises')) {
@@ -39,6 +40,8 @@ function router(req, res) {
         produtosRoutes(req, res);
     } else if (req.url.includes('compras')) {
         comprasRoutes(req, res);
+    } else if (req.url.includes('vendas')) {
+        vendasRoutes(req, res);
     }
 }
 

@@ -244,23 +244,17 @@ async function buscarTodosComPg (url) {
     })
 };
 
-async function buscarProdutosVendaComPg(numnf, serienf, idcliente) {
+async function buscarProdutosVendaComPg(idvenda) {
     return new Promise((resolve, reject) => {
         var listaprodutos = [];
         pool.query(`
         select * from produtos as p
             inner join produtos_venda as pv on p.id = pv.fk_idproduto
             inner join vendas as v on 
-                v.numnf = pv.fk_numnf and
-                v.serienf = pv.fk_serienf and
-                v.fk_idcliente = pv.fk_idcliente where
-                    v.numnf = $1 and
-                    v.serienf = $2 and
-                    v.fk_idcliente = $3
+                v.id = pv.fk_idvenda where
+                    v.id = $1
         `, [
-            numnf,
-            serienf,
-            idcliente
+            idvenda
         ], (err, res) => {
             if (err) return reject(err);
             if (res.rowCount != 0) {
