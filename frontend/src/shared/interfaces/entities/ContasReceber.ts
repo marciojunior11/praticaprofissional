@@ -12,7 +12,7 @@ export interface IContasReceber {
     observacao: string;
     cliente: IClientes;
     formapagamento: IFormasPagamento;
-    flcentrocusto: string;
+    florigem: string;
     flsituacao: string;
     datacad: string | Date;
     ultalt: string | Date;
@@ -29,7 +29,7 @@ export interface IDetalhesContasReceber {
     observacao: string;
     cliente: IClientes;
     formapagamento: IFormasPagamento;
-    flcentrocusto: string;
+    florigem: string;
     flsituacao: string;
 }
 

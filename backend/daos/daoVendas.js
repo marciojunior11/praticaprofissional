@@ -19,12 +19,12 @@ async function getQtd(url) {
             const filter = url.split('=')[3];
             pool.query( `
                 select 
-                    vendas.numnf,
-                    vendas.serienf,
+                    vendas.id,
                     vendas.fk_idcliente,
                     vendas.observacao,
                     vendas.fk_idcondpgto,
                     vendas.vltotal,
+                    vendas.flsituacao,
                     vendas.dataemissao,
                     vendas.datacad,
                     vendas.ultalt
@@ -82,21 +82,21 @@ async function buscarTodosSemPg(url) {
                                     observacao: res.rows[i].observacao,
                                     cliente: mCliente,
                                     formapagamento: mFormaPagamento,
-                                    flcentrocusto: res.rows[i].flcentrocusto,
+                                    florigem: res.rows[i].florigem,
                                     flsituacao: res.rows[i].flsituacao,
                                     datacad: res.rows[i].datacad,
                                     ultalt: res.rows[i].ultalt
                                 })
                             };
                             mListaVendas.push({
-                                numnf: res.rows[i].numnf,
-                                serienf: res.rows[i].serienf,
+                                id: res.rows[i].id,
                                 cliente: mCliente,
                                 observacao: res.rows[i].observacao,
                                 condicaopagamento: mCondicaoPagamento,
+                                vltotal: res.rows[i].vltotal,
                                 listaprodutos: mListaProdutosNF,
                                 listacontasreceber: contasreceber,
-                                vltotal: res.rows[i].vltotal,
+                                flsituacao: res.rows[i].flsituacao,
                                 dataemissao: res.rows[i].dataemissao,
                                 datacad: res.rows[i].datacad,
                                 ultalt: res.rows[i].ultalt,
@@ -160,21 +160,21 @@ async function buscarTodosComPg (url) {
                                 observacao: res.rows[i].observacao,
                                 cliente: mCliente,
                                 formapagamento: mFormaPagamento,
-                                flcentrocusto: res.rows[i].flcentrocusto,
+                                florigem: res.rows[i].florigem,
                                 flsituacao: res.rows[i].flsituacao,
                                 datacad: res.rows[i].datacad,
                                 ultalt: res.rows[i].ultalt
                             })
                         };
                         mListaVendas.push({
-                            numnf: res.rows[i].numnf,
-                            serienf: res.rows[i].serienf,
+                            id: res.rows[i].id,
                             cliente: mCliente,
                             observacao: res.rows[i].observacao,
                             condicaopagamento: mCondicaoPagamento,
+                            vltotal: res.rows[i].vltotal,
                             listaprodutos: mListaProdutosNF,
                             listacontasreceber: contasreceber,
-                            vltotal: res.rows[i].vltotal,
+                            flsituacao: res.rows[i].flsituacao,
                             dataemissao: res.rows[i].dataemissao,
                             datacad: res.rows[i].datacad,
                             ultalt: res.rows[i].ultalt,

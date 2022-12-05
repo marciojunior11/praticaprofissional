@@ -23,7 +23,7 @@ function vendasRoutes(req, res) {
         if (req.url.match(/\/api\/vendas\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlVendas.alterar(req, res, id);
-        } else if (req.url.includes('pagarconta')) {
+        } else if (req.url.includes('receberconta')) {
             ctrlVendas.receberConta(req, res);
         }
     } else if(req.url.includes('numnf') && req.url.includes('serienf') && req.url.includes('modelonf') && req.url.includes('idfornecedor') && req.method === 'DELETE') {

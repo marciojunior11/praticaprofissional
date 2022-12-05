@@ -14,7 +14,7 @@ class ContasReceber extends PaiSemId {
     private observacao: string;
     private cliente: Fisicas;
     private formapagamento: FormasPagamento;
-    private flcentrocusto: string;
+    private florigem: string;
     private flsituacao: string;
     // #endregion
 
@@ -30,7 +30,7 @@ class ContasReceber extends PaiSemId {
         observacao: string = "",
         cliente: Fisicas = new Fisicas(),
         formapagamento: FormasPagamento = new FormasPagamento(),
-        flcentrocusto: string = "",
+        florigem: string = "",
         flsituacao: string = "",
         datacad: string | Date = new Date(),
         ultalt: string | Date = new Date()
@@ -46,7 +46,7 @@ class ContasReceber extends PaiSemId {
         this.observacao = observacao;
         this.cliente = cliente;
         this.formapagamento = formapagamento;
-        this.flcentrocusto = flcentrocusto;
+        this.florigem = florigem;
         this.flsituacao = flsituacao;
         this.datacad = datacad;
         this.ultalt = ultalt;
@@ -94,8 +94,8 @@ class ContasReceber extends PaiSemId {
         return this.formapagamento;
     }
 
-    public get _centrocusto() {
-        return this.flcentrocusto;
+    public get _florigem() {
+        return this.florigem;
     }
 
     public get _flsituacao() {
@@ -144,8 +144,8 @@ class ContasReceber extends PaiSemId {
         this.formapagamento = value;
     }
 
-    public set _centrocusto(value: string) {
-        this.flcentrocusto = value;
+    public set _florigem(value: string) {
+        this.florigem = value;
     }
 
     public set _flsituacao(value: string) {

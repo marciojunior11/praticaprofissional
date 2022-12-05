@@ -6,11 +6,10 @@ import CondicoesPagamento from "./CondicoesPagamento";
 
 class Vendas extends PaiSemId {
     // #region ATRIBUTOS
-    private numnf: string;
-    private serienf: string;
+    private id: number;
     private cliente: Fisicas;
-    private condicaopagamento: CondicoesPagamento;
     private observacao: string;
+    private condicaopagamento: CondicoesPagamento;
     private vltotal: number;
     private listaprodutos: Produtos[];
     private listacontasreceber: ContasReceber[];
@@ -20,27 +19,20 @@ class Vendas extends PaiSemId {
 
     // #region CONSTRUCTOR
     constructor(
-        numnf: string = "",
-        serienf: string = "",
-        modelonf: string = "",
+        id: number,
         cliente: Fisicas = new Fisicas(),
         condicaopagamento: CondicoesPagamento = new CondicoesPagamento(),
         observacao: string = "",
-        vlfrete: number = 0,
-        vlpedagio: number = 0,
-        vloutrasdespesas = 0,
         vltotal: number = 0,
         listaprodutos: Produtos[] = [],
         listacontasreceber: ContasReceber[] = [],
         flsituacao: string = "",
         dataemissao: string | Date = new Date(),
-        dataentrada: string | Date = new Date(),
         datacad: string | Date = new Date(),
         ultalt: string | Date = new Date()
     ) {
         super();
-        this.numnf = numnf;
-        this.serienf = serienf;
+        this.id = id;
         this.cliente = cliente;
         this.condicaopagamento = condicaopagamento;
         this.observacao = observacao;
@@ -55,12 +47,8 @@ class Vendas extends PaiSemId {
     // #endregion
 
     // #region GETTERS
-    public get _numnf() {
-        return this.numnf;
-    }
-
-    public get _serienf() {
-        return this.serienf;
+    public get _id() {
+        return this.id;
     }
 
     public get _cliente() {
@@ -97,12 +85,8 @@ class Vendas extends PaiSemId {
     // #endregion
 
     // #region SETTERS
-    public set _numnf(value: string) {
-        this.numnf = value;
-    }
-
-    public set _serienf(value: string) {
-        this.serienf = value;
+    public set _id(value: number) {
+        this.id = value;
     }
 
     public set _cliente(value: Fisicas) {
