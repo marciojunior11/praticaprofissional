@@ -77,7 +77,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     const [objFornecedor, setObjFornecedor] = useState<IFornecedores | null>(null);
     const [compraOriginal, setCompraOriginal] = useState<ICompras | null>(null);
     const [produto, setProduto] = useState<IProdutosNF | null>(null);
-    const [condicaopagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
+    const [condicaoPagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
     const [vlTotalProdutosNota, setVlTotalProdutosNota] = useState(0);
     const [vlTotalNota, setVlTotalNota] = useState(0);
     const [vlUnitario, setVlUnitario] = useState(0);
@@ -291,7 +291,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }
 
     const gerarContasPagar = () => {
-        const listaParcelas = condicaopagamento?.listaparcelas;
+        const listaParcelas = condicaoPagamento?.listaparcelas;
         const mArray: Array<IContasPagar> = [];
         const dataEmissao: Dayjs = formRef.current?.getData().dataemissao;
         const dtemissao = new Date(dataEmissao.toISOString());
@@ -329,9 +329,9 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                 percparcela: item.percentual,
                 dtvencimento: dtvencimento,
                 vltotal: parseFloat(Number(valor).toFixed(2)),
-                txdesc: condicaopagamento!.txdesc,
-                txmulta: condicaopagamento!.txmulta,
-                txjuros: condicaopagamento!.txjuros,
+                txdesc: condicaoPagamento!.txdesc,
+                txmulta: condicaoPagamento!.txmulta,
+                txjuros: condicaoPagamento!.txjuros,
                 observacao: `Conta a Pagar Parcela ${item.numero} de ${index + 1} referente ao mês ${dtvencimento.getMonth()}/${dtvencimento.getFullYear()}`,
                 fornecedor: objFornecedor!,
                 flcentrocusto: 'C',
@@ -574,7 +574,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }
 
     const handleSave = (dados: IFormData) => {
-        console.log(condicaopagamento);
+        console.log(condicaoPagamento);
         var errors = false;
         if (listaContasPagar.length == 0) {
             errors = true;
@@ -615,7 +615,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     modelonf: dadosValidados.modelonf,
                                     fornecedor: objFornecedor!,
                                     observacao: "",
-                                    condicaopagamento: condicaopagamento!,
+                                    condicaopagamento: condicaoPagamento!,
                                     listaprodutos: listaProdutosNF,
                                     listacontaspagar: listaContasPagar,
                                     vlfrete: vlfrete,
@@ -657,7 +657,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                     modelonf: dadosValidados.modelonf,
                                     fornecedor: objFornecedor!,
                                     observacao: "",
-                                    condicaopagamento: condicaopagamento!,
+                                    condicaopagamento: condicaoPagamento!,
                                     listaprodutos: listaProdutosNF,
                                     listacontaspagar: listaContasPagar,
                                     vltotal: vltotal,
@@ -1088,7 +1088,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
 
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                 <Button
-                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0 || listaProdutosNF.length == 0}
+                                    disabled={isLoading || !isValid || isEditingProduto || listaContasPagar.length > 0 || listaProdutosNF.length == 0 || !condicaoPagamento}
                                     variant="contained" 
                                     color="primary"
                                     size="large"

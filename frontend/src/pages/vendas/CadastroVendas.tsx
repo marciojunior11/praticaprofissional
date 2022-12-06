@@ -68,7 +68,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
     const [objCliente, setObjCliente] = useState<IClientes | null>(null);
     const [vendaOriginal, setVendaOriginal] = useState<IVendas | null>(null);
     const [produto, setProduto] = useState<IProdutosNF | null>(null);
-    const [condicaopagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
+    const [condicaoPagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
     const [vlTotalProdutosNota, setVlTotalProdutosNota] = useState(0);
     const [vlTotalNota, setVlTotalNota] = useState(0);
     const [vlUnitario, setVlUnitario] = useState(0);
@@ -257,7 +257,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
     }
 
     const gerarContasPagar = () => {
-        const listaParcelas = condicaopagamento?.listaparcelas;
+        const listaParcelas = condicaoPagamento?.listaparcelas;
         const mArray: Array<IContasReceber> = [];
         const dataEmissao: Dayjs = formRef.current?.getData().dataemissao;
         const dtemissao = new Date(dataEmissao.toISOString());
@@ -286,9 +286,9 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                 percparcela: item.percentual,
                 dtvencimento: dtvencimento,
                 vltotal: parseFloat(Number(valor).toFixed(2)),
-                txdesc: condicaopagamento!.txdesc,
-                txmulta: condicaopagamento!.txmulta,
-                txjuros: condicaopagamento!.txjuros,
+                txdesc: condicaoPagamento!.txdesc,
+                txmulta: condicaoPagamento!.txmulta,
+                txjuros: condicaoPagamento!.txjuros,
                 observacao: `Conta a Pagar Parcela ${item.numero} de ${index + 1} referente ao mês ${dtvencimento.getMonth()}/${dtvencimento.getFullYear()}`,
                 cliente: objCliente!,
                 florigem: 'V',
@@ -501,7 +501,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                 controller.create({
                     cliente: objCliente!,
                     observacao: "",
-                    condicaopagamento: condicaopagamento!,
+                    condicaopagamento: condicaoPagamento!,
                     vltotal: vltotal,
                     listaprodutos: listaProdutosNF,
                     listacontasreceber: listaContasReceber,
@@ -536,7 +536,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                 controller.create({
                     cliente: objCliente!,
                     observacao: "",
-                    condicaopagamento: condicaopagamento!,
+                    condicaopagamento: condicaoPagamento!,
                     vltotal: vltotal,
                     listaprodutos: listaProdutosNF,
                     listacontasreceber: listaContasReceber,
@@ -675,6 +675,8 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                                     getAll={controllerProdutos.getAll}
                                     onChange={(value) => {
                                         setProduto(value);
+                                        formRef.current?.setFieldValue('valor', value.vlvenda);
+                                        setVlUnitario(value.vlvenda);
                                         formRef.current?.setFieldError('produto', '');
                                     }}
                                     onInputchange={() => {
@@ -783,7 +785,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
 
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                 <Button
-                                    disabled={isLoading || isEditingProduto || listaContasReceber.length > 0 || listaProdutosNF.length == 0}
+                                    disabled={isLoading || isEditingProduto || listaContasReceber.length > 0 || listaProdutosNF.length == 0 || !condicaoPagamento}
                                     variant="contained" 
                                     color="primary"
                                     size="large"
