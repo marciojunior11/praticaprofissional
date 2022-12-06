@@ -82,7 +82,7 @@ class ControllerProdutos implements IController {
             dados.unidade,
             0,
             0,
-            0,
+            dados.vlvenda,
             0,
             dados.pesoliq,
             dados.pesobruto,

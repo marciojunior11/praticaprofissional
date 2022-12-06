@@ -24,6 +24,8 @@ import ControllerCaracteristicas from "../../shared/controllers/CaracteristicasC
 import ControllerVariacoes from "../../shared/controllers/VariacoesController";
 import ControllerFornecedores from "../../shared/controllers/FornecedoresController";
 import { ConsultaFornecedores } from "../fornecedores/ConsultaFornecedores";
+import { ConsultaCaracteristicas } from "../caracteristicas/ConsultaCaracteristicas";
+import { ConsultaVariacoes } from "../variacoes/ConsultaVariacoes";
 // #endregion
 
 // #region INTERFACES
@@ -97,6 +99,8 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
     const [listaVariacoes, setListaVariacoes] = useState<IVariacoes[]>([]);
     const [fornecedor, setFornecedor] = useState<IFornecedores | null>(null);
     const [isConsultaGradesDialogOpen, setIsConsultaGradesDialogOpen] = useState(false);
+    const [isConsultaCaracteristicasDialogOpen, setIsConsultaCaracteristicasDialogOpen] = useState(false);
+    const [isConsultaVariacoesDialogOpen, setIsConsultaVariacoesDialogOpen] = useState(false);
     const [isConsultaFornecedoresDialogOpen, setIsConsultaFornecedoresDialogOpen] = useState(false);
     const [idGrade, setIdGrade] = useState<number | undefined>();
     const [idCaracteristica, setIdCaracteristica] = useState<number | undefined>();
@@ -108,6 +112,14 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
     // #region ACTIONS
     const toggleConsultaGradesDialogOpen = () => {
         setIsConsultaGradesDialogOpen(oldValue => !oldValue);
+    }
+
+    const toggleConsultaCaracteristicasDialogOpen = () => {
+        setIsConsultaCaracteristicasDialogOpen(oldValue => !oldValue);
+    }
+
+    const toggleConsultaVariacoesDialogOpen = () => {
+        setIsConsultaVariacoesDialogOpen(oldValue => !oldValue);
     }
 
     const toggleConsultaFornecedoresDialogOpen = () => {
@@ -855,6 +867,37 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
 
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
+                                <VAutocompleteSearch
+                                    reload={reloadCaracteristicas}
+                                    disabled={!idGrade}
+                                    size="small"
+                                    required
+                                    name="caracteristica"
+                                    label={["descricao"]}
+                                    TFLabel="Característica"
+                                    rows={selectCaracteristicas}
+                                    onInputchange={() => {
+                                        formRef.current?.setFieldError('caracteristica', '');
+                                        formRef.current?.setFieldError('variacao', '');
+                                    }}
+                                    onChange={(value) => {
+                                        formRef.current?.setFieldError('variacao', '');
+                                        if (!value) {
+                                            formRef.current?.setFieldValue('caracteristica', null);
+                                            formRef.current?.setFieldValue('variacao', null);
+                                            setIdCaracteristica(undefined);
+                                            setIdVariacao(undefined);
+                                        } else {
+                                            setIdCaracteristica(value.id)
+                                        }
+                                    }}
+                                    onClickSearch={() => {
+                                        toggleConsultaCaracteristicasDialogOpen();
+                                    }}
+                                    isDialogOpen={isConsultaCaracteristicasDialogOpen}
+                                />
+                            </Grid>
+                            {/* <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                                 <VAutocomplete
                                     reload={reloadCaracteristicas}
                                     disabled={!idGrade}
@@ -880,11 +923,40 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                         }
                                     }}
                                 />
-                            </Grid>
+                            </Grid> */}
                         </Grid>
 
                         <Grid container item direction="row" spacing={2} alignItems="end">
-                            <Grid item xs={10} sm={10} md={6} lg={6} xl={6}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
+                                <VAutocompleteSearch
+                                    reload={reloadVariacoes}
+                                    disabled={!idCaracteristica}
+                                    size="small"
+                                    required
+                                    name="variacao"
+                                    label={["descricao"]}
+                                    TFLabel="Variação"
+                                    rows={selectVariacoes}
+                                    onInputchange={() => {
+                                        console.log(selectVariacoes);
+                                        formRef.current?.setFieldError('variacao', '');
+                                    }}
+                                    onChange={(value) => {
+                                        formRef.current?.setFieldError('variacao', '');
+                                        if (!value) {
+                                            formRef.current?.setFieldValue('variacao', null);
+                                            setIdVariacao(undefined);
+                                        } else {
+                                            setIdVariacao(value.id)
+                                        }
+                                    }}
+                                    onClickSearch={() => {
+                                        toggleConsultaVariacoesDialogOpen();
+                                    }}
+                                    isDialogOpen={isConsultaVariacoesDialogOpen}
+                                />
+                            </Grid>
+                            {/* <Grid item xs={10} sm={10} md={6} lg={6} xl={6}>
                                 <VAutocomplete
                                     reload={reloadVariacoes}
                                     disabled={!idCaracteristica}
@@ -908,7 +980,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                         }
                                     }}
                                 />                           
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
                                 <Button
                                     variant="contained" 
@@ -990,7 +1062,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                             onSelectItem={(row) => {
                                 formRef.current?.setFieldValue("grade", row);
                                 setIdGrade(row.id);
-
+                                formRef.current?.setFieldError('grade', '');
                                 formRef.current?.setFieldError('caracteristica', '');
                                 formRef.current?.setFieldError('variacao', '');
                                 setIdVariacao(undefined);
@@ -999,6 +1071,48 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                 setSelectCaracteristicas([]);
                             }}
                             toggleDialogOpen={toggleConsultaGradesDialogOpen}
+                        />
+                    </CustomDialog>
+
+                    <CustomDialog 
+                        onClose={toggleConsultaCaracteristicasDialogOpen}
+                        handleClose={toggleConsultaCaracteristicasDialogOpen} 
+                        open={isConsultaCaracteristicasDialogOpen} 
+                        title="Consultar Características"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaCaracteristicas 
+                            isDialog
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldValue("caracteristica", row);
+                                setIdCaracteristica(row.id);
+
+                                formRef.current?.setFieldError('caracteristica', '');
+                                formRef.current?.setFieldError('variacao', '');
+                                setIdVariacao(undefined);
+                                setSelectVariacoes([]);
+                            }}
+                            toggleDialogOpen={toggleConsultaCaracteristicasDialogOpen}
+                        />
+                    </CustomDialog>
+
+                    <CustomDialog 
+                        onClose={toggleConsultaVariacoesDialogOpen}
+                        handleClose={toggleConsultaVariacoesDialogOpen} 
+                        open={isConsultaVariacoesDialogOpen} 
+                        title="Consultar Variações"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaVariacoes 
+                            isDialog
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldValue("variacao", row);
+                                setIdVariacao(row.id);
+                                formRef.current?.setFieldError('variacao', '');
+                            }}
+                            toggleDialogOpen={toggleConsultaVariacoesDialogOpen}
                         />
                     </CustomDialog>
 

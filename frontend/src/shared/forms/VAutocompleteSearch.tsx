@@ -28,10 +28,11 @@ type TVAutocompleteProps = {
     required?: boolean,
     onClickSearch?: () => void,
     isDialogOpen: boolean,
-    disabled?: boolean
+    disabled?: boolean,
+    reload?: boolean
 }
 
-export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, rows, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, disabled, ...rest}) => {
+export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen, size, name, rows, getAll, label, TFLabel, isExternalLoading = false, onClickSearch, disabled, reload, ...rest}) => {
 
     //HOOKS
     const { debounce } = useDebounce();
@@ -76,7 +77,7 @@ export const VAutocompleteSearch: React.FC<TVAutocompleteProps> = ({isDialogOpen
 
     useEffect(() =>{
         reloadData();
-    }, [])
+    }, [reload])
 
     useEffect(() =>{
         if (!isDialogOpen) {
