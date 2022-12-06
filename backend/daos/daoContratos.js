@@ -117,7 +117,7 @@ async function salvar (contrato) {
                 return !!err;
             }
 
-            client.query('BEGIN', err => {
+            client.query('BEGIN', async err => {
                 if (shouldAbort(err)) return reject(err);
                 await daoVendas.salvar(contrato.venda);
                 var response = await client.query('select * from vendas where id = (select max(id) from vendas)');
