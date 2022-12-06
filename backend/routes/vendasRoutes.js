@@ -1,11 +1,12 @@
 const ctrlVendas = require('../controllers/ctrlVendas');
 
 function vendasRoutes(req, res) {
+    console.log('vendas');
     if(req.method === 'OPTIONS') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end();
     } else if(req.method === 'GET') {
-        if(req.url.match(/\/api\/clientes\/([0-9+])/)) {
+        if(req.url.match(/\/api\/vendas\/([0-9+])/)) {
             const id = req.url.split('/')[3];
             ctrlVendas.buscarUm(req, res, id);
         } else if (req.url.includes('page=all')) {

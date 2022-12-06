@@ -22,6 +22,8 @@ import {
     ConsultaFormasPagamento,
     ConsultaCompras,
     CadastroCompras,
+    ConsultaVendas,
+    CadastroVendas,
     ConsultaGrades,
     CadastroGrades,
     ConsultaCaracteristicas,
@@ -31,7 +33,9 @@ import {
     ConsultaCentrosCusto,
     CadastroCentrosCusto,
     ConsultaContasPagar,
-    CadastroContasPagar
+    CadastroContasPagar,
+    ConsultaContasReceber,
+    CadastroContasReceber
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -86,13 +90,23 @@ export const AppRoutes = () => {
             },
             {
                 label: 'Compras',
-                icon: ['paid'],
+                icon: ['local_shipping', 'paid'],
                 path: '/compras',
+            },
+            {
+                label: 'Vendas',
+                icon: ['add_shopping_cart', 'paid'],
+                path: '/vendas',
             },
             {
                 label: 'Contas a Pagar',
                 icon: ['monetization_on_icon', 'arrow_forward'],
                 path: '/contaspagar',
+            },
+            {
+                label: 'Contas a Receber',
+                icon: ['monetization_on_icon', 'arrow_backward'],
+                path: '/contasreceber',
             },
             {
                 label: 'Grades',
@@ -148,8 +162,14 @@ export const AppRoutes = () => {
             <Route path="/compras" element={<ConsultaCompras/>}/>
             <Route path="/compras/cadastro/:id" element={<CadastroCompras/>}/>
 
+            <Route path="/vendas" element={<ConsultaVendas/>}/>
+            <Route path="/vendas/cadastro/:id" element={<CadastroVendas/>}/>
+
             <Route path="/contaspagar" element={<ConsultaContasPagar/>}/>
             <Route path="/contaspagar/cadastro/:id" element={<CadastroContasPagar/>}/>
+
+            <Route path="/contasreceber" element={<ConsultaContasReceber/>}/>
+            <Route path="/contasreceber/cadastro/:id" element={<CadastroContasReceber/>}/>
 
             <Route path="/grades" element={<ConsultaGrades/>}/>
             <Route path="/grades/cadastro/:id" element={<CadastroGrades/>}/>

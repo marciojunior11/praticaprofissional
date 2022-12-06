@@ -31,16 +31,12 @@ import { ICadastroProps } from "../../shared/interfaces/views/Cadastro";
 
 // #region INTERFACES
 interface IFormData {
-    numnf: string;
-    serienf: string;
-    modelonf: string;
+
 }
 // #endregion
 
 const formValidationSchema: yup.SchemaOf<IFormData> = yup.object().shape({
-    numnf: yup.string().required(),
-    serienf: yup.string().required(),
-    modelonf: yup.string().required(),
+
 })
 
 export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, toggleOpen, selectedId, reloadDataTableIfDialog}) => {
@@ -311,6 +307,13 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
     }
 
     const insertProduto = (isDeleting: boolean = false, index?: number) => {
+        if (produto?.qtdatual! < qtd) {
+            toast.error('Verifique a quantidade de produtos informada.')
+            const validationErrors: IVFormErrors = {};
+            validationErrors['qtd'] = 'A quantidade de produtos informada é maior do que a quantidade atual em estoque.';
+            formRef.current?.setErrors(validationErrors);
+            return;
+        }
         console.log('produto', produto);
         var totalProdutosNota = vlTotalProdutosNota;
         if (isEditingProduto) {
@@ -464,122 +467,108 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
             errors = true;
         }
         if (errors) {
-            setIsValid(false);
+            const validationErrors: IVFormErrors = {}
+
+            toast.error('Verifique os erros.');
+
+            if (listaContasReceber.length == 0) {
+                validationErrors['condicaopagamento'] = 'Por favor, gere as contas a receber antes de salvar.'
+            }
+
+            if (listaProdutosNF.length == 0) {
+                validationErrors['produto'] = 'Por favor, insira ao menos um produto.'
+            }
+
+            if (!formRef.current?.getData().dataemissao) {
+                validationErrors['dataemissao'] = 'Por favor, informe a data de emissäo.'
+            }
+
+            if (!objCliente) {
+                validationErrors['cliente'] = 'Por favor, informe o cliente.'
+            }
+
+            formRef.current?.setErrors(validationErrors);
+
+            return;
         }
-        formValidationSchema
-            .validate(dados, { abortEarly: false })
-                .then((dadosValidados) => {
-                    if(isValid) {
-                        setIsLoading(true);
-                        let vltotal = vlTotalProdutosNota;
-                        let dtemissao: Dayjs = formRef.current?.getData().dataemissao;
-                        let dataemissao = new Date(dtemissao.toISOString());
-                        if (isDialog) {
-                            if (!selectedId) {
-                                controller.create({
-                                    cliente: objCliente!,
-                                    observacao: "",
-                                    condicaopagamento: condicaopagamento!,
-                                    vltotal: vltotal,
-                                    listaprodutos: listaProdutosNF,
-                                    listacontasreceber: listaContasReceber,
-                                    flsituacao: "A",
-                                    dataemissao: dataemissao
-                                })
-                                    .then((result) => {
-                                        setIsLoading(false);
-                                        if (result instanceof Error) {
-                                            toast.error(result.message)
-                                        } else {
-                                            toast.success('Cadastrado com sucesso!')
-                                            reloadDataTableIfDialog?.()
-                                            toggleOpen?.();
-                                        }
-                                    });
-                            } else {
-                                // controller.update(dadosValidados)
-                                // .then((result) => {
-                                //     setIsLoading(false);
-                                //     if (result instanceof Error) {
-                                //         toast.error(result.message);
-                                //     } else {
-                                //         toast.success('Alterado com sucesso!');
-                                //         reloadDataTableIfDialog?.();
-                                //         toggleOpen?.();
-                                //     }
-                                // });
-                            }
+
+        setIsLoading(true);
+        let vltotal = vlTotalProdutosNota;
+        let dtemissao: Dayjs = formRef.current?.getData().dataemissao;
+        let dataemissao = new Date(dtemissao.toISOString());
+        if (isDialog) {
+            if (!selectedId) {
+                controller.create({
+                    cliente: objCliente!,
+                    observacao: "",
+                    condicaopagamento: condicaopagamento!,
+                    vltotal: vltotal,
+                    listaprodutos: listaProdutosNF,
+                    listacontasreceber: listaContasReceber,
+                    flsituacao: "A",
+                    dataemissao: dataemissao
+                })
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message)
                         } else {
-                            if (id === 'novo') {
-                                controller.create({
-                                    cliente: objCliente!,
-                                    observacao: "",
-                                    condicaopagamento: condicaopagamento!,
-                                    vltotal: vltotal,
-                                    listaprodutos: listaProdutosNF,
-                                    listacontasreceber: listaContasReceber,
-                                    flsituacao: "A",
-                                    dataemissao: dataemissao
-                                })
-                                    .then((result) => {
-                                        setIsLoading(false);
-                                        if (result instanceof Error) {
-                                            toast.error(result.message)
-                                        } else {
-                                            toast.success('Cadastrado com sucesso!')
-                                            if (isSaveAndClose()) {
-                                                navigate('/compras');
-                                            }
-                                        }
-                                    });
-                            } else {
-                                // controller.update(dadosValidados)
-                                // .then((result) => {
-                                //     setIsLoading(false);
-                                //     if (result instanceof Error) {
-                                //         toast.error(result.message);
-                                //     } else {
-                                //         toast.success('Alterado com sucesso!');
-                                //         if (isSaveAndClose()) {
-                                //             navigate('/compras')
-                                //         }
-                                //     }
-                                // });
+                            toast.success('Cadastrado com sucesso!')
+                            reloadDataTableIfDialog?.()
+                            toggleOpen?.();
+                        }
+                    });
+            } else {
+                // controller.update(dadosValidados)
+                // .then((result) => {
+                //     setIsLoading(false);
+                //     if (result instanceof Error) {
+                //         toast.error(result.message);
+                //     } else {
+                //         toast.success('Alterado com sucesso!');
+                //         reloadDataTableIfDialog?.();
+                //         toggleOpen?.();
+                //     }
+                // });
+            }
+        } else {
+            if (id === 'novo') {
+                controller.create({
+                    cliente: objCliente!,
+                    observacao: "",
+                    condicaopagamento: condicaopagamento!,
+                    vltotal: vltotal,
+                    listaprodutos: listaProdutosNF,
+                    listacontasreceber: listaContasReceber,
+                    flsituacao: "A",
+                    dataemissao: dataemissao
+                })
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message)
+                        } else {
+                            toast.success('Cadastrado com sucesso!')
+                            if (isSaveAndClose()) {
+                                navigate('/compras');
                             }
                         }
-                    } else {
-                        toast.error('Verifique os campos');
-                    }
-                })
-                .catch((errors: yup.ValidationError) => {
-                    const validationErrors: IVFormErrors = {}
-
-                    toast.error('Verifique os erros.');
-
-                    if (listaContasReceber.length == 0) {
-                        validationErrors['condicaopagamento'] = 'Por favor, gere as contas a receber antes de salvar.'
-                    }
-
-                    if (listaProdutosNF.length == 0) {
-                        validationErrors['produto'] = 'Por favor, insira ao menos um produto.'
-                    }
-
-                    if (!formRef.current?.getData().dataemissao) {
-                        validationErrors['dataemissao'] = 'Por favor, informe a data de emissäo.'
-                    }
-
-                    if (!objCliente) {
-                        validationErrors['fornecedor'] = 'Por favor, informe o fornecedor.'
-                    }
-
-                    errors.inner.forEach(error => {
-                        if ( !error.path ) return;
-                        console.log('path', error.path);
-                        console.log('message', error.message);
-                        validationErrors[error.path] = error.message;
                     });
-                    formRef.current?.setErrors(validationErrors);
-                })
+            } else {
+                // controller.update(dadosValidados)
+                // .then((result) => {
+                //     setIsLoading(false);
+                //     if (result instanceof Error) {
+                //         toast.error(result.message);
+                //     } else {
+                //         toast.success('Alterado com sucesso!');
+                //         if (isSaveAndClose()) {
+                //             navigate('/compras')
+                //         }
+                //     }
+                // });
+            }
+        }
     };
 
     const handleDelete = (id: number) => {
@@ -645,7 +634,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                                     name="cliente"
                                     label={["nmcliente"]}
                                     TFLabel="Cliente"
-                                    disabled={isLoading || isValid || isEditing}
+                                    disabled={isLoading || isEditing}
                                     getAll={controllerClientes.getAll}
                                     onChange={(value) => {
                                         setObjCliente(value);
@@ -664,7 +653,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                             <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
                                 <VDatePicker
                                     disableFuture
-                                    disabled={isLoading || !isValid || listaContasReceber.length > 0}
+                                    disabled={isLoading || listaContasReceber.length > 0}
                                     name="dataemissao"
                                     label="Data de Emissão"
                                 />
@@ -678,7 +667,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
                                 <VAutocompleteSearch
-                                    disabled={isLoading || !isValid || isEditingProduto || listaContasReceber.length > 0}
+                                    disabled={isLoading || isEditingProduto || listaContasReceber.length > 0}
                                     size="small"
                                     name="produto"
                                     label={["descricao"]}
@@ -698,7 +687,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VNumberInput
-                                    disabled={isLoading || !isValid || listaContasReceber.length > 0}
+                                    disabled={isLoading || listaContasReceber.length > 0}
                                     size="small"
                                     fullWidth
                                     name="qtd"
@@ -711,7 +700,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VMoneyInput
-                                    disabled={isLoading || !isValid || listaContasReceber.length > 0}
+                                    disabled={isLoading || listaContasReceber.length > 0}
                                     size="small"
                                     fullWidth
                                     name="valor"
@@ -724,7 +713,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
 
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VMoneyInput
-                                    disabled={isLoading || !isValid}
+                                    disabled={isLoading}
                                     inputProps={{
                                         readOnly: true
                                     }}
@@ -738,7 +727,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
 
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={2}>
                                 <Button
-                                    disabled={isLoading || !isValid || listaContasReceber.length > 0}
+                                    disabled={isLoading || listaContasReceber.length > 0}
                                     variant="contained" 
                                     color={isEditingProduto ? "warning" : "success"}
                                     size="large"
@@ -774,7 +763,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                         <Grid container item direction="row" spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
                                 <VAutocompleteSearch
-                                    disabled={isLoading || !isValid || isEditingProduto || listaContasReceber.length > 0 || listaProdutosNF.length == 0}
+                                    disabled={isLoading || isEditingProduto || listaContasReceber.length > 0 || listaProdutosNF.length == 0}
                                     size="small"
                                     name="condicaopagamento"
                                     label={["descricao"]}
@@ -794,7 +783,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
 
                             <Grid item xs={2} sm={2} md={2} lg={2} xl={1}>
                                 <Button
-                                    disabled={isLoading || !isValid || isEditingProduto || listaContasReceber.length > 0 || listaProdutosNF.length == 0}
+                                    disabled={isLoading || isEditingProduto || listaContasReceber.length > 0 || listaProdutosNF.length == 0}
                                     variant="contained" 
                                     color="primary"
                                     size="large"

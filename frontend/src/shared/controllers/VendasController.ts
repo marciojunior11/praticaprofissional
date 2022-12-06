@@ -62,6 +62,7 @@ class ControllerVendas implements IControllerVendas {
     }
 
     create = async (dados: IDetalhesVendas): Promise<number | undefined | Error> => {
+        console.log('controller');
         console.log(dados);
 
         var listaprodutos = new Array<Produtos>();
@@ -119,7 +120,7 @@ class ControllerVendas implements IControllerVendas {
                 conta.observacao,
                 new Fisicas(conta.cliente.id),
                 new FormasPagamento(conta.formapagamento.id),
-                'C',
+                'V',
                 'A',
                 conta.datacad,
                 conta.ultalt

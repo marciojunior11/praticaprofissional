@@ -120,52 +120,46 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         pool.query('select * from vendas limit $1 offset $2', [limit, (limit*page)-limit], async (err, res) => {
-
             if (err) {
                 return reject(err);
             }
+
             if (res.rowCount != 0) {
                 const mListaVendas = [];
                 for (let i = 0; i < res.rows.length; i++) {
                     const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
                     const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
-                    const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(
-                        res.rows[i].numnf,
-                        res.rows[i].serienf,
-                        res.rows[i].fk_idcliente
-                    );
+                    const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(res.rows[i].id);
                     pool.query(`
                         select * from contasreceber where
-                            fk_numnf = $1 and
-                            fk_serienf = $2 and
-                            fk_idcliente = $3
+                            fk_idvenda = $1
                         order by nrparcela
                     `, [
-                        res.rows[i].numnf,
-                        res.rows[i].serienf,
-                        res.rows[i].fk_idcliente                    
+                        res.rows[i].id,                 
                     ], (err, conta) => {
+                        console.log(conta.rows);
                         if (err) return reject(err);
                         var contasreceber = [];
                         for (let i = 0; i < conta.rows.length; i++) {
-                            const mFormaPagamento = await daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
+                            const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
                             contasreceber.push({
-                                nrparcela: res.rows[i].nrparcela,
-                                percparcela: res.rows[i].percparcela,
-                                dtvencimento: res.rows[i].dtvencimento,
-                                vltotal: res.rows[i].vltotal,
-                                txdesc: res.rows[i].txdesc,
-                                txmulta: res.rows[i].txmulta,
-                                txjuros: res.rows[i].txjuros,
-                                observacao: res.rows[i].observacao,
+                                nrparcela: conta.rows[i].nrparcela,
+                                percparcela: conta.rows[i].percparcela,
+                                dtvencimento: conta.rows[i].dtvencimento,
+                                vltotal: conta.rows[i].vltotal,
+                                txdesc: conta.rows[i].txdesc,
+                                txmulta: conta.rows[i].txmulta,
+                                txjuros: conta.rows[i].txjuros,
+                                observacao: conta.rows[i].observacao,
                                 cliente: mCliente,
                                 formapagamento: mFormaPagamento,
-                                florigem: res.rows[i].florigem,
-                                flsituacao: res.rows[i].flsituacao,
-                                datacad: res.rows[i].datacad,
-                                ultalt: res.rows[i].ultalt
+                                florigem: conta.rows[i].florigem,
+                                flsituacao: conta.rows[i].flsituacao,
+                                datacad: conta.rows[i].datacad,
+                                ultalt: conta.rows[i].ultalt
                             })
                         };
+                        console.log(contasreceber);
                         mListaVendas.push({
                             id: res.rows[i].id,
                             cliente: mCliente,
@@ -181,6 +175,7 @@ async function buscarTodosComPg (url) {
                         });
                     })
                 }
+                console.log('vendas', mListaVendas);
                 return resolve(mListaVendas);
             }
             return resolve([]);
@@ -270,7 +265,7 @@ async function salvar (venda) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into vendas values ($1, $2, $3, $4, $5, $6, $7, $8)', [
+                client.query('insert into vendas (fk_idcliente, observacao, fk_idcondpgto, vltotal, flsituacao, dataemissao, datacad, ultalt) values ($1, $2, $3, $4, $5, $6, $7, $8)', [
                     venda.cliente.id,
                     venda.observacao,
                     venda.condicaopagamento.id,
@@ -281,9 +276,9 @@ async function salvar (venda) {
                     venda.ultalt,
                 ], async (err, res) => {
                         if (shouldAbort(err)) return reject(err);
-                        const response = await client.query('select * from vendas where numnf = $1 and serienf = $2 and modelonf = $3 and fk_idcliente = $4', [venda.numnf.toString(), venda.serienf.toString(), venda.modelonf.toString(), venda.cliente.id]);
+                        const response = await client.query('select * from vendas where id = (select max(id) from vendas)');
                         for (let i = 0; i < venda.listaprodutos.length; i++) {
-                            client.query('insert into produtos_venda values($1, $2, $3, $4, $5, $6, $7, $8)', [
+                            client.query('insert into produtos_venda values($1, $2, $3, $4)', [
                                 response.rows[0].id,
                                 venda.listaprodutos[i].id,
                                 venda.listaprodutos[i].qtd,
@@ -294,7 +289,7 @@ async function salvar (venda) {
                         }
                         for (let i = 0; i < venda.listacontasreceber.length; i++) {
                             let conta = venda.listacontasreceber[i];
-                            client.query('insert into contasreceber values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)', [
+                            client.query('insert into contasreceber values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)', [
                                 conta.nrparcela,
                                 response.rows[0].id,
                                 venda.cliente.id,
@@ -494,7 +489,7 @@ module.exports = {
     buscarUm,
     salvar,
     alterar,
-    pagarConta: receberConta,
+    receberConta,
     deletar,
     validate
 }

@@ -1,6 +1,6 @@
 // #region EXTERNAL IMPORTS
 import React, { useEffect, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography, Chip } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableFooter, LinearProgress, Pagination, IconButton, Icon, Collapse, Typography, Chip, Divider, Grid } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Box } from "@mui/system";
@@ -13,13 +13,14 @@ import { LayoutBase } from "../../shared/layouts";
 import { IVendas, IValidator } from "../../shared/interfaces/entities/Vendas";
 import { Environment } from "../../shared/environment";
 import ControllerVendas from "../../shared/controllers/VendasController";
-import { IHeaderProps } from "../../shared/components/data-table/DataTable";
+import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import { IConsultaProps } from "../../shared/interfaces/views/Consulta";
 import { CollapsedDataTable } from "../../shared/components/data-table/CollapsedDataTable";
-import { CadastroVendas } from "./CadastroVendas";
+import { CadastroContasReceber } from "./CadastroContasReceber";
+import { IContasReceber } from "../../shared/interfaces/entities/ContasReceber";
 // #endregion
 
-export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
+export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = false, onSelectItem, toggleDialogOpen }) => {
     // #region CONTROLLERS
     const controller = new ControllerVendas();
     // #endregion
@@ -39,7 +40,7 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
 
     // #region STATES
     const [selectedId, setSelectedId] = useState<number | undefined>();
-    const [rows, setRows] = useState<IVendas[]>([]);
+    const [rows, setRows] = useState<any[]>([]);
     const [rowOpen, setRowOpen] = useState(false);
     const [qtd, setQtd] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -53,14 +54,18 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
 
     const headers: IHeaderProps[] = [
         {
-            label: "ID",
+            label: 'ID Compra',
             name: "id",
-            align: "center", 
+            align: "center",
         },
         {
-            label: "Cliente",
-            name: "cliente.nmcliente", 
-            align: "center", 
+            label: 'Cliente',
+            name: 'cliente.nmcliente',
+            align: 'left'
+        },
+        {
+            label: "Nr. Parcela",
+            name: "nrparcela",
         },
         {
             label: "Vl. Total",
@@ -76,22 +81,54 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
             }
         },
         {
+            label: "Dt. Vencimento",
+            name: "dtvencimento",
+            align: "center", 
+            render: (row) => {
+                return (
+                    <Typography sx={{
+                        color: (new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "A") ? '#ed6c02' : (new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString()) && (row.flsituacao == "A") ? '#d32f2f' : '#000000de',
+                    }}>{new Date(row.dtvencimento).toLocaleDateString()}</Typography>
+                )
+            }
+        },
+        {
+            label: "Situação",
+            name: "flsituacao",
+            align: "center",
+            render: (row) => {
+                return (
+                    <>
+                        <Grid item container spacing={2} justifyContent="center">
+                            <Grid item>
+                                {row.flsituacao == 'A' && new Date(row.dtvencimento).toLocaleDateString() > new Date().toLocaleDateString() ? (
+                                    <Chip label="ABERTA" color="info"/>
+                                ) : row.flsituacao == 'P' ? (
+                                    <Chip label="RECEBIDA" color="success"/>
+                                ) : new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
+                                    <Chip label="VENCE HOJE" color="warning"/>
+                                ) : new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
+                                    <Chip label="VENCIDA" color="error"/>
+                                ) : null}
+                            </Grid>
+                        </Grid>                     
+                    </>
+                )
+            } 
+        },
+        {
             label: "Ações",
             name: ' ',
             align: "right",
             render: (row) => {
                 return (
                     <>
-                        <IconButton color="error" size="small" onClick={() => handleDelete(row)}>
-                            <Icon>block</Icon>
+                        <IconButton disabled={row.flsituacao != 'A'} color="success" size="small" onClick={() => handlePay(row)}>
+                            <Icon>paid</Icon>
+                            <Icon>check</Icon>
                         </IconButton>
                         <IconButton color="primary" size="small" onClick={() => {
-                            if (isDialog) {
-                                setSelectedId(row.id);
-                                toggleCadastroVendasDialogOpen();
-                            } else {
-                                navigate(`/vendas/cadastro/${row.id}`);
-                            }
+                            navigate(`/contasreceber/cadastro/nrparcela=${row.nrparcela}_id=${row.id}`);
                         }}>
                             <Icon>visibility</Icon>
                         </IconButton>
@@ -108,50 +145,6 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
             }
         }
     ]
-
-    const collapsedHeaders: IHeaderProps[] = [
-        {
-            label: "ID",
-            name: "id",
-            align: "right",  
-        },
-        {
-            label: "Descrição",
-            name: "descricao",  
-            align: "left",
-        },        
-        {
-            label: "QTD",
-            name: "qtd",
-            align: "center", 
-        },
-        {   
-            name: "vlvenda",
-            label: "Vl. Unitário",
-            align: "center",
-            render: (row) => {
-                return (
-                    new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                    }).format(row.vlvenda)
-                )
-            }
-        },
-        {
-            name: "vltotal",
-            label: "Total",
-            align: "center",
-            render: (row) => {
-                return (
-                    new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                    }).format(row.vltotal)
-                )
-            }
-        }
-    ]
     
     const reloadDataTable = () => {
         setIsLoading(true);
@@ -164,9 +157,14 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        console.log('RESULT', result);
-                        setRows(result.data);
-                        setQtd(result.qtd);
+                        var mLista: IContasReceber[] = [];
+                        result.data.forEach((compra) => {
+                            compra.listacontasreceber.forEach((conta) => {
+                                mLista.push(conta);
+                            })
+                        })
+                        setRows(mLista);
+                        setQtd(result.data.length);
                     }
                 });
         })        
@@ -185,25 +183,34 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
-                        console.log('RESULT', result);
-                        setRows(result.data);
-                        setQtd(result.qtd);
+                        var mLista: any[] = [];
+                        result.data.forEach((compra) => {
+                            compra.listacontasreceber.forEach((conta) => {
+                                mLista.push({
+                                    ...conta,
+                                    id: compra.id
+                                });
+                            })
+                        })
+                        console.log(mLista);
+                        setRows(mLista);
+                        setQtd(result.data.length);
                     }
                 });
         })
     }, [busca, pagina]);
 
-    const handleDelete = (id: number) => {
+    const handlePay = (dados: IContasReceber) => {
 
-        if (window.confirm('Deseja apagar o registro?')) {
-            controller.delete(id)
+        if (window.confirm('Deseja receber esta conta?')) {
+            controller.receberConta(dados)
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {
                         reloadDataTable();
-                        toast.success('Apagado com sucesso!');
+                        toast.success('Conta paga com sucesso!');
                     }
                 })
         }
@@ -213,7 +220,7 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
 
     return (
         <LayoutBase 
-            titulo="Consultar Vendas"
+            titulo="Consultar Contas a Receber"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca
@@ -224,32 +231,24 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
                             setSelectedId(0);
                             toggleCadastroVendasDialogOpen();
                         } else {
-                            navigate('/vendas/cadastro/novo')
+                            navigate('/compras/cadastro/novo')
                         }
                     }}
                 />
             }
         >
-            <CollapsedDataTable
-                collapseLabel="Produtos"
-                collapseHeaders={collapsedHeaders}
-                collapseRowId="id"
-                collapseRows="listaprodutos"
+            <DataTable
+                rowId="nrParcela"
                 headers={headers}
                 rows={rows}
-                rowId="id"
-                selectable={isDialog}
+                rowCount={qtd}
                 onRowClick={(row) => {
                     if (isDialog)
                     {
                         onSelectItem?.(row);
                         toggleDialogOpen?.();
                     }
-                }}   
-                isLoading={isLoading}
-                page={pagina}
-                rowCount={qtd}
-                onPageChange={(page) => setSearchParams({ busca, pagina: page.toString() }, { replace : true })}   
+                }}
             />
 
             <CustomDialog
@@ -260,10 +259,10 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
                 open={isCadastroVendasDialogOpen}
                 title="Cadastrar Compra"
             >
-                <CadastroVendas
+                <CadastroContasReceber
                     isDialog
                     toggleOpen={toggleCadastroVendasDialogOpen}
-                    selectedId={Number(selectedId)}
+                    selectedId={selectedId}
                     reloadDataTableIfDialog={reloadDataTable}
                 />
             </CustomDialog>
