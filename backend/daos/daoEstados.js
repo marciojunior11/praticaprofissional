@@ -97,7 +97,6 @@ async function buscarTodosComPg (url) {
             })
         } else {
             var filter = url.split('=')[3];
-            console.log(filter);
             pool.query('select * from estados where nmestado like ' + "'%" + `${filter.toUpperCase()}` + "%' " + `limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);

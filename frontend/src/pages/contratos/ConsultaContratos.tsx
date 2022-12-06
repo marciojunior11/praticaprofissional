@@ -67,6 +67,7 @@ export const ConsultaContratos: React.FC<IConsultaProps> = ({ isDialog = false, 
         debounce(() => {
             controller.getAll(pagina, busca)
                 .then((result) => {
+                    console.log(result);
                     setIsLoading(false);
                     if (result instanceof Error) {
                         toast.error(result.message);
@@ -100,11 +101,13 @@ export const ConsultaContratos: React.FC<IConsultaProps> = ({ isDialog = false, 
     const headers: IHeaderProps[] = [
         {
             label: "ID",
-            name: "id",  
+            name: "id",
+            align: "right",  
         },
         {
             label: "Cliente",
-            name: "cliente.nmcliente",  
+            name: "cliente.nmcliente",
+            align: "left",  
         },        
         {
             label: "Dt. Validade",
@@ -120,12 +123,13 @@ export const ConsultaContratos: React.FC<IConsultaProps> = ({ isDialog = false, 
         {
             label: "Situação",
             name: "flsituacao",
+            align: "center",
             render: (row) => {
                 return (
                     <>
                         <Grid item container spacing={2} justifyContent="center">
                             <Grid item>
-                                {new Date(row.datavalidade).toLocaleDateString() >= new Date().toLocaleDateString() ? (
+                                {new Date(row.datavalidade).toLocaleDateString() <= new Date().toLocaleDateString() ? (
                                     <Chip label="VIGENTE" color="info"/>
                                 ) : (
                                     <Chip label="ENCERRADO" color="error"/>

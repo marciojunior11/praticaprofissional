@@ -1,5 +1,7 @@
 const { pool } = require('../datamodule/index');
 const daoVendas = require('./daoVendas');
+const daoClientes = require('./daoClientes');
+const daoCondicoesPagamento = require('./daoCondicoesPagamento');
 
 // @descricao BUSCA TODOS OS REGISTROS
 // @route GET /api/contratos
@@ -31,11 +33,25 @@ async function getQtd(url) {
 async function buscarTodosSemPg(url) {
     return new Promise((resolve, reject) => {
         if (url.endsWith('all')) {
-            pool.query('select * from contratos order by id asc', (err, res) => {
+            pool.query('select * from contratos order by id asc', async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaContratos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
+                    const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                    const contrato = res.rows[i];
+                    mListaContratos.push({
+                        id: contrato.id,
+                        cliente: mCliente,
+                        vltotal: contrato.vltotal,
+                        flsituacao: contrato.flsituacao,
+                        condicaopagamento: mCondicaoPagamento,
+                        datavalidade: contrato.datavalidade
+                    })
+                }
+                return resolve(mListaContratos);
             })
         } else {
             const filter = url.split('=')[2];
@@ -43,11 +59,25 @@ async function buscarTodosSemPg(url) {
                 select * from contratos as c inner join clientes as cl
                     on c.fk_idcliente = cl.fk_idcliente 
                 where cl.nmcliente like '%${filter.toUpperCase()}%'
-            `, (err, res) => {
+            `, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaContratos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
+                    const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                    const contrato = res.rows[i];
+                    mListaContratos.push({
+                        id: contrato.id,
+                        cliente: mCliente,
+                        vltotal: contrato.vltotal,
+                        flsituacao: contrato.flsituacao,
+                        condicaopagamento: mCondicaoPagamento,
+                        datavalidade: contrato.datavalidade
+                    })
+                }
+                return resolve(mListaContratos);
             })
         }
     })
@@ -60,24 +90,51 @@ async function buscarTodosComPg (url) {
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
         if (url.endsWith('=')) {
-            pool.query('select * from contratos order by id asc limit $1 offset $2', [limit, ((limit*page)-limit)], (err, res) => {
+            pool.query('select * from contratos order by id asc limit $1 offset $2', [limit, ((limit*page)-limit)], async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaContratos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
+                    const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                    const contrato = res.rows[i];
+                    mListaContratos.push({
+                        id: contrato.id,
+                        cliente: mCliente,
+                        vltotal: contrato.vltotal,
+                        flsituacao: contrato.flsituacao,
+                        condicaopagamento: mCondicaoPagamento,
+                        datavalidade: contrato.datavalidade
+                    })
+                }
+                return resolve(mListaContratos);
             })
         } else {
             var filter = url.split('=')[3];
-            console.log(filter);
             pool.query(`
                 select * from contratos as c inner join clientes as cl
                     on c.fk_idcliente = cl.fk_idclient
                 where cl.nmcliente like ${filter.toUpperCase()} limit ${limit} offset ${(limit * page) - limit}
-            `, (err, res) => {
+            `, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(res.rows);
+                const mListaContratos = [];
+                for (let i = 0; i < res.rows.length; i++) {
+                    const contrato = res.rows[i];
+                    const mCliente = await daoClientes.buscarUm(contrato.fk_idcliente);
+                    const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(contrato.fk_idcondpgto);
+                    mListaContratos.push({
+                        id: contrato.id,
+                        cliente: mCliente,
+                        vltotal: contrato.vltotal,
+                        flsituacao: contrato.flsituacao,
+                        condicaopagamento: mCondicaoPagamento,
+                        datavalidade: contrato.datavalidade
+                    })
+                }
+                return resolve(mListaContratos);
             })
         }
     })
@@ -87,12 +144,23 @@ async function buscarTodosComPg (url) {
 // @route GET /api/contratos
 async function buscarUm (id) {
     return new Promise((resolve, reject) => {
-        pool.query('select * from contratos where id = $1', [id], (err, res) => {
+        pool.query('select * from contratos where id = $1', [id], async (err, res) => {
             if (err) {
                 return reject(err);
             }
             if (res.rowCount != 0) {
-                return resolve(res.rows[0]);
+                const contrato = res.rows[i];
+                const mCliente = await daoClientes.buscarUm(contrato.fk_idcliente);
+                const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(contrato.fk_idcondpgto);
+                const mContrato = {
+                    id: contrato.id,
+                    cliente: mCliente,
+                    vltotal: contrato.vltotal,
+                    flsituacao: contrato.flsituacao,
+                    condicaopagamento: mCondicaoPagamento,
+                    datavalidade: contrato.datavalidade
+                }
+                return resolve(mContrato);
             }
             return resolve(null);
         })
