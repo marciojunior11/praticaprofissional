@@ -36,6 +36,7 @@ import {
     CadastroContasPagar,
     ConsultaContasReceber,
     CadastroContasReceber,
+    ConsultaContratos,
     CadastroContratos
 } from "../pages";
 
@@ -129,6 +130,11 @@ export const AppRoutes = () => {
                 icon: ['currency_exchange'],
                 path: '/centroscusto',
             },
+            {
+                label: 'Contratos',
+                icon: ['history_edu'],
+                path: '/contratos',
+            },
         ]);
     }, []);
 
@@ -184,7 +190,7 @@ export const AppRoutes = () => {
             <Route path="/centroscusto" element={<ConsultaCentrosCusto/>}/>
             <Route path="/centroscusto/cadastro/:id" element={<CadastroCentrosCusto/>}/>
 
-            {/* <Route path="/centroscusto" element={<ConsultaCentrosCusto/>}/> */}
+            <Route path="/contratos" element={<ConsultaContratos/>}/>
             <Route path="/contratos/cadastro/:id" element={<CadastroContratos/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>

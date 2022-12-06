@@ -8,13 +8,13 @@ import Vendas from "./Vendas";
 class Contratos extends PaiComId {
     // #region ATRIBUTOS
     private cliente: Fisicas;
-    private condicaopagamento: CondicoesPagamento;
-    private venda: Vendas;
-    private listacontasreceber: ContasReceber[];
     private qtdmeses: number;
     private vltotal: number;
-    private datavalidade: string | Date;
     private flsituacao: string;
+    private condicaopagamento: CondicoesPagamento;
+    private datavalidade: string | Date;
+    private venda: Vendas;
+    private listacontasreceber: ContasReceber[];
     // #endregion
 
     // #region CONSTRUCTOR
