@@ -15,6 +15,10 @@ export const Environment = {
     /**
      * Url base de consulta dos dados da aplicação
      */
-    URL_BASE: 'http://localhost:5000'
+    URL_BASE: 'http://localhost:5000',
+    /**
+     * Valor mensal do contrato
+     */
+    VALOR_CONTRATO: 25
 
 };
