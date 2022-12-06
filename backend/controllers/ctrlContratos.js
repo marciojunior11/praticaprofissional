@@ -67,9 +67,11 @@ async function salvar(req, res) {
                 condicaopagamento,
                 datavalidade,
                 venda,
-                listacontasreceber
+                listacontasreceber,
+                datacad,
+                ultalt
             } = JSON.parse(body);
-            console.log(body)
+
             const mContrato = {
                 cliente,
                 qtdmeses,
@@ -78,7 +80,9 @@ async function salvar(req, res) {
                 condicaopagamento,
                 datavalidade,
                 venda,
-                listacontasreceber
+                listacontasreceber,
+                datacad,
+                ultalt
             };
             const novoContrato = await daoContratos.salvar(mContrato);
             res.writeHead(201, { 'Content-Type': 'application/json'});

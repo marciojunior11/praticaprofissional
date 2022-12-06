@@ -117,42 +117,37 @@ async function salvar (contrato) {
                 return !!err;
             }
 
-            client.query('BEGIN', async err => {
+            client.query('BEGIN', (err) => {
                 if (shouldAbort(err)) return reject(err);
-                await daoVendas.salvar(contrato.venda);
-                var response = await client.query('select * from vendas where id = (select max(id) from vendas)');
-                var venda = response.rows[0];
-                if (shouldAbort(response)) return reject(response);
-                client.query(`insert into contratos (
-                    fk_idcliente, 
-                    qtdmeses, 
-                    vltotal, 
-                    flsituacao, 
-                    datacad, 
-                    ultalt, 
-                    fk_idcondpgto, 
-                    datavalidade,
-                    fk_idvenda
-                ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [
-                    contrato.cliente.id,
-                    contrato.qtdmeses,
-                    contrato.vltotal,
-                    'V',
-                    contrato.datacad,
-                    contrato.ultalt,
-                    contrato.condicaopagamento.id,
-                    contrato.datavalidade,
-                    venda.id
-                ], (err, res) => {
+                let venda = contrato.venda;
+                client.query(`
+                    insert into vendas (
+                        fk_idcliente, observacao, fk_idcondpgto, vltotal, flsituacao, dataemissao, datacad, ultalt
+                    ) values ($1, $2, $3, $4, $5, $6, $7, $8)
+                `, [
+                    venda.cliente.id,
+                    venda.observacao,
+                    venda.condicaopagamento.id,
+                    venda.vltotal,
+                    venda.flsituacao,
+                    venda.dataemissao,
+                    venda.datacad,
+                    venda.ultalt
+                ], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
-                    for (let i = 0; i < contrato.listacontasreceber.length; i++) {
-                        let conta = contrato.listacontasreceber[i];
-                        client.query(`insert into contasreceber values (
-                            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-                        )`, [
+                    let responseVenda = await client.query('select * from vendas where id = (select max(id) from vendas)');
+                    let venda = responseVenda.rows[0];
+                    let contasreceber = contrato.listacontasreceber;
+                    for (let i = 0; i < contasreceber.length; i++) {
+                        let conta = contasreceber[i];
+                        client.query(`
+                            insert into contasreceber values (
+                                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+                            )
+                        `, [
                             conta.nrparcela,
                             venda.id,
-                            contrato.cliente.id,
+                            conta.cliente.id,
                             conta.percparcela,
                             conta.txdesc,
                             conta.txmulta,
@@ -167,20 +162,37 @@ async function salvar (contrato) {
                             conta.ultalt
                         ], (err, res) => {
                             if (shouldAbort(err)) return reject(err);
+                            client.query(`
+                                insert into contratos (
+                                    fk_idcliente, qtdmeses, vltotal, flsituacao, datacad, ultalt, fk_idcondpgto, datavalidade, fk_idvenda
+                                ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                            `, [
+                                contrato.cliente.id,
+                                contrato.qtdmeses,
+                                contrato.vltotal,
+                                contrato.flsituacao,
+                                contrato.datacad,
+                                contrato.ultalt,
+                                contrato.condicaopagamento.id,
+                                contrato.datavalidade,
+                                venda.id
+                            ], async (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                                var responseContrato = await client.query('select * from contratos where id = (select max(id) from contratos)');
+                                const contratoCriado = responseContrato.rows[0];
+                                client.query('COMMIT', err => {
+                                    if (err) {
+                                        console.error('Erro durante o commit da transação', err.stack);
+                                        done();
+                                        return reject(err);
+                                    }
+                                    done();
+                                    return resolve(contratoCriado);
+                                })
+                            })
                         })
                     }
                 })
-                client.query('COMMIT', err => {
-                    if (err) {
-                        console.error('Erro durante o commit da transação', err.stack);
-                        done();
-                        return reject(err);
-                    }
-                    done();
-                })
-                let responseContrato = await client.query('select * from contratos where id = (select max(id) from contratos)');
-                let contratoCriado = responseContrato.rows[0];
-                return resolve(contratoCriado);
             })
         })
 

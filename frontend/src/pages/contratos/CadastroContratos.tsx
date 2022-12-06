@@ -228,6 +228,7 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
     }, [id]);
 
     const handleSave = (dados: IFormData) => {
+        console.log(qtd);
         var errors = false;
         if (!objCliente) {
             errors = true;
@@ -261,122 +262,107 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
             formRef.current?.setErrors(validationErrors);
 
         } else {
-            formValidationSchema
-                .validate(dados, { abortEarly: false })
-                    .then((dadosValidados) => {
-                        let datavalidade = new Date();
-                        datavalidade.setMonth(datavalidade.getMonth() + qtd);
-                        setIsLoading(true);
-                        if (isDialog) {
-                            if (selectedId === 0) {
-                                controller.create({
-                                    ...dadosValidados,
-                                    cliente: objCliente!,
-                                    condicaopagamento: condicaoPagamento!,
-                                    listacontasreceber: listaContasReceber,
-                                    vltotal: formRef.current?.getData().total,
-                                    datavalidade: datavalidade,
-                                    flsituacao: 'V'
-                                })
-                                    .then((result) => {
-                                        setIsLoading(false);
-                                        if (result instanceof Error) {
-                                            toast.error(result.message)
-                                        } else {
-                                            toast.success('Cadastrado com sucesso!')
-                                            reloadDataTableIfDialog?.()
-                                            toggleOpen?.();
-                                        }
-                                    });
+            let datavalidade = new Date();
+            datavalidade.setMonth(datavalidade.getMonth() + qtd);
+            setIsLoading(true);
+            if (isDialog) {
+                if (selectedId === 0) {
+                    controller.create({
+                        cliente: objCliente!,
+                        qtdmeses: qtd,
+                        condicaopagamento: condicaoPagamento!,
+                        listacontasreceber: listaContasReceber,
+                        vltotal: formRef.current?.getData().total,
+                        datavalidade: datavalidade,
+                        flsituacao: 'V'
+                    })
+                        .then((result) => {
+                            setIsLoading(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message)
                             } else {
-                                controller.update(Number(id), {
-                                    ...dadosValidados,
-                                    cliente: objCliente!,
-                                    condicaopagamento: condicaoPagamento!,
-                                    listacontasreceber: listaContasReceber,
-                                    vltotal: formRef.current?.getData().total,
-                                    datavalidade: datavalidade,
-                                    flsituacao: 'V'
-                                })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        reloadDataTableIfDialog?.();
-                                        toggleOpen?.();
-                                    }
-                                });
+                                toast.success('Cadastrado com sucesso!')
+                                reloadDataTableIfDialog?.()
+                                toggleOpen?.();
                             }
+                        });
+                } else {
+                    controller.update(Number(id), {
+                        cliente: objCliente!,
+                        qtdmeses: qtd,
+                        condicaopagamento: condicaoPagamento!,
+                        listacontasreceber: listaContasReceber,
+                        vltotal: formRef.current?.getData().total,
+                        datavalidade: datavalidade,
+                        flsituacao: 'V'
+                    })
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
                         } else {
-                            if (id === 'novo') {
-                                controller.create({
-                                    ...dadosValidados,
-                                    cliente: objCliente!,
-                                    condicaopagamento: condicaoPagamento!,
-                                    listacontasreceber: listaContasReceber,
-                                    vltotal: formRef.current?.getData().total,
-                                    datavalidade: datavalidade,
-                                    flsituacao: 'V'
-                                })
-                                    .then((result) => {
-                                        setIsLoading(false);
-                                        if (result instanceof Error) {
-                                            toast.error(result.message)
-                                        } else {
-                                            toast.success('Cadastrado com sucesso!')
-                                            if (isSaveAndClose()) {
-                                                navigate('/contratos');
-                                            } else if (isSaveAndNew()) {
-                                                navigate('/contratos/cadastro/novo');
-                                                setQtd(0);
-                                                formRef.current?.setData({
-                                                    cliente: null,
-                                                    qtd: 0,
-                                                    condicaoPagamento: null
-                                                });
-                                            } else {
-                                                navigate(`/contratos/cadastro/${result}`);
-                                            }
-                                        }
-                                    });
+                            toast.success('Alterado com sucesso!');
+                            reloadDataTableIfDialog?.();
+                            toggleOpen?.();
+                        }
+                    });
+                }
+            } else {
+                if (id === 'novo') {
+                    controller.create({
+                        cliente: objCliente!,
+                        qtdmeses: qtd,
+                        condicaopagamento: condicaoPagamento!,
+                        listacontasreceber: listaContasReceber,
+                        vltotal: formRef.current?.getData().total,
+                        datavalidade: datavalidade,
+                        flsituacao: 'V'
+                    })
+                        .then((result) => {
+                            setIsLoading(false);
+                            if (result instanceof Error) {
+                                toast.error(result.message)
                             } else {
-                                controller.update(Number(id), {
-                                    ...dadosValidados,
-                                    cliente: objCliente!,
-                                    condicaopagamento: condicaoPagamento!,
-                                    listacontasreceber: listaContasReceber,
-                                    vltotal: formRef.current?.getData().total,
-                                    datavalidade: datavalidade,
-                                    flsituacao: 'V'
-                                })
-                                .then((result) => {
-                                    setIsLoading(false);
-                                    if (result instanceof Error) {
-                                        toast.error(result.message);
-                                    } else {
-                                        toast.success('Alterado com sucesso!');
-                                        if (isSaveAndClose()) {
-                                            navigate('/contratos')
-                                        } else {
-                                        }
-                                    }
-                                });
+                                toast.success('Cadastrado com sucesso!')
+                                if (isSaveAndClose()) {
+                                    navigate('/contratos');
+                                } else if (isSaveAndNew()) {
+                                    navigate('/contratos/cadastro/novo');
+                                    setQtd(0);
+                                    formRef.current?.setData({
+                                        cliente: null,
+                                        qtd: 0,
+                                        condicaoPagamento: null
+                                    });
+                                } else {
+                                    navigate(`/contratos/cadastro/${result}`);
+                                }
+                            }
+                        });
+                } else {
+                    controller.update(Number(id), {
+                        cliente: objCliente!,
+                        qtdmeses: qtd,
+                        condicaopagamento: condicaoPagamento!,
+                        listacontasreceber: listaContasReceber,
+                        vltotal: formRef.current?.getData().total,
+                        datavalidade: datavalidade,
+                        flsituacao: 'V'
+                    })
+                    .then((result) => {
+                        setIsLoading(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            toast.success('Alterado com sucesso!');
+                            if (isSaveAndClose()) {
+                                navigate('/contratos')
+                            } else {
                             }
                         }
-                    })
-                    .catch((errors: yup.ValidationError) => {
-                        const validationErrors: IVFormErrors = {}
-
-                        errors.inner.forEach(error => {
-                            if ( !error.path ) return;
-                            console.log('path', error.path);
-                            console.log('message', error.message);
-                            validationErrors[error.path] = error.message;
-                        });
-                        formRef.current?.setErrors(validationErrors);
-                    })
+                    });
+                }
+            }
         }
     };
 
