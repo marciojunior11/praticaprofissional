@@ -1,10 +1,12 @@
 import { ICondicoesPagamento } from './CondicoesPagamento';
 import { IClientes } from './Clientes';
+import { IContasReceber } from './ContasReceber';
 export interface IContratos {
     id: number;
     cliente: IClientes;
     condicaopagamento: ICondicoesPagamento;
-    qtd: number;
+    listacontasreceber: IContasReceber[];
+    qtdmeses: number;
     vltotal: number;
     datavalidade: string | Date;
     flsituacao: string;
@@ -15,7 +17,8 @@ export interface IContratos {
 export interface IDetalhesContratos {
     cliente: IClientes;
     condicaopagamento: ICondicoesPagamento;
-    qtd: number;
+    listacontasreceber: IContasReceber[];
+    qtdmeses: number;
     vltotal: number;
     datavalidade: string | Date;
     flsituacao: string;

@@ -19,7 +19,7 @@ class Vendas extends PaiSemId {
 
     // #region CONSTRUCTOR
     constructor(
-        id: number,
+        id: number = 0,
         cliente: Fisicas = new Fisicas(),
         condicaopagamento: CondicoesPagamento = new CondicoesPagamento(),
         observacao: string = "",

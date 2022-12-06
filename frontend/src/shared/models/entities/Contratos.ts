@@ -2,12 +2,16 @@ import FormasPagamento from "./FormasPagamento";
 import Fisicas from "./Fisicas";
 import CondicoesPagamento from "./CondicoesPagamento";
 import PaiComId from "./PaiComId";
+import ContasReceber from "./ContasReceber";
+import Vendas from "./Vendas";
 
 class Contratos extends PaiComId {
     // #region ATRIBUTOS
     private cliente: Fisicas;
     private condicaopagamento: CondicoesPagamento;
-    private qtd: number;
+    private venda: Vendas;
+    private listacontasreceber: ContasReceber[];
+    private qtdmeses: number;
     private vltotal: number;
     private datavalidade: string | Date;
     private flsituacao: string;
@@ -18,7 +22,9 @@ class Contratos extends PaiComId {
         id: number = 0,
         cliente: Fisicas = new Fisicas(),
         condicaopagamento: CondicoesPagamento = new CondicoesPagamento(),
-        qtd: number = 0,
+        venda: Vendas = new Vendas(),
+        listacontasreceber: ContasReceber[] = [],
+        qtdmeses: number = 0,
         vltotal: number = 0,
         datavalidade: string | Date = new Date(),
         flsituacao: string = '',
@@ -29,7 +35,9 @@ class Contratos extends PaiComId {
         this.id = id;
         this.cliente = cliente;
         this.condicaopagamento = condicaopagamento;
-        this.qtd = qtd;
+        this.venda = venda;
+        this.listacontasreceber = listacontasreceber;
+        this.qtdmeses = qtdmeses;
         this.vltotal = vltotal;
         this.datavalidade = datavalidade;
         this.flsituacao = flsituacao;
@@ -47,8 +55,16 @@ class Contratos extends PaiComId {
         return this.condicaopagamento;
     }
 
-    public get _qtd() {
-        return this.qtd;
+    public get _venda() {
+        return this.venda;
+    }
+
+    public get _listacontasreceber() {
+        return this.listacontasreceber;
+    }
+
+    public get _qtdmeses() {
+        return this.qtdmeses;
     }
 
     public get _vltotal() {
@@ -73,8 +89,16 @@ class Contratos extends PaiComId {
         this.condicaopagamento = value;
     }
 
-    public set _qtd(value: number) {
-        this.qtd = value;
+    public set _venda(value: Vendas) {
+        this.venda = value;
+    }
+
+    public set _listacontasreceber(value: ContasReceber[]) {
+        this.listacontasreceber = value;
+    }
+
+    public set _qtdmeses(value: number) {
+        this.qtdmeses = value;
     }
 
     public set _vltotal(value: number) {

@@ -31,3 +31,4 @@ export * from './variacoes/ConsultaVariacoes';
 export * from './variacoes/CadastroVariacoes';
 export * from './centrosCusto/ConsultaCentrosCusto';
 export * from './centrosCusto/CadastroCentrosCusto';
+export * from './contratos/CadastroContratos';

@@ -887,7 +887,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                         onClose={toggleConsultaClientesDialogOpen}
                         handleClose={toggleConsultaClientesDialogOpen} 
                         open={isConsultaClientesDialogOpen} 
-                        title="Consultar Fornecedores"
+                        title="Consultar Clientes"
                         fullWidth
                         maxWidth="xl"
                     >

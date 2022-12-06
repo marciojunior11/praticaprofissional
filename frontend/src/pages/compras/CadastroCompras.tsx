@@ -574,7 +574,6 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
     }
 
     const handleSave = (dados: IFormData) => {
-        console.log(condicaoPagamento);
         var errors = false;
         if (listaContasPagar.length == 0) {
             errors = true;
