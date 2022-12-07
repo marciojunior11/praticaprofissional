@@ -37,7 +37,8 @@ import {
     ConsultaContasReceber,
     CadastroContasReceber,
     ConsultaContratos,
-    CadastroContratos
+    CadastroContratos,
+    ConsultaMovimentacoes,
 } from "../pages";
 
 export const AppRoutes = () => {
@@ -135,6 +136,11 @@ export const AppRoutes = () => {
                 icon: ['history_edu'],
                 path: '/contratos',
             },
+            {
+                label: 'Movimentações',
+                icon: ['timeline'],
+                path: '/movimentacoes',
+            },
         ]);
     }, []);
 
@@ -192,6 +198,8 @@ export const AppRoutes = () => {
 
             <Route path="/contratos" element={<ConsultaContratos/>}/>
             <Route path="/contratos/cadastro/:id" element={<CadastroContratos/>}/>
+
+            <Route path="/movimentacoes" element={<ConsultaMovimentacoes/>}/>
 
             <Route path="*" element={<Navigate to="/home"/>}/>
         </Routes>

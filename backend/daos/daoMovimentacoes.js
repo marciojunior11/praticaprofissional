@@ -29,10 +29,8 @@ async function buscarTodosComPg (url) {
                 const mListaMovimentacoes = [];
                 for (let i = 0; i < res.rows.length; i++) {
                     let movimentacao = res.rows[i];
-                    let pessoa = {};
                     if (movimentacao.tipo == 'E') {
-                        let response = await daoClientes.buscarUm(movimentacao.idpessoa);
-                        pessoa = response.rows[0];
+                        let pessoa = await daoFornecedores.buscarUm(movimentacao.idpessoa);
                         mListaMovimentacoes.push({
                             id: movimentacao.id,
                             tipo: movimentacao.tipo,
@@ -41,8 +39,7 @@ async function buscarTodosComPg (url) {
                             pessoa: pessoa
                         })
                     } else {
-                        let response = await daoFornecedores.buscarUm(movimentacao.idpessoa);
-                        pessoa = response.rows[0];
+                        let pessoa = await daoClientes.buscarUm(movimentacao.idpessoa);
                         mListaMovimentacoes.push({
                             id: movimentacao.id,
                             tipo: movimentacao.tipo,
@@ -61,17 +58,16 @@ async function buscarTodosComPg (url) {
             } else if (filter.includes('SAIDA')) {
                 filter = 'S';
             }
-            pool.query(`select * from movimentacoes where tipo = '${filter}' limit ${limit} offset ${(limit*page)-limit}`, (err, res) => {
+            pool.query(`select * from movimentacoes where tipo = '${filter}' limit ${limit} offset ${(limit*page)-limit}`, async (err, res) => {
                 if (err) {
                     return reject(err);
                 }
                 const mListaMovimentacoes = [];
                 for (let i = 0; i < res.rows.length; i++) {
                     let movimentacao = res.rows[i];
-                    let pessoa = {};
+                    console.log(movimentacao);
                     if (movimentacao.tipo == 'E') {
-                        let response = await daoClientes.buscarUm(movimentacao.idpessoa);
-                        pessoa = response.rows[0];
+                        let pessoa = await daoClientes.buscarUm(movimentacao.idpessoa);
                         mListaMovimentacoes.push({
                             id: movimentacao.id,
                             tipo: movimentacao.tipo,
@@ -80,8 +76,7 @@ async function buscarTodosComPg (url) {
                             pessoa: pessoa
                         })
                     } else {
-                        let response = await daoFornecedores.buscarUm(movimentacao.idpessoa);
-                        pessoa = response.rows[0];
+                        let pessoa = await daoFornecedores.buscarUm(movimentacao.idpessoa);
                         mListaMovimentacoes.push({
                             id: movimentacao.id,
                             tipo: movimentacao.tipo,

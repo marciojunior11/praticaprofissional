@@ -13,6 +13,7 @@ const { produtosRoutes } = require('./produtosRoutes');
 const { comprasRoutes } = require('./comprasRoutes');
 const { vendasRoutes } = require('./vendasRoutes');
 const { contratosRoutes } = require('./contratosRoutes');
+const { movimentacoesRoutes } = require('./movimentacoesRoutes');
 
 function router(req, res) {
     if (req.url.includes('/paises')) {
@@ -45,6 +46,8 @@ function router(req, res) {
         vendasRoutes(req, res);
     } else if (req.url.includes('contratos')) {
         contratosRoutes(req, res);
+    } else if (req.url.includes('movimentacoes')) {
+        movimentacoesRoutes(req, res);
     }
 }
 
