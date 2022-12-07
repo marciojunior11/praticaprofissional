@@ -115,7 +115,7 @@ export const ConsultaContratos: React.FC<IConsultaProps> = ({ isDialog = false, 
             render: (row) => {
                 return (
                     <Typography sx={{
-                        color: (new Date(row.datavalidade).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "V") ? '#ed6c02' : (new Date(row.datavalidade).toLocaleDateString() < new Date().toLocaleDateString()) && (row.flsituacao == "V") ? '#d32f2f' : '#000000de',
+                        color: (new Date(row.datavalidade).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "V") ? '#ed6c02' : (new Date(row.datavalidade) < new Date()) && (row.flsituacao == "V") ? '#d32f2f' : '#000000de',
                     }}>{new Date(row.datavalidade).toLocaleDateString()}</Typography>
                 )
             }  
@@ -129,7 +129,7 @@ export const ConsultaContratos: React.FC<IConsultaProps> = ({ isDialog = false, 
                     <>
                         <Grid item container spacing={2} justifyContent="center">
                             <Grid item>
-                                {new Date(row.datavalidade).toLocaleDateString() <= new Date().toLocaleDateString() ? (
+                                {new Date(row.datavalidade) >= new Date() ? (
                                     <Chip label="VIGENTE" color="info"/>
                                 ) : (
                                     <Chip label="ENCERRADO" color="error"/>
