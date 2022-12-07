@@ -235,7 +235,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
     const handleDelete = (dados: ICompras) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            controller.delete({
+            controller.cancelarCompra({
                 numnf: dados.numnf,
                 serienf: dados.serienf,
                 modelonf: dados.modelonf,
@@ -247,7 +247,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
                         toast.error(result.message);
                     } else {
                         reloadDataTable();
-                        toast.success('Apagado com sucesso!');
+                        toast.success('Compra cancelada com sucesso!');
                     }
                 })
         }

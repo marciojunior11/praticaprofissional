@@ -538,7 +538,7 @@ async function cancelarCompra(compra) {
                     compra.numnf,
                     compra.serienf,
                     compra.modelonf,
-                    compra.fornecedor.id
+                    compra.idfornecedor
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     client.query(`
@@ -551,7 +551,7 @@ async function cancelarCompra(compra) {
                         compra.numnf,
                         compra.serienf,
                         compra.modelonf,
-                        compra.fornecedor.id
+                        compra.idfornecedor
                     ], (err, res) => {
                         if (shouldAbort(err)) return reject(err);
                         client.query(`
@@ -564,7 +564,7 @@ async function cancelarCompra(compra) {
                             compra.numnf,
                             compra.serienf,
                             compra.modelonf,
-                            compra.fornecedor.id
+                            compra.idfornecedor
                         ], (err, res) => {
                             if (shouldAbort(err)) return reject(err);
                             client.query('COMMIT', err => {

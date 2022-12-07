@@ -30,9 +30,7 @@ export interface IDetalhesVendas {
 }
 
 export interface IValidator {
-    numnf: string;
-    serienf: string;
-    icliente: number | undefined;
+    id: number;
 }
 
 export type TListaVendas = {

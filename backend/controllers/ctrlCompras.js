@@ -175,13 +175,13 @@ async function cancelarCompra(req, res) {
             body += chunk.toString();
         })
         req.on('end', async () => {
-            const { nrparcela, numnf, serienf, modelonf, fornecedor } = JSON.parse(body);
+            const { nrparcela, numnf, serienf, modelonf, idfornecedor } = JSON.parse(body);
             const mCompra = {
                 nrparcela,
                 numnf,
                 serienf,
                 modelonf,
-                fornecedor
+                idfornecedor
             };
             const contaPaga = await daoCompras.cancelarCompra(mCompra);
             res.writeHead(201, { 'Content-Type': 'application/json'});

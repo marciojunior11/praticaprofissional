@@ -241,7 +241,7 @@ class ControllerCompras implements IControllerCompras {
         }
     }
 
-    cancelarCompra = async (dados: ICompras): Promise<void | Error> => {
+    cancelarCompra = async (dados: IValidator): Promise<void | Error> => {
         try {
             const { data } = await Api.post('/api/compras/cancelarcompra', dados);
             if (data) {

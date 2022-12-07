@@ -82,7 +82,7 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
             render: (row) => {
                 return (
                     <>
-                        <IconButton disabled={row.flmovimentacao == 'S'} color="error" size="small" onClick={() => handleDelete(row)}>
+                        <IconButton disabled={row.flmovimentacao == 'S'} color="error" size="small" onClick={() => handleDelete(row.id)}>
                             <Icon>block</Icon>
                         </IconButton>
                         <IconButton color="primary" size="small" onClick={() => {
@@ -196,7 +196,9 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
     const handleDelete = (id: number) => {
 
         if (window.confirm('Deseja apagar o registro?')) {
-            controller.delete(id)
+            controller.cancelarVenda({
+                id: id
+            })
                 .then(result => {
                     console.log(result);
                     if (result instanceof Error) {
