@@ -233,14 +233,12 @@ export const CadastroContasPagar: React.FC<ICadastroComprasProps> = ({isDialog =
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={3}>
-                                <Typography variant="h6">Centro de Custo</Typography>
+                                <Typography variant="h6">Origem</Typography>
                             </Grid>
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={2}>
-                                {flCentroCusto == 'C' ? (
-                                    <Chip label="COMPRAS" color="primary"/>
-                                ) : flCentroCusto == 'V' ? (
-                                    <Chip label="VENDAS" color="primary"/>
-                                ) : `SEM CENTRO DE CUSTO`}
+                                {flCentroCusto == "C" && (
+                                    <Chip label="COMPRA" color="primary"/>
+                                )}
                             </Grid>
                         </Grid>
 

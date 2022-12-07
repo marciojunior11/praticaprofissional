@@ -172,6 +172,7 @@ async function buscarTodosComPg (url) {
                             dataemissao: res.rows[i].dataemissao,
                             datacad: res.rows[i].datacad,
                             ultalt: res.rows[i].ultalt,
+                            flmovimentacao: res.rows[i].flmovimentacao
                         });
                     })
                 }
@@ -265,7 +266,7 @@ async function salvar (venda) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into vendas (fk_idcliente, observacao, fk_idcondpgto, vltotal, flsituacao, dataemissao, datacad, ultalt) values ($1, $2, $3, $4, $5, $6, $7, $8)', [
+                client.query('insert into vendas (fk_idcliente, observacao, fk_idcondpgto, vltotal, flsituacao, dataemissao, datacad, ultalt, flmovimentacao) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
                     venda.cliente.id,
                     venda.observacao,
                     venda.condicaopagamento.id,
@@ -274,6 +275,7 @@ async function salvar (venda) {
                     venda.dataemissao,
                     venda.datacad,
                     venda.ultalt,
+                    'N'
                 ], async (err, res) => {
                         if (shouldAbort(err)) return reject(err);
                         const response = await client.query('select * from vendas where id = (select max(id) from vendas)');
@@ -395,7 +397,7 @@ async function receberConta(conta) {
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
                 client.query(`
-                    update contasreceber set flsituacao = $1 where, ultalt = $2
+                    update contasreceber set flsituacao = $1, ultalt = $2 where
                         nrparcela = $3 and
                         fk_idvenda = $4
                 `, [
@@ -405,15 +407,28 @@ async function receberConta(conta) {
                     conta.id
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
-
-                    client.query('COMMIT', err => {
-                        if (err) {
-                            console.error('Erro durante o commit da transação', err.stack);
-                            done();
-                            return reject(err);
-                        }
-                        done();
-                        return resolve(res);
+                    client.query('insert into movimentacoes (tipo, dtmovimentacao, valor, idpessoa) values ($1, $2, $3, $4)', [
+                        'S',
+                        new Date(),
+                        conta.vltotal,
+                        conta.cliente.id
+                    ], (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        client.query('update vendas set flmovimentacao = $1 where id = $2', [
+                            'S',
+                            conta.id
+                        ], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                            client.query('COMMIT', err => {
+                                if (err) {
+                                    console.error('Erro durante o commit da transação', err.stack);
+                                    done();
+                                    return reject(err);
+                                }
+                                done();
+                                return resolve(res);
+                            })
+                        })
                     })
                 })
             })

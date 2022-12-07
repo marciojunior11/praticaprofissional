@@ -147,12 +147,16 @@ async function receberConta(req, res) {
             const { 
                 nrparcela,
                 id,
-                flsituacao
+                flsituacao,
+                vltotal,
+                cliente
             } = JSON.parse(body);
             const mConta = {
                 nrparcela,
                 id,
-                flsituacao
+                flsituacao,
+                vltotal,
+                cliente
             };
             const contaPaga = await daoVendas.receberConta(mConta);
             res.writeHead(201, { 'Content-Type': 'application/json'});

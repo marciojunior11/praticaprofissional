@@ -190,6 +190,7 @@ async function buscarTodosComPg (url) {
                             dataentrada: res.rows[i].dataentrada,
                             datacad: res.rows[i].datacad,
                             ultalt: res.rows[i].ultalt,
+                            flmovimentacao: res.rows[i].flmovimentacao
                         });
                     })
                 }
@@ -309,7 +310,7 @@ async function salvar (compra) {
 
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
-                client.query('insert into compras values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)', [
+                client.query('insert into compras values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)', [
                     compra.numnf,
                     compra.serienf,
                     compra.modelonf,
@@ -325,6 +326,7 @@ async function salvar (compra) {
                     compra.vlpedagio,
                     compra.vloutrasdespesas,
                     compra.condicaopagamento.id,
+                    'N'
                 ], async (err, res) => {
                         if (shouldAbort(err)) return reject(err);
                         const response = await client.query('select * from compras where numnf = $1 and serienf = $2 and modelonf = $3 and fk_idfornecedor = $4', [compra.numnf.toString(), compra.serienf.toString(), compra.modelonf.toString(), compra.fornecedor.id]);
@@ -460,14 +462,15 @@ async function pagarConta(conta) {
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
                 client.query(`
-                    update contaspagar set flsituacao = $1 where
-                        nrparcela = $2 and
-                        fk_numnf = $3 and
-                        fk_serienf = $4 and
-                        fk_modelonf = $5 and
-                        fk_idfornecedor = $6
+                    update contaspagar set flsituacao = $1, ultalt = $2 where
+                        nrparcela = $3 and
+                        fk_numnf = $4 and
+                        fk_serienf = $5 and
+                        fk_modelonf = $6 and
+                        fk_idfornecedor = $7
                 `, [
                     'P',
+                    new Date(),
                     conta.nrparcela,
                     conta.numnf,
                     conta.serienf,
@@ -475,15 +478,31 @@ async function pagarConta(conta) {
                     conta.fornecedor.id
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
-
-                    client.query('COMMIT', err => {
-                        if (err) {
-                            console.error('Erro durante o commit da transação', err.stack);
-                            done();
-                            return reject(err);
-                        }
-                        done();
-                        return resolve(res);
+                    client.query('insert into movimentacoes (tipo, dtmovimentacao, valor, idpessoa) values ($1, $2, $3, $4)', [
+                        'E',
+                        new Date(),
+                        conta.vltotal,
+                        conta.fornecedor.id
+                    ], (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        client.query('update compras set flmovimentacao = $1 where numnf = $2 and serienf = $3 and modelonf = $4 and fk_idfornecedor = $5', [
+                            'S',
+                            conta.numnf,
+                            conta.serienf,
+                            conta.modelonf,
+                            conta.fornecedor.id
+                        ], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                            client.query('COMMIT', err => {
+                                if (err) {
+                                    console.error('Erro durante o commit da transação', err.stack);
+                                    done();
+                                    return reject(err);
+                                }
+                                done();
+                                return resolve(res);
+                            })
+                        })
                     })
                 })
             })

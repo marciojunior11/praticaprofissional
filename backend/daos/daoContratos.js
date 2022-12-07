@@ -190,8 +190,8 @@ async function salvar (contrato) {
                 let venda = contrato.venda;
                 client.query(`
                     insert into vendas (
-                        fk_idcliente, observacao, fk_idcondpgto, vltotal, flsituacao, dataemissao, datacad, ultalt
-                    ) values ($1, $2, $3, $4, $5, $6, $7, $8)
+                        fk_idcliente, observacao, fk_idcondpgto, vltotal, flsituacao, dataemissao, datacad, ultalt, flmovimentacao
+                    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 `, [
                     venda.cliente.id,
                     venda.observacao,
@@ -200,7 +200,8 @@ async function salvar (contrato) {
                     venda.flsituacao,
                     venda.dataemissao,
                     venda.datacad,
-                    venda.ultalt
+                    venda.ultalt,
+                    'N'
                 ], async (err, res) => {
                     if (shouldAbort(err)) return reject(err);
                     let responseVenda = await client.query('select * from vendas where id = (select max(id) from vendas)');
