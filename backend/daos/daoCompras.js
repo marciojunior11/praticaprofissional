@@ -510,6 +510,80 @@ async function pagarConta(conta) {
     })
 }
 
+async function cancelarCompra(compra) {
+    return new Promise((resolve, reject) => {
+        pool.connect((err, client, done) => {
+            const shouldAbort = err => {
+                if (err) {
+                    console.error('Erro na transação', err.stack);
+                    client.query('ROLLBACK', err => {
+                        if (err) {
+                            console.error('Erro durante o rollback', err.stack);
+                        }
+                        done();
+                    })
+                }
+                return !!err;
+            }
+            
+            client.query('BEGIN', err => {
+                if (shouldAbort(err)) return reject(err);
+                client.query(`
+                    delete from contaspagar where
+                        fk_numnf = $1 and
+                        fk_serienf = $2 and
+                        fk_modelonf = $3 and 
+                        fk_idfornecedor = $4
+                `, [
+                    compra.numnf,
+                    compra.serienf,
+                    compra.modelonf,
+                    compra.fornecedor.id
+                ], (err, res) => {
+                    if (shouldAbort(err)) return reject(err);
+                    client.query(`
+                        delete from produtos_compra where
+                            fk_numnf = $1 and
+                            fk_serienf = $2 and
+                            fk_modelonf = $3 and 
+                            fk_idfornecedor = $4
+                    `, [
+                        compra.numnf,
+                        compra.serienf,
+                        compra.modelonf,
+                        compra.fornecedor.id
+                    ], (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        client.query(`
+                            delete from compras where
+                                fk_numnf = $1 and
+                                fk_serienf = $2 and
+                                fk_modelonf = $3 and 
+                                fk_idfornecedor = $4
+                        `, [
+                            compra.numnf,
+                            compra.serienf,
+                            compra.modelonf,
+                            compra.fornecedor.id
+                        ], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                            client.query('COMMIT', err => {
+                                if (err) {
+                                    console.error('Erro durante o commit da transação', err.stack);
+                                    done();
+                                    return reject(err);
+                                }
+                                done();
+                                return resolve(res);
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    })
+}
+
 // @descricao DELETA UM REGISTRO
 // @route GET /api/compras/:id
 async function deletar (url) {
@@ -580,6 +654,7 @@ module.exports = {
     salvar,
     alterar,
     pagarConta,
+    cancelarCompra,
     deletar,
     validate
 }

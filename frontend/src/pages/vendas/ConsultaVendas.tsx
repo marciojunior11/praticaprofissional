@@ -82,7 +82,7 @@ export const ConsultaVendas: React.FC<IConsultaProps> = ({ isDialog = false, onS
             render: (row) => {
                 return (
                     <>
-                        <IconButton color="error" size="small" onClick={() => handleDelete(row)}>
+                        <IconButton disabled={row.flmovimentacao == 'S'} color="error" size="small" onClick={() => handleDelete(row)}>
                             <Icon>block</Icon>
                         </IconButton>
                         <IconButton color="primary" size="small" onClick={() => {

@@ -168,6 +168,30 @@ async function pagarConta(req, res) {
     }
 }
 
+async function cancelarCompra(req, res) {
+    try {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+        req.on('end', async () => {
+            const { nrparcela, numnf, serienf, modelonf, fornecedor } = JSON.parse(body);
+            const mConta = {
+                nrparcela,
+                numnf,
+                serienf,
+                modelonf,
+                fornecedor
+            };
+            const contaPaga = await daoCompras.pagarConta(mConta);
+            res.writeHead(201, { 'Content-Type': 'application/json'});
+            res.end(JSON.stringify(contaPaga));
+        })        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 // @descricao DELETA UM REGISTROS
 // @route GET /api/paises/:id
 async function deletar(req, res) {
