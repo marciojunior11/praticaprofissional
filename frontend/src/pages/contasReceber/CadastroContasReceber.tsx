@@ -62,7 +62,7 @@ export const CadastroContasReceber: React.FC<ICadastroProps> = ({isDialog = fals
 
     // #region STATES
     const [flSituacao, setFlSituacao] = useState('');
-    const [flCentroCusto, setFlCentroCusto] = useState('');
+    const [flOrigem, setFlOrigem] = useState('');
     const [isConsultaFornecedoresDialogOpen, setIsConsultaFornecedoresDialogOpen] = useState(false);
     const [isConsultaProdutosDialogOpen, setIsConsultaProdutosDialogOpen] = useState(false);
     const [isConsultaCondicoesPagamentoDialogOpen, setIsConsultaCondicoesPagamentoDialogOpen] = useState(false);
@@ -128,8 +128,8 @@ export const CadastroContasReceber: React.FC<ICadastroProps> = ({isDialog = fals
                         result.datacad = new Date(result.datacad).toLocaleString();
                         result.ultalt = new Date(result.ultalt).toLocaleString();
                         var conta: any = result.listacontasreceber.find(item => item.nrparcela == Number(nrparcela));
-                        setFlSituacao(conta.flsituacao);
-                        setFlCentroCusto(conta.flcentrocusto);
+                        console.log(conta);
+                        setFlOrigem(conta.florigem);
                         conta = {
                             ...conta,
                             id: result.id,
@@ -137,6 +137,18 @@ export const CadastroContasReceber: React.FC<ICadastroProps> = ({isDialog = fals
                             datacad: new Date(conta.datacad).toLocaleString(),
                             ultalt: new Date(conta.ultalt).toLocaleString(),
                         }
+                        if (conta.flsituacao == "P") {
+                            setFlSituacao(conta.flsituacao);
+                        } else if (conta.flsituacao == "A") {
+                            if (new Date(conta.dtvencimento) > new Date()) {
+                                setFlSituacao(conta.flsituacao);
+                            } else if (new Date(conta.dtvencimento) < new Date(new Date().toLocaleDateString())) {
+                                setFlSituacao('V');
+                            } else {
+                                setFlSituacao('VH');
+                            }
+                        }
+                        console.log(flSituacao);
                         formRef.current?.setData(conta);
                         setIsEditing(true);
                     }
@@ -189,22 +201,29 @@ export const CadastroContasReceber: React.FC<ICadastroProps> = ({isDialog = fals
                                 <Typography variant="h6">Situação</Typography>
                             </Grid>
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={2}>
-                                {flSituacao == 'A' ? (
+                                {(flSituacao === 'A') && (
                                     <Chip label="ABERTA" color="info"/>
-                                ) : flSituacao == 'P' ? (
-                                    <Chip label="PAGA" color="success"/>
-                                ) : `SEM SITUAÇÃO`}
+                                )}
+                                {(flSituacao === 'V') && (
+                                    <Chip label="VENCIDA" color="error"/>
+                                )}
+                                {flSituacao === 'P' && (
+                                    <Chip label="RECEBIDA" color="success"/>
+                                )}
+                                {flSituacao === 'VH' && (
+                                    <Chip label="VENCE HOJE" color="warning"/>
+                                )}
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={3}>
-                                <Typography variant="h6">Centro de Custo</Typography>
+                                <Typography variant="h6">Origem</Typography>
                             </Grid>
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={2}>
-                                {flCentroCusto == 'C' ? (
-                                    <Chip label="COMPRAS" color="primary"/>
-                                ) : flCentroCusto == 'V' ? (
-                                    <Chip label="VENDAS" color="primary"/>
-                                ) : `SEM CENTRO DE CUSTO`}
+                                {flOrigem == 'C' ? (
+                                    <Chip label="CONTRATO" color="primary"/>
+                                ) : (
+                                    <Chip label="VENDA" color="primary"/>
+                                )}
                             </Grid>
                         </Grid>
 
@@ -227,49 +246,8 @@ export const CadastroContasReceber: React.FC<ICadastroProps> = ({isDialog = fals
                                         size="small"
                                         disabled={isLoading}
                                         fullWidth
-                                        name="fornecedor.razsocial"
-                                        label="Fornecedor"
-                                    />
-                                </Grid>
-                        </Grid>
-
-                        <Grid container item direction="row" spacing={2} justifyContent="center">
-                                <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-                                    <VTextField
-                                        inputProps={{
-                                            readOnly: isEditing
-                                        }}
-                                        size="small"
-                                        disabled={isLoading}
-                                        fullWidth
-                                        name="numnf"
-                                        label="NF"
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-                                    <VTextField
-                                        inputProps={{
-                                            readOnly: isEditing
-                                        }}
-                                        size="small"
-                                        disabled={isLoading}
-                                        fullWidth
-                                        name="serienf"
-                                        label="Série"
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-                                    <VTextField
-                                        inputProps={{
-                                            readOnly: isEditing
-                                        }}
-                                        size="small"
-                                        disabled={isLoading}
-                                        fullWidth
-                                        name="modelonf"
-                                        label="Modelonf"
+                                        name="cliente.nmcliente"
+                                        label="Cliente"
                                     />
                                 </Grid>
                         </Grid>

@@ -92,7 +92,7 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
             render: (row) => {
                 return (
                     <Typography sx={{
-                        color: (new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "A") ? '#ed6c02' : (new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString()) && (row.flsituacao == "A") ? '#d32f2f' : '#000000de',
+                        color: (new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "A") ? '#ed6c02' : (new Date(row.dtvencimento) < new Date()) && (row.flsituacao == "A") ? '#d32f2f' : '#000000de',
                     }}>{new Date(row.dtvencimento).toLocaleDateString()}</Typography>
                 )
             }
@@ -109,7 +109,7 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
                                 {row.flsituacao == 'A' && new Date(row.dtvencimento).toLocaleDateString() > new Date().toLocaleDateString() ? (
                                     <Chip label="ABERTA" color="info"/>
                                 ) : row.flsituacao == 'P' ? (
-                                    <Chip label="PAGA" color="success"/>
+                                    <Chip label="RECEBIDA" color="success"/>
                                 ) : new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
                                     <Chip label="VENCE HOJE" color="warning"/>
                                 ) : new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString() && (row.flsituacao == "A") ? (

@@ -395,11 +395,12 @@ async function receberConta(conta) {
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
                 client.query(`
-                    update contasreceber set flsituacao = $1 where
-                        nrparcela = $2 and
-                        fk_idvenda = $3
+                    update contasreceber set flsituacao = $1 where, ultalt = $2
+                        nrparcela = $3 and
+                        fk_idvenda = $4
                 `, [
                     'P',
+                    new Date(),
                     conta.nrparcela,
                     conta.id
                 ], (err, res) => {

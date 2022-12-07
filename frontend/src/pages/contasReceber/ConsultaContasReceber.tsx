@@ -87,7 +87,7 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
             render: (row) => {
                 return (
                     <Typography sx={{
-                        color: (new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString()) && (row.flSituacao == "A") ? '#ed6c02' : (new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString()) && (row.flsituacao == "A") ? '#d32f2f' : '#000000de',
+                        color: (new Date(row.dtvencimento) == new Date()) && (row.flSituacao == "A") ? '#ed6c02' : (new Date(row.dtvencimento) < new Date()) && (row.flsituacao == "A") ? '#d32f2f' : '#000000de',
                     }}>{new Date(row.dtvencimento).toLocaleDateString()}</Typography>
                 )
             }
@@ -101,13 +101,13 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
                     <>
                         <Grid item container spacing={2} justifyContent="center">
                             <Grid item>
-                                {row.flsituacao == 'A' && new Date(row.dtvencimento).toLocaleDateString() > new Date().toLocaleDateString() ? (
+                                {row.flsituacao == 'A' && new Date(row.dtvencimento) > new Date() ? (
                                     <Chip label="ABERTA" color="info"/>
                                 ) : row.flsituacao == 'P' ? (
                                     <Chip label="RECEBIDA" color="success"/>
-                                ) : new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
+                                ) : new Date(row.dtvencimento)== new Date() && (row.flsituacao == "A") ? (
                                     <Chip label="VENCE HOJE" color="warning"/>
-                                ) : new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
+                                ) : new Date(row.dtvencimento) < new Date() && (row.flsituacao == "A") ? (
                                     <Chip label="VENCIDA" color="error"/>
                                 ) : null}
                             </Grid>
@@ -210,7 +210,7 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
                         toast.error(result.message);
                     } else {
                         reloadDataTable();
-                        toast.success('Conta paga com sucesso!');
+                        toast.success('Conta recebida com sucesso!');
                     }
                 })
         }

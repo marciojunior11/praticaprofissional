@@ -155,6 +155,17 @@ export const CadastroContasPagar: React.FC<ICadastroComprasProps> = ({isDialog =
                             datacad: new Date(conta.datacad).toLocaleString(),
                             ultalt: new Date(conta.ultalt).toLocaleString(),
                         }
+                        if (conta.flsituacao == "P") {
+                            setFlSituacao(conta.flsituacao);
+                        } else if (conta.flsituacao == "A") {
+                            if (new Date(conta.dtvencimento) > new Date()) {
+                                setFlSituacao(conta.flsituacao);
+                            } else if (new Date(conta.dtvencimento) < new Date(new Date().toLocaleDateString())) {
+                                setFlSituacao('V');
+                            } else {
+                                setFlSituacao('VH');
+                            }
+                        }
                         formRef.current?.setData(conta);
                         setIsEditing(true);
                     }
@@ -207,11 +218,18 @@ export const CadastroContasPagar: React.FC<ICadastroComprasProps> = ({isDialog =
                                 <Typography variant="h6">Situação</Typography>
                             </Grid>
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={2}>
-                                {flSituacao == 'A' ? (
+                                {(flSituacao === 'A') && (
                                     <Chip label="ABERTA" color="info"/>
-                                ) : flSituacao == 'P' ? (
-                                    <Chip label="PAGA" color="success"/>
-                                ) : `SEM SITUAÇÃO`}
+                                )}
+                                {(flSituacao === 'V') && (
+                                    <Chip label="VENCIDA" color="error"/>
+                                )}
+                                {flSituacao === 'P' && (
+                                    <Chip label="RECEBIDA" color="success"/>
+                                )}
+                                {flSituacao === 'VH' && (
+                                    <Chip label="VENCE HOJE" color="warning"/>
+                                )}
                             </Grid>
 
                             <Grid item xs={12} sm={12} md={4} lg={3} xl={3}>
