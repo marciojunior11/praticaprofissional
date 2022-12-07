@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 // #endregion
 
 // #region INTERNAL IMPORTS
-import { DetailTools } from "../../shared/components";
+import { CustomDialog, DetailTools } from "../../shared/components";
 import { LayoutBase } from "../../shared/layouts";
 import { IDetalhesPaises, IPaises } from "../../shared/interfaces/entities/Paises";
 import { VTextField, VForm, useVForm, IVFormErrors, VAutocompleteSearch, VNumberInput, VIntegerNumberInput, VMoneyInput } from "../../shared/forms"
@@ -23,6 +23,8 @@ import { IContasReceber } from "../../shared/interfaces/entities/ContasReceber";
 import { DataTable, IHeaderProps } from "../../shared/components/data-table/DataTable";
 import { IDetalhesContratos } from "../../shared/interfaces/entities/Contratos";
 import ControllerContratos from "../../shared/controllers/ContratosController";
+import { ConsultaClientes } from "../clientes/ConsultaClientes";
+import { ConsultaCondicoesPagamento } from "../condicoesPagamento/ConsultaCondicoesPagamento";
 // #endregion
 
 // #region INTERFACES
@@ -50,6 +52,8 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
     // #endregion
 
     // #region STATES
+    const [isValidating, setIsValidating] = useState<boolean>(false);
+    const [isValid, setIsValid] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [objCliente, setObjCliente] = useState<IClientes | null>(null);
     const [condicaoPagamento, setCondicaoPagamento] = useState<ICondicoesPagamento | null>(null);
@@ -242,11 +246,18 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
         if (listaContasReceber.length === 0) {
             errors = true;
         }
+        if (!isValid && objCliente != null) {
+            errors = true;
+        }
         if (errors) {
             const validationErrors: IVFormErrors = {};
 
             toast.error('Verifique os erros.');
 
+            if (!isValid && objCliente != null) {
+                toast.error('Este cliente já possui um contrato vigente.')
+                validationErrors['cliente'] = 'Este cliente já possui um contrato vigente, selecione outro.';
+            }
             if (!objCliente) {
                 validationErrors['cliente'] = 'Selecione um cliente.';
             }
@@ -380,6 +391,34 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
                 })
         }
     }
+
+    const validate = (cliente: IClientes) => {
+        debounce(() => {
+            setIsValidating(true);
+            debounce(() => {
+                controller.validate({
+                    id: cliente.id
+                })
+                    .then((result) => {
+                        setIsValidating(false);
+                        if (result instanceof Error) {
+                            toast.error(result.message);
+                        } else {
+                            setIsValid(result);
+                            if (result === false) {
+                                const validationErrors: IVFormErrors = {};
+                                validationErrors['cliente'] = 'Este cliente já possui um contrato vigente.';
+                                formRef.current?.setErrors(validationErrors);
+                            }
+                        }
+                    })
+            });        
+        })
+    }
+
+    useEffect(() => {
+        if (objCliente != null) validate(objCliente);
+    }, [objCliente])
     // #endregion
 
     return (
@@ -426,6 +465,7 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
                         <Grid container item direction="row" spacing={2} justifyContent="center">
                             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VAutocompleteSearch
+                                    isExternalLoading={isValidating}
                                     size="small"
                                     required
                                     name="cliente"
@@ -594,6 +634,45 @@ export const CadastroContratos: React.FC<ICadastroProps> = ({isDialog = false, t
                             </Grid>
                         )}
                     </Grid>
+
+                    <CustomDialog 
+                        onClose={toggleConsultaClientesDialogOpen}
+                        handleClose={toggleConsultaClientesDialogOpen} 
+                        open={isConsultaClientesDialogOpen} 
+                        title="Consultar Clientes"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaClientes 
+                            isDialog
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldError('cliente', '');
+                                formRef.current?.setFieldValue('cliente', row);
+                                setObjCliente(row);
+                            }}
+                            toggleDialogOpen={toggleConsultaClientesDialogOpen}
+                        />
+                    </CustomDialog>
+
+                    <CustomDialog 
+                        onClose={toggleConsultaCondicoesPagamentoDialogOpen}
+                        handleClose={toggleConsultaCondicoesPagamentoDialogOpen} 
+                        open={isConsultaCondicoesPagamentoDialogOpen} 
+                        title="Consultar Condições de Pagamento"
+                        fullWidth
+                        maxWidth="xl"
+                    >
+                        <ConsultaCondicoesPagamento 
+                            isDialog
+                            onSelectItem={(row) => {
+                                formRef.current?.setFieldError('condicaopagamento', '');
+                                formRef.current?.setFieldValue('condicaopagamento', row);
+                                setCondicaoPagamento(row);
+                            }}
+                            toggleDialogOpen={toggleConsultaCondicoesPagamentoDialogOpen}
+                        />
+                    </CustomDialog>
+
                 </Box>
             </VForm>
         </LayoutBase>

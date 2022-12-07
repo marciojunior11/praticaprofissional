@@ -351,9 +351,9 @@ async function deletar (id) {
     })
 };
 
-async function validate(filter) {
+async function validate(id) {
     return new Promise( async (resolve, reject) => {
-        pool.query('select * from contratos where nmpais like $1', [filter.toUpperCase()], (err, res) => {
+        pool.query('select * from contratos where fk_idcliente = $1 and flsituacao = $2', [id, 'V'], (err, res) => {
             if (err) {
                 return reject(err);
             }

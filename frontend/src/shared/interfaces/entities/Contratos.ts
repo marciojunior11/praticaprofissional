@@ -24,6 +24,10 @@ export interface IDetalhesContratos {
     flsituacao: string;
 }
 
+export interface IValidator {
+    id: number;
+}
+
 export type TListaContratos = {
     data: IContratos[];
     qtd: number;

@@ -1,3 +1,4 @@
+import { IValidator } from './../interfaces/entities/Contratos';
 import { IContasReceber } from './../interfaces/entities/ContasReceber';
 import { Api } from '../../api/axios-config'
 import { Environment } from '../environment';
@@ -150,6 +151,19 @@ class ControllerContratos implements IController {
         } catch (error) {
             return new Error((error as {message:string}).message || 'Erro ao areceber o registros.');
         }           
+    }
+
+    validate = async (dados: IValidator): Promise<boolean | Error> => {
+        try {
+            const {data} = await Api.post(`/api/contratos/validate`, dados);
+            if (data != 0) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            return new Error((error as {message:string}).message || 'Erro ao areceber o registros.');
+        }     
     }
 }
 

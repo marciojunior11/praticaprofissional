@@ -15,8 +15,12 @@ function contratosRoutes(req, res) {
         } else {
             ctrlContratos.buscarTodosComPg(req, res);
         }
-    } else if(req.url === '/api/contratos' && req.method === 'POST') {
-        ctrlContratos.salvar(req, res);
+    } else if(req.method === 'POST') {
+        if (req.url === '/api/contratos') {
+            ctrlContratos.salvar(req, res);
+        } else if (req.url.includes('validate')) {
+            ctrlContratos.validate(req, res);
+        }
     } else if(req.url.match(/\/api\/contratos\/([0-9+])/) && req.method === 'PUT') {
         const id = req.url.split('/')[3];
         ctrlContratos.alterar(req, res, id);
