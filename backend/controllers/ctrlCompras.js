@@ -176,14 +176,14 @@ async function cancelarCompra(req, res) {
         })
         req.on('end', async () => {
             const { nrparcela, numnf, serienf, modelonf, fornecedor } = JSON.parse(body);
-            const mConta = {
+            const mCompra = {
                 nrparcela,
                 numnf,
                 serienf,
                 modelonf,
                 fornecedor
             };
-            const contaPaga = await daoCompras.pagarConta(mConta);
+            const contaPaga = await daoCompras.cancelarCompra(mCompra);
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(contaPaga));
         })        
@@ -242,6 +242,7 @@ module.exports = {
     salvar,
     alterar,
     pagarConta,
+    cancelarCompra,
     deletar,
     validate
 }

@@ -167,6 +167,28 @@ async function receberConta(req, res) {
     }
 }
 
+async function cancelarVenda(req, res) {
+    try {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        })
+        req.on('end', async () => {
+            const { 
+                id
+            } = JSON.parse(body);
+            const mVenda = {
+                id
+            };
+            const contaPaga = await daoVendas.cancelarVenda(mVenda);
+            res.writeHead(201, { 'Content-Type': 'application/json'});
+            res.end(JSON.stringify(contaPaga));
+        })        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 // @descricao DELETA UM REGISTROS
 // @route GET /api/paises/:id
 async function deletar(req, res) {
@@ -217,6 +239,7 @@ module.exports = {
     salvar,
     alterar,
     receberConta,
+    cancelarVenda,
     deletar,
     validate
 }

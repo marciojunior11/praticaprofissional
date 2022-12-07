@@ -436,6 +436,58 @@ async function receberConta(conta) {
     })
 }
 
+async function cancelarVenda(venda) {
+    return new Promise((resolve, reject) => {
+        pool.connect((err, client, done) => {
+            const shouldAbort = err => {
+                if (err) {
+                    console.error('Erro na transação', err.stack);
+                    client.query('ROLLBACK', err => {
+                        if (err) {
+                            console.error('Erro durante o rollback', err.stack);
+                        }
+                        done();
+                    })
+                }
+                return !!err;
+            }
+
+            client.query('BEGIN', err => {
+                if (shouldAbort(err)) return reject(err);
+                client.query(`
+                    delete from contasreceber where fk_idvenda = $1
+                `, [venda.id], (err, res) => {
+                    if (shouldAbort(err)) return reject(err);
+                    client.query(`
+                        delete from contratos where fk_idvenda = $1 
+                    `, [venda.id], (err, res) => {
+                        if (shouldAbort(err)) return reject(err);
+                        client.query(`
+                            delete from produtos_venda where fk_idvenda = $1   
+                        `, [venda.id], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                            client.query(`
+                                delete from vendas where id = $1
+                            `, [venda.id], (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                                client.query('COMMIT', err => {
+                                    if (err) {
+                                        console.error('Erro durante o commit da transação', err.stack);
+                                        done();
+                                        return reject(err);
+                                    }
+                                    done();
+                                    return resolve(res);
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    })
+}
+
 // @descricao DELETA UM REGISTRO
 // @route GET /api/vendas/:id
 async function deletar (url) {
@@ -506,6 +558,7 @@ module.exports = {
     salvar,
     alterar,
     receberConta,
+    cancelarVenda,
     deletar,
     validate
 }

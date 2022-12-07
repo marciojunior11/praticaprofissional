@@ -556,10 +556,10 @@ async function cancelarCompra(compra) {
                         if (shouldAbort(err)) return reject(err);
                         client.query(`
                             delete from compras where
-                                fk_numnf = $1 and
-                                fk_serienf = $2 and
-                                fk_modelonf = $3 and 
-                                fk_idfornecedor = $4
+                                numnf = $1 and
+                                serienf = $2 and
+                                modelonf = $3 and 
+                                idfornecedor = $4
                         `, [
                             compra.numnf,
                             compra.serienf,
