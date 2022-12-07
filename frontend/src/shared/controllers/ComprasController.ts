@@ -241,6 +241,17 @@ class ControllerCompras implements IControllerCompras {
         }
     }
 
+    cancelarCompra = async (dados: ICompras): Promise<void | Error> => {
+        try {
+            const { data } = await Api.post('/api/compras/cancelarcompra', dados);
+            if (data) {
+                return data;
+            }
+        } catch (error) {
+            return new Error((error as {message:string}).message || 'Erro ao pagar a conta.');
+        }
+    }
+
     validate = async (dados: IValidator): Promise<boolean | Error> => {
         try {
             const { data } = await Api.post(`/api/compras/validate`, dados);

@@ -231,6 +231,17 @@ class ControllerVendas implements IControllerVendas {
         }
     }
 
+    cancelarVenda = async (dados: IVendas): Promise<void | Error> => {
+        try {
+            const { data } = await Api.post('/api/vendas/cancelarvenda', dados);
+            if (data) {
+                return data;
+            }
+        } catch (error) {
+            return new Error((error as {message:string}).message || 'Erro ao receber a conta.');
+        }
+    }
+
     validate = async (dados: IValidator): Promise<boolean | Error> => {
         try {
             const { data } = await Api.post(`/api/vendas/validate`, dados);
