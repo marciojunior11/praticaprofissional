@@ -18,7 +18,7 @@ async function getQtd(url) {
             var filter = url.split('=')[3];
             pool.query(`
                 select * from contratos as c inner join clientes as cl
-                    on c.fk_idcliente = cl.fk_idcliente 
+                    on c.fk_idcliente = cl.id
                 where cl.nmcliente like '%${filter.toUpperCase()}%'
              `, (err, res) => {
                 if (err) {
@@ -57,7 +57,7 @@ async function buscarTodosSemPg(url) {
             const filter = url.split('=')[2];
             pool.query(`
                 select * from contratos as c inner join clientes as cl
-                    on c.fk_idcliente = cl.fk_idcliente 
+                    on c.fk_idcliente = cl.id
                 where cl.nmcliente like '%${filter.toUpperCase()}%'
             `, async (err, res) => {
                 if (err) {
@@ -114,8 +114,8 @@ async function buscarTodosComPg (url) {
             var filter = url.split('=')[3];
             pool.query(`
                 select * from contratos as c inner join clientes as cl
-                    on c.fk_idcliente = cl.fk_idclient
-                where cl.nmcliente like ${filter.toUpperCase()} limit ${limit} offset ${(limit * page) - limit}
+                    on c.fk_idcliente = cl.id
+                where cl.nmcliente like '%${filter.toUpperCase()}%' limit ${limit} offset ${(limit * page) - limit}
             `, async (err, res) => {
                 if (err) {
                     return reject(err);
