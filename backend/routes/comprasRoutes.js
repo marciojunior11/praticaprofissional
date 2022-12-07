@@ -17,6 +17,8 @@ function comprasRoutes(req, res) {
     } else if(req.method === 'POST') {
         if (req.url.includes('validate')) {
             ctrlCompras.validate(req, res);
+        } else if (req.url.includes('cancelarcompra')) {
+            ctrlCompras.cancelarCompra(req, res);
         } else {
             ctrlCompras.salvar(req, res);
         }
