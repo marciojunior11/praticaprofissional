@@ -559,7 +559,7 @@ async function cancelarCompra(compra) {
                                 numnf = $1 and
                                 serienf = $2 and
                                 modelonf = $3 and 
-                                idfornecedor = $4
+                                fk_idfornecedor = $4
                         `, [
                             compra.numnf,
                             compra.serienf,

@@ -234,7 +234,7 @@ export const ConsultaCompras: React.FC<IConsultaProps> = ({ isDialog = false, on
 
     const handleDelete = (dados: ICompras) => {
 
-        if (window.confirm('Deseja apagar o registro?')) {
+        if (window.confirm('Deseja cancelar a compra?')) {
             controller.cancelarCompra({
                 numnf: dados.numnf,
                 serienf: dados.serienf,
