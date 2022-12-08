@@ -250,6 +250,7 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
             }
         >
             <DataTable
+                isLoading={isLoading}
                 rowId="nrParcela"
                 headers={headers}
                 rows={rows}

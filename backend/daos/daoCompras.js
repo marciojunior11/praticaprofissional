@@ -123,81 +123,164 @@ async function buscarTodosComPg (url) {
     limit = limit.replace(/[^0-9]/g, '');
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
-        pool.query('select * from compras limit $1 offset $2', [limit, (limit*page)-limit], async (err, res) => {
-            if (err) {
-                return reject(err);
-            }
-            if (res.rowCount != 0) {
-                const mListaCompras = [];
-                for (let i = 0; i < res.rows.length; i++) {
-                    const mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
-                    const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
-                    const mListaProdutosNF = await daoProdutos.buscarProdutosNfComPg(
-                        res.rows[i].numnf,
-                        res.rows[i].serienf,
-                        res.rows[i].modelonf,
-                        res.rows[i].fk_idfornecedor
-                    );
-                    pool.query(`
-                        select * from contaspagar where
-                            fk_numnf = $1 and
-                            fk_serienf = $2 and
-                            fk_modelonf = $3 and
-                            fk_idfornecedor = $4
-                        order by nrparcela
-                    `, [
-                        res.rows[i].numnf,
-                        res.rows[i].serienf,
-                        res.rows[i].modelonf,
-                        res.rows[i].fk_idfornecedor                      
-                    ], async (err, conta) => {
-                        if (err) return reject(err);
-                        var contaspagar = [];
-                        for (let i = 0; i < conta.rows.length; i++) {
-                            const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
-                            contaspagar.push({
-                                nrparcela: conta.rows[i].nrparcela,
-                                percparcela: conta.rows[i].percparcela,
-                                dtvencimento: conta.rows[i].dtvencimento,
-                                vltotal: conta.rows[i].vltotal,
-                                txdesc: conta.rows[i].txdesc,
-                                txmulta: conta.rows[i].txmulta,
-                                txjuros: conta.rows[i].txjuros,
-                                observacao: conta.rows[i].observacao,
-                                fornecedor: mFornecedor,
-                                formapagamento: mFormaPagamento,
-                                flcentrocusto: conta.rows[i].flcentrocusto,
-                                flsituacao: conta.rows[i].flsituacao,
-                                datacad: conta.rows[i].datacad,
-                                ultalt: conta.rows[i].ultalt
-                            })
-                        };
-                        mListaCompras.push({
-                            numnf: res.rows[i].numnf,
-                            serienf: res.rows[i].serienf,
-                            modelonf: res.rows[i].modelonf,
-                            fornecedor: mFornecedor,
-                            observacao: res.rows[i].observacao,
-                            condicaoPagamento: mCondicaoPagamento,
-                            listaprodutos: mListaProdutosNF,
-                            listacontaspagar: contaspagar,
-                            vlfrete: res.rows[i].vlfrete,
-                            vlpedagio: res.rows[i].vlpedagio,
-                            vloutrasdespesas: res.rows[i].vloutrasdespesas,
-                            vltotal: res.rows[i].vltotal,
-                            flsituacao: res.rows[i].flsituacao,
-                            dataemissao: res.rows[i].dataemissao,
-                            dataentrada: res.rows[i].dataentrada,
-                            datacad: res.rows[i].datacad,
-                            ultalt: res.rows[i].ultalt,
-                            flmovimentacao: res.rows[i].flmovimentacao
-                        });
-                    })
+        if (url.endsWith('=')) {
+            pool.query('select * from compras limit $1 offset $2', [limit, (limit*page)-limit], async (err, res) => {
+                if (err) {
+                    return reject(err);
                 }
-                return resolve(mListaCompras);
-            }
-            return resolve([]);
-        })
+                if (res.rowCount != 0) {
+                    const mListaCompras = [];
+                    for (let i = 0; i < res.rows.length; i++) {
+                        const mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
+                        const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                        const mListaProdutosNF = await daoProdutos.buscarProdutosNfComPg(
+                            res.rows[i].numnf,
+                            res.rows[i].serienf,
+                            res.rows[i].modelonf,
+                            res.rows[i].fk_idfornecedor
+                        );
+                        pool.query(`
+                            select * from contaspagar where
+                                fk_numnf = $1 and
+                                fk_serienf = $2 and
+                                fk_modelonf = $3 and
+                                fk_idfornecedor = $4
+                            order by nrparcela
+                        `, [
+                            res.rows[i].numnf,
+                            res.rows[i].serienf,
+                            res.rows[i].modelonf,
+                            res.rows[i].fk_idfornecedor                      
+                        ], async (err, conta) => {
+                            if (err) return reject(err);
+                            var contaspagar = [];
+                            for (let i = 0; i < conta.rows.length; i++) {
+                                const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
+                                contaspagar.push({
+                                    nrparcela: conta.rows[i].nrparcela,
+                                    percparcela: conta.rows[i].percparcela,
+                                    dtvencimento: conta.rows[i].dtvencimento,
+                                    vltotal: conta.rows[i].vltotal,
+                                    txdesc: conta.rows[i].txdesc,
+                                    txmulta: conta.rows[i].txmulta,
+                                    txjuros: conta.rows[i].txjuros,
+                                    observacao: conta.rows[i].observacao,
+                                    fornecedor: mFornecedor,
+                                    formapagamento: mFormaPagamento,
+                                    flcentrocusto: conta.rows[i].flcentrocusto,
+                                    flsituacao: conta.rows[i].flsituacao,
+                                    datacad: conta.rows[i].datacad,
+                                    ultalt: conta.rows[i].ultalt
+                                })
+                            };
+                            mListaCompras.push({
+                                numnf: res.rows[i].numnf,
+                                serienf: res.rows[i].serienf,
+                                modelonf: res.rows[i].modelonf,
+                                fornecedor: mFornecedor,
+                                observacao: res.rows[i].observacao,
+                                condicaoPagamento: mCondicaoPagamento,
+                                listaprodutos: mListaProdutosNF,
+                                listacontaspagar: contaspagar,
+                                vlfrete: res.rows[i].vlfrete,
+                                vlpedagio: res.rows[i].vlpedagio,
+                                vloutrasdespesas: res.rows[i].vloutrasdespesas,
+                                vltotal: res.rows[i].vltotal,
+                                flsituacao: res.rows[i].flsituacao,
+                                dataemissao: res.rows[i].dataemissao,
+                                dataentrada: res.rows[i].dataentrada,
+                                datacad: res.rows[i].datacad,
+                                ultalt: res.rows[i].ultalt,
+                                flmovimentacao: res.rows[i].flmovimentacao
+                            });
+                        })
+                    }
+                    return resolve(mListaCompras);
+                }
+                return resolve([]);
+            })
+        } else {
+            var filter = url.split('=')[3];
+            pool.query(`
+                select * from compras as c inner join fornecedores as f
+                    on c.fk_idfornecedor = f.id 
+                where f.razsocial like '%${filter}%' limit $1 offset $2 
+            `, [limit, (limit*page)-limit], async (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (res.rowCount != 0) {
+                    const mListaCompras = [];
+                    for (let i = 0; i < res.rows.length; i++) {
+                        const mFornecedor = await daoFornecedores.buscarUm(res.rows[i].fk_idfornecedor);
+                        const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                        const mListaProdutosNF = await daoProdutos.buscarProdutosNfComPg(
+                            res.rows[i].numnf,
+                            res.rows[i].serienf,
+                            res.rows[i].modelonf,
+                            res.rows[i].fk_idfornecedor
+                        );
+                        pool.query(`
+                            select * from contaspagar where
+                                fk_numnf = $1 and
+                                fk_serienf = $2 and
+                                fk_modelonf = $3 and
+                                fk_idfornecedor = $4
+                            order by nrparcela
+                        `, [
+                            res.rows[i].numnf,
+                            res.rows[i].serienf,
+                            res.rows[i].modelonf,
+                            res.rows[i].fk_idfornecedor                      
+                        ], async (err, conta) => {
+                            if (err) return reject(err);
+                            var contaspagar = [];
+                            for (let i = 0; i < conta.rows.length; i++) {
+                                const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
+                                contaspagar.push({
+                                    nrparcela: conta.rows[i].nrparcela,
+                                    percparcela: conta.rows[i].percparcela,
+                                    dtvencimento: conta.rows[i].dtvencimento,
+                                    vltotal: conta.rows[i].vltotal,
+                                    txdesc: conta.rows[i].txdesc,
+                                    txmulta: conta.rows[i].txmulta,
+                                    txjuros: conta.rows[i].txjuros,
+                                    observacao: conta.rows[i].observacao,
+                                    fornecedor: mFornecedor,
+                                    formapagamento: mFormaPagamento,
+                                    flcentrocusto: conta.rows[i].flcentrocusto,
+                                    flsituacao: conta.rows[i].flsituacao,
+                                    datacad: conta.rows[i].datacad,
+                                    ultalt: conta.rows[i].ultalt
+                                })
+                            };
+                            mListaCompras.push({
+                                numnf: res.rows[i].numnf,
+                                serienf: res.rows[i].serienf,
+                                modelonf: res.rows[i].modelonf,
+                                fornecedor: mFornecedor,
+                                observacao: res.rows[i].observacao,
+                                condicaoPagamento: mCondicaoPagamento,
+                                listaprodutos: mListaProdutosNF,
+                                listacontaspagar: contaspagar,
+                                vlfrete: res.rows[i].vlfrete,
+                                vlpedagio: res.rows[i].vlpedagio,
+                                vloutrasdespesas: res.rows[i].vloutrasdespesas,
+                                vltotal: res.rows[i].vltotal,
+                                flsituacao: res.rows[i].flsituacao,
+                                dataemissao: res.rows[i].dataemissao,
+                                dataentrada: res.rows[i].dataentrada,
+                                datacad: res.rows[i].datacad,
+                                ultalt: res.rows[i].ultalt,
+                                flmovimentacao: res.rows[i].flmovimentacao
+                            });
+                        })
+                    }
+                    return resolve(mListaCompras);
+                }
+                return resolve([]);
+            })
+        }
     })
 };
 
@@ -365,28 +448,23 @@ async function salvar (compra) {
                                 conta.ultalt,
                                 conta.flsituacao,
                                 conta.flcentrocusto
-                            ], (err, res) => {
+                            ], async (err, res) => {
                                 if (shouldAbort(err)) return reject(err);
-                                console.log('AQUI DAO 2');
+                                for (let i = 0; i < compra.listaprodutos.length; i++) {
+                                    var produto = compra.listaprodutos[i];
+                                    await daoProdutos.alterar(produto.id, produto);
+                                }
+                                client.query('COMMIT', err => {
+                                    if (err) {
+                                        console.error('Erro durante o commit da transação', err.stack);
+                                        done();
+                                        return reject(err);
+                                    }
+                                    done();
+                                })
+                                return resolve(response.rows[0]);
                             });
                         }
-
-                        //const produtosFornecedor = await client.query('select * from fornecedores_produtos where fk_idfornecedor = $1');
-                        
-
-                        for (let i = 0; i < compra.listaprodutos.length; i++) {
-                            var produto = compra.listaprodutos[i];
-                            await daoProdutos.alterar(produto.id, produto);
-                        }
-                        client.query('COMMIT', err => {
-                            if (err) {
-                                console.error('Erro durante o commit da transação', err.stack);
-                                done();
-                                return reject(err);
-                            }
-                            done();
-                        })
-                        return resolve(response.rows[0]);
                 })
             })
         })

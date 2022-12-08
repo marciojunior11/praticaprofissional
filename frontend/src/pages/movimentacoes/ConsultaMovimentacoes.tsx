@@ -133,10 +133,10 @@ export const ConsultaMovimentacoes: React.FC<IConsultaProps> = ({ isDialog = fal
                         <Grid item container spacing={2} justifyContent="center">
                             <Grid item>
                                 {row.tipo == 'E' && (
-                                    <Chip label="ENTRADA" color="success"/>
+                                    <Chip label="ENTRADA" color="error"/>
                                 )}
                                 {row.tipo == 'S' && (
-                                    <Chip label="SAÍDA" color="error"/>
+                                    <Chip label="SAÍDA" color="success"/>
                                 )}
                             </Grid>
                         </Grid>                     
@@ -148,7 +148,7 @@ export const ConsultaMovimentacoes: React.FC<IConsultaProps> = ({ isDialog = fal
 
     return (
         <LayoutBase 
-            titulo="Consultar Movimentacoes"
+            titulo="Consultar Movimentações"
             barraDeFerramentas={
                 <ListTools
                     mostrarInputBusca={false}

@@ -28,7 +28,7 @@ async function getQtd(url) {
                     vendas.dataemissao,
                     vendas.datacad,
                     vendas.ultalt
-                from vendas inner join clientes on clientes.cpf like '%${filter.toUpperCase()}%'
+                from vendas inner join clientes on clientes.nmcliente like '%${filter.toUpperCase()}%'
             `, (err, res) => {
                 if (err) {
                     return reject(err);
@@ -119,68 +119,144 @@ async function buscarTodosComPg (url) {
     limit = limit.replace(/[^0-9]/g, '');
     page = page.replace(/[^0-9]/g, '');
     return new Promise((resolve, reject) => {
-        pool.query('select * from vendas limit $1 offset $2', [limit, (limit*page)-limit], async (err, res) => {
-            if (err) {
-                return reject(err);
-            }
-
-            if (res.rowCount != 0) {
-                const mListaVendas = [];
-                for (let i = 0; i < res.rows.length; i++) {
-                    const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
-                    const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
-                    const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(res.rows[i].id);
-                    pool.query(`
-                        select * from contasreceber where
-                            fk_idvenda = $1
-                        order by nrparcela
-                    `, [
-                        res.rows[i].id,                 
-                    ], (err, conta) => {
-                        console.log(conta.rows);
-                        if (err) return reject(err);
-                        var contasreceber = [];
-                        for (let i = 0; i < conta.rows.length; i++) {
-                            const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
-                            contasreceber.push({
-                                nrparcela: conta.rows[i].nrparcela,
-                                percparcela: conta.rows[i].percparcela,
-                                dtvencimento: conta.rows[i].dtvencimento,
-                                vltotal: conta.rows[i].vltotal,
-                                txdesc: conta.rows[i].txdesc,
-                                txmulta: conta.rows[i].txmulta,
-                                txjuros: conta.rows[i].txjuros,
-                                observacao: conta.rows[i].observacao,
-                                cliente: mCliente,
-                                formapagamento: mFormaPagamento,
-                                florigem: conta.rows[i].florigem,
-                                flsituacao: conta.rows[i].flsituacao,
-                                datacad: conta.rows[i].datacad,
-                                ultalt: conta.rows[i].ultalt
-                            })
-                        };
-                        console.log(contasreceber);
-                        mListaVendas.push({
-                            id: res.rows[i].id,
-                            cliente: mCliente,
-                            observacao: res.rows[i].observacao,
-                            condicaopagamento: mCondicaoPagamento,
-                            vltotal: res.rows[i].vltotal,
-                            listaprodutos: mListaProdutosNF,
-                            listacontasreceber: contasreceber,
-                            flsituacao: res.rows[i].flsituacao,
-                            dataemissao: res.rows[i].dataemissao,
-                            datacad: res.rows[i].datacad,
-                            ultalt: res.rows[i].ultalt,
-                            flmovimentacao: res.rows[i].flmovimentacao
-                        });
-                    })
+        if (url.endsWith('=')) {
+            pool.query('select * from vendas limit $1 offset $2', [limit, (limit*page)-limit], async (err, res) => {
+                if (err) {
+                    return reject(err);
                 }
-                console.log('vendas', mListaVendas);
-                return resolve(mListaVendas);
-            }
-            return resolve([]);
-        })
+    
+                if (res.rowCount != 0) {
+                    const mListaVendas = [];
+                    for (let i = 0; i < res.rows.length; i++) {
+                        const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
+                        const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                        const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(res.rows[i].id);
+                        pool.query(`
+                            select * from contasreceber where
+                                fk_idvenda = $1
+                            order by nrparcela
+                        `, [
+                            res.rows[i].id,                 
+                        ], (err, conta) => {
+                            if (err) return reject(err);
+                            var contasreceber = [];
+                            for (let i = 0; i < conta.rows.length; i++) {
+                                const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
+                                contasreceber.push({
+                                    nrparcela: conta.rows[i].nrparcela,
+                                    percparcela: conta.rows[i].percparcela,
+                                    dtvencimento: conta.rows[i].dtvencimento,
+                                    vltotal: conta.rows[i].vltotal,
+                                    txdesc: conta.rows[i].txdesc,
+                                    txmulta: conta.rows[i].txmulta,
+                                    txjuros: conta.rows[i].txjuros,
+                                    observacao: conta.rows[i].observacao,
+                                    cliente: mCliente,
+                                    formapagamento: mFormaPagamento,
+                                    florigem: conta.rows[i].florigem,
+                                    flsituacao: conta.rows[i].flsituacao,
+                                    datacad: conta.rows[i].datacad,
+                                    ultalt: conta.rows[i].ultalt
+                                })
+                            };
+                            mListaVendas.push({
+                                id: res.rows[i].id,
+                                cliente: mCliente,
+                                observacao: res.rows[i].observacao,
+                                condicaopagamento: mCondicaoPagamento,
+                                vltotal: res.rows[i].vltotal,
+                                listaprodutos: mListaProdutosNF,
+                                listacontasreceber: contasreceber,
+                                flsituacao: res.rows[i].flsituacao,
+                                dataemissao: res.rows[i].dataemissao,
+                                datacad: res.rows[i].datacad,
+                                ultalt: res.rows[i].ultalt,
+                                flmovimentacao: res.rows[i].flmovimentacao
+                            });
+                        })
+                    }
+                    return resolve(mListaVendas);
+                }
+                return resolve([]);
+            })
+        } else {
+            var filter = url.split('=')[3];
+            pool.query(`
+                select
+                    v.id,
+                    v.fk_idcliente,
+                    v.observacao,
+                    v.fk_idcondpgto,
+                    v.vltotal,
+                    v.flsituacao,
+                    v.dataemissao,
+                    v.datacad,
+                    v.ultalt 
+                from vendas as v inner join clientes as c
+                    on v.fk_idcliente = c.id
+                where c.nmcliente like '%${filter}%' limit $1 offset $2
+            `, [limit, (limit*page)-limit], async (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (res.rowCount != 0) {
+                    const mListaVendas = [];
+                    for (let i = 0; i < res.rows.length; i++) {
+                        const mCliente = await daoClientes.buscarUm(res.rows[i].fk_idcliente);
+                        const mCondicaoPagamento = await daoCondicoesPagamento.buscarUm(res.rows[i].fk_idcondpgto);
+                        const mListaProdutosNF = await daoProdutos.buscarProdutosVendaComPg(res.rows[i].id);
+                        pool.query(`
+                            select * from contasreceber where
+                                fk_idvenda = $1
+                            order by nrparcela
+                        `, [
+                            res.rows[i].id,                 
+                        ], (err, conta) => {
+                            if (err) return reject(err);
+                            var contasreceber = [];
+                            for (let i = 0; i < conta.rows.length; i++) {
+                                const mFormaPagamento = daoFormasPagamento.buscarUm(conta.rows[i].fk_idformapgto);
+                                contasreceber.push({
+                                    nrparcela: conta.rows[i].nrparcela,
+                                    percparcela: conta.rows[i].percparcela,
+                                    dtvencimento: conta.rows[i].dtvencimento,
+                                    vltotal: conta.rows[i].vltotal,
+                                    txdesc: conta.rows[i].txdesc,
+                                    txmulta: conta.rows[i].txmulta,
+                                    txjuros: conta.rows[i].txjuros,
+                                    observacao: conta.rows[i].observacao,
+                                    cliente: mCliente,
+                                    formapagamento: mFormaPagamento,
+                                    florigem: conta.rows[i].florigem,
+                                    flsituacao: conta.rows[i].flsituacao,
+                                    datacad: conta.rows[i].datacad,
+                                    ultalt: conta.rows[i].ultalt
+                                })
+                            };
+                            console.log(contasreceber);
+                            mListaVendas.push({
+                                id: res.rows[i].id,
+                                cliente: mCliente,
+                                observacao: res.rows[i].observacao,
+                                condicaopagamento: mCondicaoPagamento,
+                                vltotal: res.rows[i].vltotal,
+                                listaprodutos: mListaProdutosNF,
+                                listacontasreceber: contasreceber,
+                                flsituacao: res.rows[i].flsituacao,
+                                dataemissao: res.rows[i].dataemissao,
+                                datacad: res.rows[i].datacad,
+                                ultalt: res.rows[i].ultalt,
+                                flmovimentacao: res.rows[i].flmovimentacao
+                            });
+                        })
+                    }
+
+                    return resolve(mListaVendas);
+                }
+                return resolve([]);
+            })
+        }
     })
 };
 

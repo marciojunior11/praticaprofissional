@@ -174,8 +174,6 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
         setIsLoading(true);
 
         debounce(() => {
-            let data = new Date();
-            console.log(data.toLocaleString());
             controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
@@ -238,6 +236,7 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
             }
         >
             <DataTable
+                isLoading={isLoading}
                 rowId="nrParcela"
                 headers={headers}
                 rows={rows}

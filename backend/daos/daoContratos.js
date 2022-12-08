@@ -247,16 +247,19 @@ async function salvar (contrato) {
                                 venda.id
                             ], async (err, res) => {
                                 if (shouldAbort(err)) return reject(err);
-                                var responseContrato = await client.query('select * from contratos where id = (select max(id) from contratos)');
-                                const contratoCriado = responseContrato.rows[0];
-                                client.query('COMMIT', err => {
-                                    if (err) {
-                                        console.error('Erro durante o commit da transação', err.stack);
+                                client.query('update clientes set flassociado = $1, flsituacao = $2 where id = $3', ['S', 'A', contrato.cliente.id,], async (err, res) => {
+                                    if (shouldAbort(err)) return reject(err);
+                                    var responseContrato = await client.query('select * from contratos where id = (select max(id) from contratos)');
+                                    const contratoCriado = responseContrato.rows[0];
+                                    client.query('COMMIT', err => {
+                                        if (err) {
+                                            console.error('Erro durante o commit da transação', err.stack);
+                                            done();
+                                            return reject(err);
+                                        }
                                         done();
-                                        return reject(err);
-                                    }
-                                    done();
-                                    return resolve(contratoCriado);
+                                        return resolve(contratoCriado);
+                                    })
                                 })
                             })
                         })
