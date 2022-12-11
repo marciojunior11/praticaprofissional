@@ -67,21 +67,6 @@ export const AppRoutes = () => {
                 path: '/cidades',
             },
             {
-                label: 'Fornecedores',
-                icon: ['handshake'],
-                path: '/fornecedores',
-            },
-            {
-                label: 'Clientes',
-                icon: ['person'],
-                path: '/clientes',
-            },
-            {
-                label: 'Produtos',
-                icon: ['shopping_cart'],
-                path: '/produtos',
-            },
-            {
                 label: 'Formas de Pagamento',
                 icon: ['local_atm'],
                 path: '/formaspagamento',
@@ -92,24 +77,14 @@ export const AppRoutes = () => {
                 path: '/condicoespagamento',
             },
             {
-                label: 'Compras',
-                icon: ['local_shipping', 'paid'],
-                path: '/compras',
+                label: 'Fornecedores',
+                icon: ['handshake'],
+                path: '/fornecedores',
             },
             {
-                label: 'Vendas',
-                icon: ['add_shopping_cart', 'paid'],
-                path: '/vendas',
-            },
-            {
-                label: 'Contas a Pagar',
-                icon: ['monetization_on_icon', 'arrow_forward'],
-                path: '/contaspagar',
-            },
-            {
-                label: 'Contas a Receber',
-                icon: ['monetization_on_icon', 'arrow_backward'],
-                path: '/contasreceber',
+                label: 'Clientes',
+                icon: ['person'],
+                path: '/clientes',
             },
             {
                 label: 'Grades',
@@ -127,15 +102,40 @@ export const AppRoutes = () => {
                 path: '/variacoes',
             },
             {
-                label: 'Centros de Custo',
-                icon: ['currency_exchange'],
-                path: '/centroscusto',
+                label: 'Produtos',
+                icon: ['shopping_cart'],
+                path: '/produtos',
+            },
+            {
+                label: 'Compras',
+                icon: ['local_shipping', 'paid'],
+                path: '/compras',
+            },
+            {
+                label: 'Vendas',
+                icon: ['add_shopping_cart', 'paid'],
+                path: '/vendas',
             },
             {
                 label: 'Contratos',
                 icon: ['history_edu'],
                 path: '/contratos',
             },
+            {
+                label: 'Contas a Pagar',
+                icon: ['monetization_on_icon', 'arrow_forward'],
+                path: '/contaspagar',
+            },
+            {
+                label: 'Contas a Receber',
+                icon: ['monetization_on_icon', 'arrow_backward'],
+                path: '/contasreceber',
+            },
+            // {
+            //     label: 'Centros de Custo',
+            //     icon: ['currency_exchange'],
+            //     path: '/centroscusto',
+            // },
             {
                 label: 'Movimentações',
                 icon: ['timeline'],
