@@ -139,6 +139,7 @@ async function alterar(req, res, id) {
                 datacad,
                 ultalt
             };
+            console.log('vlvenda', mProduto.vlvenda);
             const novaProduto = await daoProdutos.alterar(id, mProduto)
             res.writeHead(201, { 'Content-Type': 'application/json'});
             res.end(JSON.stringify(novaProduto));

@@ -627,7 +627,7 @@ async function cancelarCompra(compra) {
                                 vlcusto = $2, 
                                 vlcompra = $3,
                                 lucro = $4
-                                where id = $5
+                            where id = $5
                         `, [
                             produto.qtd,
                             0,

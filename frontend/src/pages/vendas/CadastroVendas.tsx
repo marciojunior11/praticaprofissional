@@ -703,6 +703,9 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
                                 <VMoneyInput
                                     disabled={isLoading || listaContasReceber.length > 0}
+                                    inputProps={{
+                                        readOnly: true
+                                    }}
                                     size="small"
                                     fullWidth
                                     name="valor"

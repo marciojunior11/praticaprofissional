@@ -531,29 +531,73 @@ async function cancelarVenda(venda) {
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
                 client.query(`
-                    delete from contasreceber where fk_idvenda = $1
+                    select fk_idproduto, qtd from produtos_venda where
+                        fk_idvenda = $1
                 `, [venda.id], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+                    if (res.rows.length != 0) {
+                        for (let i = 0; i < res.rows.length; i++) {
+                            let produto = res.rows[i];
+                            client.query(`
+                                update produtos set
+                                    qtdatual = qtdatual + $1
+                                where id = $2
+                            `, [
+                                produto.qtd,
+                                produto.fk_idproduto
+                            ], (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                                client.query(`
+                                    delete from produtos_venda where
+                                        fk_idvenda = $1        
+                                `, [venda.id], (err, res) => {
+                                    if (shouldAbort(err)) return reject(err);
+                                })
+                            })
+                        }
+                    } else {
+                        client.query(`
+                            select fk_idcliente from contratos where fk_idvenda = $1
+                        `, [venda.id], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                            let idcliente = res.rows[0].fk_idcliente;
+                            client.query(`
+                                update clientes set flassociado = $1 where id = $2
+                            `, ['N', idcliente], (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                                client.query(`
+                                    delete from contratos where fk_idvenda = $1         
+                                `, [venda.id], (err, res) => {
+                                    if (shouldAbort(err)) return reject(err);
+                                })
+                            })
+                        })
+                    }
                     client.query(`
-                        delete from contratos where fk_idvenda = $1 
+                        delete from contasreceber where fk_idvenda = $1
                     `, [venda.id], (err, res) => {
                         if (shouldAbort(err)) return reject(err);
                         client.query(`
-                            delete from produtos_venda where fk_idvenda = $1   
+                            delete from contratos where fk_idvenda = $1 
                         `, [venda.id], (err, res) => {
                             if (shouldAbort(err)) return reject(err);
                             client.query(`
-                                delete from vendas where id = $1
+                                delete from produtos_venda where fk_idvenda = $1   
                             `, [venda.id], (err, res) => {
                                 if (shouldAbort(err)) return reject(err);
-                                client.query('COMMIT', err => {
-                                    if (err) {
-                                        console.error('Erro durante o commit da transação', err.stack);
+                                client.query(`
+                                    delete from vendas where id = $1
+                                `, [venda.id], (err, res) => {
+                                    if (shouldAbort(err)) return reject(err);
+                                    client.query('COMMIT', err => {
+                                        if (err) {
+                                            console.error('Erro durante o commit da transação', err.stack);
+                                            done();
+                                            return reject(err);
+                                        }
                                         done();
-                                        return reject(err);
-                                    }
-                                    done();
-                                    return resolve(res);
+                                        return resolve(res);
+                                    })
                                 })
                             })
                         })

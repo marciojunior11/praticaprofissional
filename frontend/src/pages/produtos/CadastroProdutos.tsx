@@ -342,13 +342,14 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                     }
                     if(isValid) {
                         setIsLoading(true);
+                        let vlvenda = formRef.current?.getData().vlvenda;
                         if (isDialog) {
                             if (selectedId === 0) {
                                 controller.create({
                                     ...dadosValidados,
                                     vlcusto: 0,
                                     vlcompra: 0,
-                                    vlvenda: 0,
+                                    vlvenda: vlvenda,
                                     lucro: 0,
                                     cargatribut: 0,
                                     vlfrete: 0,
@@ -388,7 +389,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                     ...dadosValidados,
                                     vlcusto: 0,
                                     vlcompra: 0,
-                                    vlvenda: 0,
+                                    vlvenda: vlvenda,
                                     lucro: 0,
                                     cargatribut: 0,
                                     vlfrete: 0,
@@ -422,7 +423,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                     ...dadosValidados,
                                     vlcusto: 0,
                                     vlcompra: 0,
-                                    vlvenda: 0,
+                                    vlvenda: vlvenda,
                                     lucro: 0,
                                     cargatribut: 0,
                                     vlfrete: 0,
@@ -462,7 +463,7 @@ export const CadastroProdutos: React.FC<ICadastroProps> = ({isDialog = false, to
                                     ...dadosValidados,
                                     vlcusto: 0,
                                     vlcompra: 0,
-                                    vlvenda: 0,
+                                    vlvenda: vlvenda,
                                     lucro: 0,
                                     cargatribut: 0,
                                     vlfrete: 0,
