@@ -45,6 +45,7 @@ export interface IValidator {
     serienf: string;
     modelonf: string;
     idfornecedor: number | undefined;
+    
 }
 
 export type TListaCompras = {

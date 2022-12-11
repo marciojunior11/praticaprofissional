@@ -607,10 +607,10 @@ async function cancelarCompra(compra) {
             client.query('BEGIN', err => {
                 if (shouldAbort(err)) return reject(err);
                 client.query(`
-                    delete from contaspagar where
+                    select fk_idproduto, qtd, vlcusto, vlcompra from produtos_compra where
                         fk_numnf = $1 and
                         fk_serienf = $2 and
-                        fk_modelonf = $3 and 
+                        fk_modelonf = $3 and
                         fk_idfornecedor = $4
                 `, [
                     compra.numnf,
@@ -619,8 +619,41 @@ async function cancelarCompra(compra) {
                     compra.idfornecedor
                 ], (err, res) => {
                     if (shouldAbort(err)) return reject(err);
+                    for (let i = 0; i < res.rows.length; i++) {
+                        let produto = res.rows[i];
+                        client.query(`
+                            update produtos set 
+                                qtdatual = qtdatual - $1, 
+                                vlcusto = $2, 
+                                vlcompra = $3,
+                                lucro = $4
+                                where id = $5
+                        `, [
+                            produto.qtd,
+                            0,
+                            0,
+                            0,
+                            produto.fk_idproduto
+                        ], (err, res) => {
+                            if (shouldAbort(err)) return reject(err);
+                            client.query(`
+                                delete from produtos_compra where
+                                    fk_numnf = $1 and
+                                    fk_serienf = $2 and
+                                    fk_modelonf = $3 and
+                                    fk_idfornecedor = $4
+                            `, [
+                                compra.numnf,
+                                compra.serienf,
+                                compra.modelonf,
+                                compra.idfornecedor
+                            ], (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                            })
+                        })
+                    }
                     client.query(`
-                        delete from produtos_compra where
+                        delete from contaspagar where
                             fk_numnf = $1 and
                             fk_serienf = $2 and
                             fk_modelonf = $3 and 
@@ -633,10 +666,10 @@ async function cancelarCompra(compra) {
                     ], (err, res) => {
                         if (shouldAbort(err)) return reject(err);
                         client.query(`
-                            delete from compras where
-                                numnf = $1 and
-                                serienf = $2 and
-                                modelonf = $3 and 
+                            delete from produtos_compra where
+                                fk_numnf = $1 and
+                                fk_serienf = $2 and
+                                fk_modelonf = $3 and 
                                 fk_idfornecedor = $4
                         `, [
                             compra.numnf,
@@ -645,14 +678,28 @@ async function cancelarCompra(compra) {
                             compra.idfornecedor
                         ], (err, res) => {
                             if (shouldAbort(err)) return reject(err);
-                            client.query('COMMIT', err => {
-                                if (err) {
-                                    console.error('Erro durante o commit da transação', err.stack);
+                            client.query(`
+                                delete from compras where
+                                    numnf = $1 and
+                                    serienf = $2 and
+                                    modelonf = $3 and 
+                                    fk_idfornecedor = $4
+                            `, [
+                                compra.numnf,
+                                compra.serienf,
+                                compra.modelonf,
+                                compra.idfornecedor
+                            ], (err, res) => {
+                                if (shouldAbort(err)) return reject(err);
+                                client.query('COMMIT', err => {
+                                    if (err) {
+                                        console.error('Erro durante o commit da transação', err.stack);
+                                        done();
+                                        return reject(err);
+                                    }
                                     done();
-                                    return reject(err);
-                                }
-                                done();
-                                return resolve(res);
+                                    return resolve(res);
+                                })
                             })
                         })
                     })
