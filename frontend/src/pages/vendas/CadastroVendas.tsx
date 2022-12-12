@@ -700,7 +700,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                            <Grid item xs={12} sm={12} md={5} lg={5} xl={2}>
                                 <VMoneyInput
                                     disabled={isLoading || listaContasReceber.length > 0}
                                     inputProps={{
@@ -716,7 +716,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                                 />  
                             </Grid>
 
-                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                            <Grid item xs={12} sm={12} md={5} lg={5} xl={2}>
                                 <VMoneyInput
                                     disabled={isLoading}
                                     inputProps={{
@@ -839,7 +839,7 @@ export const CadastroVendas: React.FC<ICadastroProps> = ({isDialog = false, togg
                         </Grid>
 
                         <Grid item>
-                            <Typography variant="h6">Contas a Pagar</Typography>
+                            <Typography variant="h6">Contas a Receber</Typography>
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>

@@ -109,7 +109,7 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
                                 {row.flsituacao == 'A' && new Date(row.dtvencimento).toLocaleDateString() > new Date().toLocaleDateString() ? (
                                     <Chip label="ABERTA" color="info"/>
                                 ) : row.flsituacao == 'P' ? (
-                                    <Chip label="RECEBIDA" color="success"/>
+                                    <Chip label="PAGA" color="success"/>
                                 ) : new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
                                     <Chip label="VENCE HOJE" color="warning"/>
                                 ) : new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
@@ -179,8 +179,6 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
         setIsLoading(true);
 
         debounce(() => {
-            let data = new Date();
-            console.log(data.toLocaleString());
             controller.getAll(pagina, busca)
                 .then((result) => {
                     setIsLoading(false);
@@ -199,7 +197,6 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
                                 });
                             })
                         })
-                        console.log(mLista);
                         setRows(mLista);
                         setQtd(result.data.length);
                     }
@@ -230,22 +227,10 @@ export const ConsultaContasPagar: React.FC<IConsultaProps> = ({ isDialog = false
             titulo="Consultar Contas a Pagar"
             barraDeFerramentas={
                 <ListTools
+                    mostrarBotaoNovo={false}
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => {
-                        if (isDialog) {
-                            setSelectedRow({
-                                numnf: "",
-                                serienf: "",
-                                modelonf: "",
-                                idfornecedor: 0
-                            });
-                            toggleCadastroComprasDialogOpen();
-                        } else {
-                            navigate('/compras/cadastro/novo')
-                        }
-                    }}
                 />
             }
         >

@@ -156,7 +156,7 @@ export const ConsultaClientes: React.FC<IConsultaProps> = ({ isDialog = false, o
                     <>
                         <Grid item container spacing={2} justifyContent="center">
                             <Grid item>
-                                {row.flsituacao == 'A' ? (
+                                {row.flsituacao == 'A' && row.flassociado != 'S' ? (
                                     <Chip label="ATIVO" color="success"/>
                                 ) : row.flsituacao == 'I' ? (
                                     <Chip label="INATIVO" color="error"/>

@@ -1002,7 +1002,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                            <Grid item xs={12} sm={12} md={5} lg={6} xl={2}>
                                 <VMoneyInput
                                     disabled={isLoading || !isValid || listaContasPagar.length > 0}
                                     size="small"
@@ -1015,7 +1015,7 @@ export const CadastroCompras: React.FC<ICadastroComprasProps> = ({isDialog = fal
                                 />  
                             </Grid>
 
-                            <Grid item xs={12} sm={12} md={6} lg={6} xl={2}>
+                            <Grid item xs={12} sm={12} md={5} lg={6} xl={2}>
                                 <VMoneyInput
                                     disabled={isLoading || !isValid}
                                     inputProps={{

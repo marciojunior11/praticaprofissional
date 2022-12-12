@@ -54,7 +54,7 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
 
     const headers: IHeaderProps[] = [
         {
-            label: 'ID Compra',
+            label: 'ID Venda',
             name: "id",
             align: "center",
         },
@@ -101,13 +101,13 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
                     <>
                         <Grid item container spacing={2} justifyContent="center">
                             <Grid item>
-                                {row.flsituacao == 'A' && new Date(row.dtvencimento) > new Date() ? (
+                                {row.flsituacao == 'A' && new Date(row.dtvencimento).toLocaleDateString() > new Date().toLocaleDateString() ? (
                                     <Chip label="ABERTA" color="info"/>
                                 ) : row.flsituacao == 'P' ? (
                                     <Chip label="RECEBIDA" color="success"/>
-                                ) : new Date(row.dtvencimento)== new Date() && (row.flsituacao == "A") ? (
+                                ) : new Date(row.dtvencimento).toLocaleDateString() == new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
                                     <Chip label="VENCE HOJE" color="warning"/>
-                                ) : new Date(row.dtvencimento) < new Date() && (row.flsituacao == "A") ? (
+                                ) : new Date(row.dtvencimento).toLocaleDateString() < new Date().toLocaleDateString() && (row.flsituacao == "A") ? (
                                     <Chip label="VENCIDA" color="error"/>
                                 ) : null}
                             </Grid>
@@ -221,17 +221,10 @@ export const ConsultaContasReceber: React.FC<IConsultaProps> = ({ isDialog = fal
             titulo="Consultar Contas a Receber"
             barraDeFerramentas={
                 <ListTools
+                    mostrarBotaoNovo={false}
                     mostrarInputBusca
                     textoDaBusca={busca}
                     handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                    onClickNew={() => {
-                        if (isDialog) {
-                            setSelectedId(0);
-                            toggleCadastroVendasDialogOpen();
-                        } else {
-                            navigate('/compras/cadastro/novo')
-                        }
-                    }}
                 />
             }
         >

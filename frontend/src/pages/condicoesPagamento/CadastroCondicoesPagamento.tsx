@@ -438,7 +438,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
         >
             <VForm ref={formRef} onSubmit={handleSave}>
                 <Box margin={1} display="flex" flexDirection="column" component={Paper} variant="outlined" alignItems="center">
-                    <Grid item container xl={8} direction="column" padding={2} spacing={2} alignItems="left">
+                    <Grid item container xs={12} sm={10} md={10} lg={10} xl={8} direction="column" padding={2} spacing={2} alignItems="left">
 
                         {isLoading && (
                             <Grid item>
@@ -466,7 +466,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
 
 
                         <Grid container item direction="row" spacing={2} justifyContent="center">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <VTextField
                                     size="small"
                                     required
@@ -501,7 +501,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                         </Grid>
 
                         <Grid container item direction="row" spacing={2} justifyContent="center">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                                 <VNumberInput
                                     size="small"
                                     required
@@ -511,7 +511,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                     disabled={isLoading}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                                 <VNumberInput
                                     size="small"
                                     required
@@ -521,7 +521,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                     disabled={isLoading}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                                 <VNumberInput
                                     size="small"
                                     required
@@ -541,7 +541,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                         </Grid>
 
                         <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="start">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={2} xl={2}>
                                 <VTextField
                                     type="number"
                                     size="small"
@@ -552,7 +552,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                     disabled={isLoading}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={2} xl={2}>
                                 <VTextField
                                     type="number"
                                     inputMode="decimal"
@@ -567,7 +567,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={6}>
+                            <Grid item xs={10} sm={10} md={8} lg={6} xl={6}>
                                 <VAutocompleteSearch
                                     size="small"
                                     required
@@ -581,7 +581,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                     isDialogOpen={isConsultaFormasPgtoDialogOpen}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                            <Grid item xs={1} sm={1} md={2} lg={1} xl={1}>
                                 <Button
                                     variant="contained" 
                                     color={ isEditingParcela ? "warning" : "success"} 
@@ -601,7 +601,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                                     <Icon>{isEditingParcela ? "check" : "add"}</Icon>
                                 </Button>
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={1}>
+                            <Grid item xs={1} sm={1} md={2} lg={1} xl={1}>
                                 <Button
                                     variant="contained" 
                                     color="error"
@@ -631,7 +631,7 @@ export const CadastroCondicoesPagamento: React.FC<ICadastroProps> = ({isDialog =
                             </Grid>
                         </Grid>
                         <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={12}>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <DataTable
                                     rowCount={listaparcelas.length}
                                     headers={headers}

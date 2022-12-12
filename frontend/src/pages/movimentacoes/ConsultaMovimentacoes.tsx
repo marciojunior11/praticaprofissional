@@ -149,14 +149,6 @@ export const ConsultaMovimentacoes: React.FC<IConsultaProps> = ({ isDialog = fal
     return (
         <LayoutBase 
             titulo="Consultar Movimentações"
-            barraDeFerramentas={
-                <ListTools
-                    mostrarInputBusca={false}
-                    textoDaBusca={busca}
-                    mostrarBotaoNovo={false}
-                    handleSeachTextChange={texto => setSearchParams({ busca : texto, pagina: '1' }, { replace : true })}
-                />
-            }
         >
             <DataTable
                 headers={headers}
