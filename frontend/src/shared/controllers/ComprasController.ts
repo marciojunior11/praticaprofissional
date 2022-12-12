@@ -226,7 +226,7 @@ class ControllerCompras implements IControllerCompras {
             const url = `/api/compras/?_numnf=${dados.numnf}&_serienf=${dados.serienf}&_modelonf=${dados.modelonf}&_idfornecedor=${dados.idfornecedor}`
             await Api.delete(url);
         } catch (error) {
-            return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
+            return new Error((error as {message:string; response: any}).response.data.detail || 'Erro ao apagar o registros.');
         }           
     }
 

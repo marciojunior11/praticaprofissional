@@ -31,6 +31,9 @@ export const LayoutBase: React.FC<ILayoutBaseProps> = ({children, titulo, barraD
 
                 { titulo && (
                     <Typography 
+                        sx={{
+                            marginLeft: 4
+                        }}
                         variant={ smDown ? 'h5' : mdDown ? 'h4' : 'h3'}
                         overflow='hiden'
                         whiteSpace='nowrap'

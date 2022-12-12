@@ -195,7 +195,7 @@ class ControllerClientes implements IController {
         try {
             await Api.delete(`/api/clientes/${id}`);
         } catch (error) {
-            return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
+            return new Error((error as {message:string; response: any}).response.data.detail || 'Erro ao apagar o registros.');
         }           
     }
 

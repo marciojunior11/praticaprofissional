@@ -145,7 +145,8 @@ async function alterar(req, res, id) {
             res.end(JSON.stringify(novaProduto));
         })
     } catch (error) {
-        console.log(error);
+        res.writeHead(409, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(error));
     }
 };
 

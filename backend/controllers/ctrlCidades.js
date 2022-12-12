@@ -122,7 +122,8 @@ async function deletar(req, res, id) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
     } catch (error) {
-        console.log(error);
+        res.writeHead(409, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(error));
     }
 };
 

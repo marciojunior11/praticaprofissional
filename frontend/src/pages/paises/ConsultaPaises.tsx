@@ -79,7 +79,6 @@ export const ConsultaPaises: React.FC<IConsultaProps> = ({ isDialog = false, onS
         if (window.confirm('Deseja apagar o registro?')) {
             controller.delete(id)
                 .then(result => {
-                    console.log(result);
                     if (result instanceof Error) {
                         toast.error(result.message);
                     } else {

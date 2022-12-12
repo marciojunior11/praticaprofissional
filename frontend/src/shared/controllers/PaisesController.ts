@@ -76,8 +76,7 @@ class ControllerPaises implements IController {
         try {
             await Api.delete(`/api/paises/${id}`);
         } catch (error) {
-            console.log(error);
-            return new Error((error as {message:string}).message || 'Erro ao apagar o registros.');
+            return new Error((error as {message:string; response: any}).response.data.detail || 'Erro ao apagar o registros.');
         }           
     }
 
